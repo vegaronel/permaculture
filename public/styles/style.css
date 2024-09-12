@@ -1,0 +1,75 @@
+@font-face {
+     font-family: "Poppins";
+     src: url("../fonts/Poppins-Regular.ttf") format("truetype"), url("../fonts/my-font.woff") format("woff");
+     font-weight: normal;
+     font-style: normal;
+     font-display: swap;
+}
+
+#map {
+     height: 200px;
+     width: 400px;
+}
+
+#footer-container {
+     background-color: white;
+}
+
+#email-section {
+     padding: 20px;
+     background-color: #30669b;
+}
+
+.active {
+     color: #30669b;
+     font-weight: 600;
+}
+
+.form-container {
+     border-style: none;
+     border-radius: 10px;
+     margin-top: 50px;
+}
+
+.listFoodWaste {
+     margin-top: 10px;
+}
+
+.details:hover {
+     background-color: #4c5e40;
+     cursor: pointer;
+}
+
+.textMessage {
+     margin-top: 20px;
+}
+
+.info-text-title {
+     margin-bottom: 50px;
+}
+.button-container {
+     gap: 6px;
+}
+
+.login-btn {
+     background-color: #486284;
+     border: none;
+     color: white;
+     border-radius: 20px;
+}
+
+.login-btn:hover {
+     background-color: #7898c2;
+}
+
+@media (max-width: 700px) {
+     .reverse-flex {
+          flex-direction: column-reverse;
+     }
+}
+
+@media (max-width: 990px) {
+     .card-pictures {
+          height: 90%;
+     }
+}

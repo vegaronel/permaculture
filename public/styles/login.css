@@ -1,0 +1,168 @@
+:root {
+    --accent-color: #5C67F7;
+    --button-hover: #48a2fd;
+    --light-placeholder:#6E829F;
+    --white-text:#FFFFFF;
+  }
+  .lighter-text{
+    font-weight: 300px;
+    color: #6E829F;
+}
+@font-face {
+    font-family: 'Poppins';
+    src: url('../fonts/Poppins-Regular.ttf') format('truetype'),
+         url('../fonts/my-font.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+html {
+    scroll-behavior: smooth;
+    overflow-y: scroll;
+}
+
+a {
+    text-decoration: none;
+}
+* {
+    font-size: 13px;
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+}
+body {
+    background-image: url(/images/reg-bg.svg);
+    background-repeat: no-repeat;
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+.input-asterisk{
+    color: red;
+}
+.wrong-message {
+    color: red;
+    font-size: 13px;
+}
+.success-message{
+    color: green;
+    font-size: 13px;
+}
+.login-container {
+    padding: 50px;
+    background-color: white;
+    border-radius: 15px;
+    max-width: 455px;
+    width: 100%;
+    margin: 60px auto 60px;
+}
+.registration-container{
+    padding: 50px;
+    margin: 30px auto 30px;
+    background-color: white;
+    border-radius: 15px;
+    max-width: 650px;
+    height: 100%;
+    width: 100%;
+}
+.login-section{
+    height: 100%;
+}
+.my-button{
+    background-color: var(--accent-color);
+    border: none;
+    color: var(--white-text);
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.otp-button{
+    height: 100%;
+    font-size: 12px;
+    width: 120px;
+    background-color: var(--accent-color);
+    border: none;
+    color: var(--white-text);
+    border-radius: 5px;
+    cursor: pointer;
+}
+.otp-button:hover{
+    height: 100%;
+    width: 120px;
+    background-color: var(--button-hover);
+    border: none;
+    color: var(--white-text);
+    border-radius: 5px;
+    cursor: pointer;
+}
+.upload-btn{
+    width: 100%;
+    max-width: 200px;
+}
+.my-button:hover{
+    background-color: var(--button-hover);
+    border: none;
+    color: var(--white-text);
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.light-text{
+    color: var(--light-placeholder);
+}
+#registrationForm .form-group{
+    width: 100%;
+}
+.profilePhoto {
+    background-repeat: no-repeat;
+    object-fit: cover;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+}
+.text-card {
+    background-color: #ffffff;
+    height: auto;
+    padding: 20px 15px 20px;
+    height: 100%;
+    max-height: 500px;
+    position: absolute;
+    top: 50%; 
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 20px;
+    box-shadow: black 2px 1px 5px;
+    overflow-y: scroll;
+    box-sizing: content-box;
+}
+@media screen and (max-width: 600px) {
+    
+    *{
+        font-size: 16px;
+    }
+    .email-card{
+        flex-direction: column;
+    }
+    .registration-container{
+        padding: 15px 20px 15px;
+        margin: auto;
+        border-radius: 0;
+        width: 100%;
+       
+    }
+    .login-container{
+        width: 100%;
+        padding: 40px 20px 40px;
+    }
+  }
+

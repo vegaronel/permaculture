@@ -1,0 +1,284 @@
+<%- include("partials/UserHeader.ejs") %>
+
+<div class="container">
+  <h1>Upload a Plant Image</h1>
+
+  <% if (error) { %>
+    <div class="alert alert-danger" role="alert">
+      <%= error %>
+    </div>
+  <% } %>
+  <form action="/plant-identification" method="POST" enctype="multipart/form-data">
+    <input type="file" name="plantImage" accept="image/*" required>
+    <button type="submit">Upload</button>
+  </form>
+
+  <% if (plantName) { %>
+  <nav>
+    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+      <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-plant-identify" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Identification</button>
+      <button class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-plant-disease" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">Disease Detection</button>
+      <button class="nav-link" id="nav-ai-tab" data-bs-toggle="tab" data-bs-target="#nav-plant-ai" type="button" role="tab" aria-controls="nav-ai" aria-selected="false">Ask AI</button>
+    </div>
+  </nav>
+
+  <div class="tab-content" id="nav-tabContent">
+    <!-- Identification Tab -->
+    <div class="tab-pane fade show active" id="nav-plant-identify" role="tabpanel" aria-labelledby="nav-home-tab" tabindex="0">
+      <h2>Plant Identification</h2>
+      <img src="<%= imagePath %>" alt="Uploaded plant image" />
+      <p><strong>Plant Name:</strong> <%= plantName %></p>
+      <p><strong>Common Names:</strong> <%= commonNames.join(', ') %></p>
+      <p><strong>Description:</strong> <%= description %></p>
+    </div>
+
+    <!-- Disease Detection Tab -->
+    <div class="tab-pane fade" id="nav-plant-disease" role="tabpanel" aria-labelledby="nav-profile-tab" tabindex="0">
+      <h2>Disease Detection</h2>
+      <% if (diseases.length > 0) { %>
+        <% diseases.forEach(disease => { %>
+          <div class="disease">
+            <h3><%= disease.name %> (Probability: <%= (disease.probability * 100).toFixed(2) %>%)</h3>
+            <p><strong>Description:</strong> <%= disease.description %></p>
+            <p><strong>Treatment:</strong> <%= disease.treatment %></p>
+          </div>
+        <% }); %>
+      <% } else { %>
+        <p>No diseases detected.</p>
+      <% } %>
+    </div>
+
+    <!-- AI Tab with Chatbot -->
+    <div class="tab-pane fade" id="nav-plant-ai" role="tabpanel" aria-labelledby="nav-ai-tab" tabindex="0">
+
+      <!-- Chatbot Container -->
+      <div class="chat-container" id="chat-container">
+        <div class="chat-messages d-flex flex-column align-items-end" id="chat-messages">
+          <div id="predefined-options" class="d-flex gap-2">
+            <button class="option-button" data-option="Can you suggest a care tips for this plant <%= plantName %>">Care tips</button>
+            <button class="option-button" data-option="What are common diseases for this plant <%= plantName %>?">Common Plant Diseases</button>
+            <button class="option-button" data-option="How much water does this plant <%= plantName %> need?">Watering Requirements</button>
+          </div>
+        </div>
+        <div class="chat-input d-flex align-items-center gap-2">
+          <input class="m-0" type="text" id="chat-input" placeholder="Type a message...">
+          <button id="send-button" class="btn">Send</button>
+        </div>
+      </div>
+
+      <!-- Chatbot JavaScript (unchanged) -->
+      <script>
+     document.addEventListener('DOMContentLoaded', () => {
+  const messagesContainer = document.getElementById('chat-messages');
+  const predefinedOptions = document.getElementById('predefined-options');
+
+  // Delegate event handling to the parent container
+  document.getElementById('predefined-options').addEventListener('click', async (event) => {
+      if (event.target.classList.contains('option-button')) {
+          const option = event.target.getAttribute('data-option');
+          const message = event.target.textContent;
+
+          // Display user's message
+          const userMessage = document.createElement('div');
+          userMessage.className = 'message sent';
+          userMessage.innerHTML = `<p class="fsize-13">${message}</p><span class="timestamp">${new Date().toLocaleTimeString()}</span>`;
+          messagesContainer.appendChild(userMessage);
+
+          // Hide predefined options
+          predefinedOptions.style.display = 'none';
+
+          // Send the selected option to the server
+          try {
+              const response = await fetch('/chat', {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({ content: option })
+              });
+
+              const data = await response.json();
+
+              // Display bot's message
+              const botMessage = document.createElement('div');
+              botMessage.className = 'message received';
+              botMessage.innerHTML = `<p class="fsize-13">${data.response}</p><span class="timestamp">${new Date().toLocaleTimeString()}</span>`;
+              messagesContainer.appendChild(botMessage);
+              messagesContainer.scrollTop = messagesContainer.scrollHeight;
+          } catch (error) {
+              console.error('Error:', error);
+          }
+      }
+  });
+
+        // Minimize button handler
+        document.getElementById('minimize-button').addEventListener('click', () => {
+            const chatContainer = document.getElementById('chat-container');
+            chatContainer.classList.toggle('minimized');
+        });
+
+        // Close button handler
+        document.getElementById('close-button').addEventListener('click', () => {
+            const chatContainer = document.getElementById('chat-container');
+            chatContainer.style.display = 'none';
+        });
+
+        // Handle predefined option clicks
+        document.querySelectorAll('.option-button').forEach(button => {
+            button.addEventListener('click', async () => {
+                const option = button.getAttribute('data-option');
+                const message = button.textContent;
+
+                // Display user's message
+                const userMessage = document.createElement('div');
+                userMessage.className = 'message sent';
+                userMessage.innerHTML = `<p class="fsize-13">${message}</p><span class="timestamp">${new Date().toLocaleTimeString()}</span>`;
+                messagesContainer.appendChild(userMessage);
+
+                // Hide predefined options
+                predefinedOptions.style.display = 'none';
+
+                // Send the selected option to the server
+                try {
+                    const response = await fetch('/chat', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ content: option })
+                    });
+
+                    const data = await response.json();
+
+                    // Display bot's message
+                    const botMessage = document.createElement('div');
+                    botMessage.className = 'message received';
+                    botMessage.innerHTML = `<p class="fsize-13">${data.response}</p><span class="timestamp">${new Date().toLocaleTimeString()}</span>`;
+                    messagesContainer.appendChild(botMessage);
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            });
+        });
+    });
+      </script>
+    </div>
+  </div>
+  <% } %>
+</div>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+      const messagesContainer = document.getElementById('chat-messages');
+      const predefinedOptions = document.getElementById('predefined-options');
+
+      // Update visibility of predefined options
+      const updateOptionsVisibility = () => {
+          if (messagesContainer.children.length === 0) {
+              predefinedOptions.style.display = 'flex';
+          } else {
+              predefinedOptions.style.display = 'none';
+          }
+      };
+
+      updateOptionsVisibility(); // Initial check
+
+      // Send button handler
+      document.getElementById('send-button').addEventListener('click', async () => {
+          const input = document.getElementById('chat-input');
+          const message = input.value.trim();
+          if (!message) return;
+
+          // Display user's message
+          const userMessage = document.createElement('div');
+          userMessage.className = 'message sent';
+          userMessage.innerHTML = `<p class="fsize-13">${message}</p><span class="timestamp">${new Date().toLocaleTimeString()}</span>`;
+          messagesContainer.appendChild(userMessage);
+          input.value = '';
+          messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+          // Hide predefined options
+          predefinedOptions.style.display = 'none';
+
+          // Send the message to the server
+          try {
+              const response = await fetch('/chat', {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({ content: message })
+              });
+
+              const data = await response.json();
+
+              // Display bot's message
+              const botMessage = document.createElement('div');
+              botMessage.className = 'message received';
+              botMessage.innerHTML = `<p class="fsize-13">${data.response}</p><span class="timestamp">${new Date().toLocaleTimeString()}</span>`;
+              messagesContainer.appendChild(botMessage);
+              messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+              updateOptionsVisibility(); // Update options visibility after new messages
+          } catch (error) {
+              console.error('Error:', error);
+          }
+      });
+
+      // Minimize button handler
+      document.getElementById('minimize-button').addEventListener('click', () => {
+          const chatContainer = document.getElementById('chat-container');
+          chatContainer.classList.toggle('minimized');
+      });
+
+      // Close button handler
+      document.getElementById('close-button').addEventListener('click', () => {
+          const chatContainer = document.getElementById('chat-container');
+          chatContainer.style.display = 'none';
+      });
+
+      // Handle predefined option clicks
+      document.querySelectorAll('.option-button').forEach(button => {
+          button.addEventListener('click', async () => {
+              const option = button.getAttribute('data-option');
+              const message = button.textContent;
+
+              // Display user's message
+              const userMessage = document.createElement('div');
+              userMessage.className = 'message sent';
+              userMessage.innerHTML = `<p class="fsize-13">${message}</p><span class="timestamp">${new Date().toLocaleTimeString()}</span>`;
+              messagesContainer.appendChild(userMessage);
+
+              // Hide predefined options
+              predefinedOptions.style.display = 'none';
+
+              // Send the selected option to the server
+              try {
+                  const response = await fetch('/chat', {
+                      method: 'POST',
+                      headers: {
+                          'Content-Type': 'application/json'
+                      },
+                      body: JSON.stringify({ content: option })
+                  });
+
+                  const data = await response.json();
+
+                  // Display bot's message
+                  const botMessage = document.createElement('div');
+                  botMessage.className = 'message received';
+                  botMessage.innerHTML = `<p class="fsize-13">${data.response}</p><span class="timestamp">${new Date().toLocaleTimeString()}</span>`;
+                  messagesContainer.appendChild(botMessage);
+                  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+              } catch (error) {
+                  console.error('Error:', error);
+              }
+          });
+      });
+  });
+</script>
+
+
+<%- include("partials/UserFooter.ejs") %>

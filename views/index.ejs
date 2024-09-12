@@ -1,0 +1,34 @@
+<%- include("partials/UserHeader.ejs") %>
+
+<div class="container">
+  <a href="/add-plant" class="btn btn-primary mb-3">Add plant</a>
+  <h1>My Plants</h1>
+  <% if (plants && plants.length > 0) { %>
+    <table id="plantsTable" class="table table-striped">
+      <thead>
+        <tr>
+          <th>Plant Name</th>
+          <th>Planting Instructions</th>
+          <th>Watering Schedule</th>
+          <th>Estimated Harvest Time</th>
+          <th>Current Stage</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% plants.forEach(plant => { %>
+        <tr>
+          <td><%= plant.name %></td>
+          <td><%= plant.plantingInstructions %></td>
+          <td><%= plant.wateringSchedule %></td>
+          <td><%= plant.harvestDate %></td>
+          <td><%= plant.currentStage || 'Not yet started' %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } else { %>
+    <p>No plants found. Start by adding a new plant!</p>
+  <% } %>
+</div>
+
+<%- include("partials/UserFooter.ejs") %>

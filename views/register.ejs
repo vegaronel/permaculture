@@ -1,0 +1,111 @@
+<%- include("partials/LoginPageHeader.ejs") %>
+
+<body>
+     <section id="registration-section">
+          <div class="registration-container ">
+               <div class="text-center">
+                    <p class="h4 fw-bold">Excessify</p>
+                    <p class="h5 fw-bold mt-3">Sign Up</p>
+                    <p class="light-text mt-2">Welcome! Begin by creating your account.</p>
+               </div>
+               <form id="registrationForm" class="needs-validation d-grid gap-3" action="/register" method="post" enctype="multipart/form-data" novalidate>
+                    <div class="d-flex gap-3">
+                         <div class="form-group">
+                              <label for="firstName">First Name</label>
+                              <input type="text" class="form-control" name="firstname" placeholder="First Name" />
+                              <div class="invalid-feedback">Please provide a first name.</div>
+                         </div>
+                         <div class="form-group">
+                              <label for="lastName">Last Name</label>
+                              <input type="text" class="form-control" name="lastname" placeholder="Last Name" />
+                              <div class="invalid-feedback">Please provide a last name.</div>
+                         </div>
+                    </div>
+
+                    <div class="d-flex gap-3 email-card">
+                         <div class="form-group">
+                              <label for="email">Email</label>
+                              <input type="email" class="form-control" name="email" id="email" placeholder="Email" />
+                              <div class="invalid-feedback m-0" id="emailFeedback">Please provide a valid email.</div>
+                              <div class="valid-feedback m-0" id="emailValid">Email is available!</div>
+                         </div>
+                         <div class="form-group m-0">
+                              <label for="form-label" form="verificationCode">Send OTP</label>
+                              <div class="d-flex">
+                                   <div style="width: 100%">
+                                        <input type="number" class="form-control" name="verificationCode" id="verificationCode" placeholder="6 Digits OTP" min="0" />
+                                   </div>
+                                   <div>
+                                        <button type="button" id="sendCodeBtn" class="btn otp-button">Send OTP</button>
+                                   </div>
+                              </div>
+                              <p class="invalid-feedback m-0" id="otpFeedback">Invalid or expired verification code.</p>
+                              <div class="invalid-feedback m-0" id="emailRequired">Please enter your email address before sending OTP.</div>
+                         </div>
+                    </div>
+
+                    <div class="form-group gap-3">
+                         <label for="password">Password</label>
+                         <input type="password" class="form-control" name="password" id="password" placeholder="Password" />
+                         <div class="invalid-feedback">Please provide a password.</div>
+                         <small class="form-text text-muted">Must be at least 8 characters long, contain letters, numbers, and special characters.</small>
+                    </div>
+                    <div class="form-group gap-3">
+                         <label for="confirmPassword">Confirm Password</label>
+                         <input type="password" class="form-control" name="confirmPassword" id="confirmPassword" placeholder="Confirm Password" />
+                         <div class="invalid-feedback" id="passwordMismatchFeedback">Passwords do not match.</div>
+                     </div>
+                     <div class="form-check">
+                         <input type="checkbox" class="form-check-input" id="agreeTerms" />
+                         <label class="form-check-label" for="agreeTerms">
+                             <p class="terms">By creating an account you agree to our <span id="showTerms" style="cursor: pointer; color: blue;">Terms & Conditions.</span>
+                             </p>
+                         </label>
+                         <div class="invalid-feedback">You must agree to the terms and conditions.</div>
+                     </div>
+
+                    <div class="text-card" id="termBox">
+                         <div class="row">
+                              <div class="col-12">
+                                   <h2 class="mt-3">Terms and Conditions</h2>
+                              </div>
+                              <div class="col-12">
+                                   <p>Welcome to [Your Website Name]! These terms and conditions outline the rules and regulations for the use of [Your Website URL] (hereafter referred to as "the Website").</p>
+                                   <p>By accessing this Website, we assume you accept these terms and conditions in full. Do not continue to use [Your Website Name] if you do not accept all of the terms and conditions stated on this page.</p>
+                                   <p>
+                                        The following terminology applies to these Terms and Conditions, Privacy Statement and Disclaimer Notice and any or all Agreements: "Client", "You" and "Your" refers to you, the person accessing this website and accepting the Company’s terms and conditions.
+                                        "The Company", "Ourselves", "We", "Our" and "Us", refers to our Company. "Party", "Parties", or "Us", refers to both the Client and ourselves, or either the Client or ourselves. All terms refer to the offer, acceptance and consideration of payment necessary to
+                                        undertake the process of our assistance to the Client in the most appropriate manner, whether by formal meetings of a fixed duration, or any other means, for the express purpose of meeting the Client’s needs in respect of provision of the Company’s stated
+                                        services/products, in accordance with and subject to, prevailing law of. Any use of the above terminology or other words in the singular, plural, capitalisation and/or he/she or they, are taken as interchangeable and therefore as referring to same.
+                                   </p>
+                                   <p>Cookies</p>
+                                   <p>We employ the use of cookies. By using [Your Website Name], you consent to the use of cookies in accordance with [Your Company Name]’s privacy policy.</p>
+                                   <p>Most of the modern-day interactive web sites use cookies to enable us to retrieve user details for each visit. Cookies are used in some areas of our site to enable the functionality of this area and ease of use for those people visiting.</p>
+                                   <p>Some of our affiliate/advertising partners may also use cookies.</p>
+                                   <b>License</b>
+                              </div>
+                         </div>
+
+                         <div class="d-flex justify-content-evenly">
+                              <div class="">
+                                   <button type="button" class="btn btn-danger" id="decline">Decline</button>
+                              </div>
+                              <div class="">
+                                   <button type="button" class="btn btn-primary" id="accept1">Accept</button>
+                              </div>
+                         </div>
+                    </div>
+                    <div class="row">
+                         <div class="form-group">
+                              <button type="submit" id="registerBtn" class="btn my-button mt-3" style="width: 100%">Create Account</button>
+                         </div>
+                         <div class="mt-3">
+                              <p class="text-center lighter-text">Already have an account? <a href="/login">Sign in</a></p>
+                         </div>
+                    </div>
+               </form>
+          </div>
+     </section>
+</body>
+
+<%- include("partials/LoginFooter.ejs") %>
