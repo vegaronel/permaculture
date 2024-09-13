@@ -1,12 +1,15 @@
 
 <%- include("partials/UserHeader.ejs") %>
+<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Email</h1>
+    </div>
 
 
 <section id="email-section">
     <div class="container ">
         <!-- EMAIL SECTION -->
             <form class="form-container form-control form-control-sm p-4" action="/send-mail" method="post"> 
-                <h2 class="email-us">Email Us</h2>
             <% if(locals.emailSent){ %>
                 <p class="wrongCridentials bg-success hvr-wobble-horizontal"><%= emailSent %></p>
             <% } %>
@@ -28,5 +31,11 @@
             </form>
     </div>
 </section>
+   
+</main>
+</div>
+</div>
+
+
 
 <%- include("partials/UserFooter.ejs") %>

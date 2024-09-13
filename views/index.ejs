@@ -1,34 +1,71 @@
 <%- include("partials/UserHeader.ejs") %>
+<!-- DataTables CSS -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.3/css/jquery.dataTables.min.css">
 
-<div class="container">
-  <a href="/add-plant" class="btn btn-primary mb-3">Add plant</a>
-  <h1>My Plants</h1>
-  <% if (plants && plants.length > 0) { %>
-    <table id="plantsTable" class="table table-striped">
-      <thead>
-        <tr>
-          <th>Plant Name</th>
-          <th>Planting Instructions</th>
-          <th>Watering Schedule</th>
-          <th>Estimated Harvest Time</th>
-          <th>Current Stage</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% plants.forEach(plant => { %>
-        <tr>
-          <td><%= plant.name %></td>
-          <td><%= plant.plantingInstructions %></td>
-          <td><%= plant.wateringSchedule %></td>
-          <td><%= plant.harvestDate %></td>
-          <td><%= plant.currentStage || 'Not yet started' %></td>
-        </tr>
-        <% }) %>
-      </tbody>
-    </table>
-  <% } else { %>
-    <p>No plants found. Start by adding a new plant!</p>
-  <% } %>
-</div>
+<!-- Main content -->
+<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <button class="navbar-toggler d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar" aria-controls="sidebar" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon">Burger</span>
+        </button>
+        <h1 class="h2">Dashboard</h1>
+    </div>
+    
+    <div class="container">
+        <a href="/add-plant" class="btn btn-primary mb-3">Add plant</a>
 
+        <h2>Plants That Need to Be Watered</h2>
+        <div class="container-water d-flex gap-3">
+            <% plants.filter(plant => plant.needsWatering).forEach(plant => { %>
+                <div class="not-watered-plants">
+                    <%= plant.name %>
+                    <form action="/water-plant/<%= plant._id %>" method="POST" style="display: inline">
+                        <button type="submit" class="btn btn-success btn-sm ml-2">Water</button>
+                    </form>
+                    <p style="width: 300px;">Last Watered: <%= plant.lastWatered ? new Date(plant.lastWatered).toLocaleDateString() : 'Not yet watered' %></p>
+                </div>
+            <% }) %>
+        </div>
+
+        <h1>My Plants</h1>
+
+        <% if (plants && plants.length > 0) { %>
+            <table id="plantsTable" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Plant Name</th>
+                        <th>Planting Instructions</th>
+                        <th>Watering Schedule</th>
+                        <th>Estimated Harvest Time</th>
+                        <th>Current Stage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% plants.forEach(plant => { %>
+                        <tr>
+                            <td><%= plant.name %></td>
+                            <td><%= plant.plantingInstructions %></td>
+                            <td><%= plant.wateringSchedule %></td>
+                            <td><%= new Date(plant.harvestDate).toLocaleDateString() %></td>
+                            <td><%= plant.growthStage %></td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        <% } else { %>
+            <p>No plants found. Start by adding a new plant!</p>
+        <% } %>
+    </div>
+</main>
+
+
+   
 <%- include("partials/UserFooter.ejs") %>
+<!-- jQuery and DataTables JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.3/js/jquery.dataTables.min.js"></script>
+<script>
+     $(document).ready(function() {
+       $('#plantsTable').DataTable();
+     });
+   </script>

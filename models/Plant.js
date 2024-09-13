@@ -7,7 +7,8 @@ const plantSchema = new mongoose.Schema({
   plantingDate: { type: Date, required: true },
   harvestDate: { type: String, required: true },
   lastWatered: { type: Date },
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }  // Added userId field
+  growthStage: { type: String },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
 });
 
 const Plant = mongoose.model('Plant', plantSchema);

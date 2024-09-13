@@ -32,7 +32,7 @@ app.get('/plant-identification', (req, res) => {
       error: null
     });
   });
-app.post('/plant-identification', upload.single('plantImage'), async (req, res) => {
+  app.post('/plant-identification', upload.single('plantImage'), async (req, res) => {
     const imagePath = path.join('public', 'uploads', req.file.filename);
   
     try {
@@ -48,8 +48,22 @@ app.post('/plant-identification', upload.single('plantImage'), async (req, res) 
       });
   
       const result = response.data;
-  
       const plantInfo = result.suggestions[0] || {};
+  
+      // Check the confidence score
+      const confidence = plantInfo.probability || 0;
+  
+      if (confidence < 0.5) { // Set a confidence threshold of 50%
+        return res.render('clientUploadPlant', {
+          plantName: null,
+          commonNames: [],
+          description: '',
+          diseases: [],
+          imagePath: '',
+          error: 'The uploaded image might not be a plant or the identification is uncertain. Please upload a clear image of the plant.'
+        });
+      }
+  
       const plantName = plantInfo.plant_name || 'Unknown';
       const commonNames = plantInfo.plant_details?.common_names || [];
       const description = plantInfo.plant_details?.wiki_description?.value || 'No description available';
@@ -101,7 +115,8 @@ app.post('/plant-identification', upload.single('plantImage'), async (req, res) 
         diseases: []
       });
     }
-  });
+});
+
   
 
 module.exports = app;

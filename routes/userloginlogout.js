@@ -6,27 +6,75 @@ const Plant = require("../models/Plant");
 const getCurrentGrowthStage = require('../public/js/growthStage'); 
 const app = express();
 
-
-
 app.get('/dashboard', isAuthenticated, async (req, res) => {
-  try {
-    // Fetch plants for the current user
-    const plants = await Plant.find({ userId: req.session.userId }); 
+  const filter = req.query.filter;
+  const page = parseInt(req.query.page) || 1;
+  const limit = 10;
+  const skip = (page - 1) * limit;
 
-    // Calculate the current stage for each plant
-    plants.forEach(plant => {
-      plant.currentStage = getCurrentGrowthStage(plant); 
+  let query = { userId: req.session.userId };
+
+  if (filter) {
+    query.type = filter; // Filter plants by type
+  }
+
+  try {
+    const plants = await Plant.find(query)
+      .skip(skip)
+      .limit(limit)
+      .sort({ plantingDate: -1 });
+
+    const currentDate = new Date();
+    const growthStages = [
+      { stage: "Sprout", days: 7 },
+      { stage: "Seedling", days: 14 },
+      { stage: "Vegetating", days: 30 },
+      { stage: "Budding", days: 45 },
+      { stage: "Flowering", days: 60 },
+      { stage: "Ripening", days: 75 },
+      { stage: "Harvesting", days: 90 }
+    ];
+
+    const updatedPlants = plants.map(plant => {
+      const plantingDate = new Date(plant.plantingDate);
+      const daysSincePlanting = Math.floor((currentDate - plantingDate) / (1000 * 60 * 60 * 24));
+
+      let currentStage = "Not yet started";
+      for (const stage of growthStages) {
+        if (daysSincePlanting <= stage.days) {
+          currentStage = stage.stage;
+          break;
+        }
+      }
+
+      // Handle case where lastWatered is not set
+      const lastWatered = new Date(plant.lastWatered || plantingDate); // Use plantingDate if lastWatered is undefined
+      const wateringSchedule = plant.wateringSchedule;
+      let needsWatering = false;
+
+      if (wateringSchedule === 'Daily') {
+        const dayDiff = Math.floor((currentDate - lastWatered) / (1000 * 60 * 60 * 24));
+        needsWatering = dayDiff >= 1;
+      } else if (wateringSchedule === 'Every 2 Days') {
+        const dayDiff = Math.floor((currentDate - lastWatered) / (1000 * 60 * 60 * 24));
+        needsWatering = dayDiff >= 2;
+      } else if (wateringSchedule === 'Weekly') {
+        const dayDiff = Math.floor((currentDate - lastWatered) / (1000 * 60 * 60 * 24));
+        needsWatering = dayDiff >= 7;
+      }
+
+      return { ...plant.toObject(), growthStage: currentStage, needsWatering };
     });
 
-    // Pass the plants array to the EJS view
-    res.render('index', { plants }); 
+    const count = await Plant.countDocuments(query);
+    const totalPages = Math.ceil(count / limit);
+
+    res.render('index', { plants: updatedPlants, page, totalPages, filter });
   } catch (error) {
     console.error(error);
     res.status(500).send("Error retrieving plants");
   }
 });
-
-
 
 
 app.post("/login", async (req, res) => {
