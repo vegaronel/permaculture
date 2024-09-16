@@ -1,49 +1,53 @@
 <%- include("partials/UserHeader.ejs") %>
 
-<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-      <h1 class="h2">Dashboard</h1>
-  </div>
-  
 
-<div class="container">
-  <h1>Add New Plant</h1>
-  <form action="/add-plant" method="POST">
-    <div class="form-group">
-      <label for="name">Select Plant</label>
-      <select class="form-control" name="name" id="name" required>
-        <option value="">Select a Plant</option>
-        <option value="Kamote" data-harvest-time="120">Kamote</option>
-        <option value="Palay" data-harvest-time="150">Palay</option>
-        <option value="Kalabasa" data-harvest-time="90">Kalabasa</option>
-        <option value="Pakwan" data-harvest-time="100">Pakwan</option>
-        <option value="Sitaw" data-harvest-time="80">Sitaw</option>
-        <option value="Mongo" data-harvest-time="110">Mongo</option>
-      </select>
+<div id="page-content-wrapper">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+      <button id="menu-toggle" class="btn">
+          <i class="fas fa-bars" id="menuIcon"></i>
+      </button>
+  </nav>
+
+    <div class="container">
+      <h1>Add New Plant</h1>
+      <form action="/add-plant" method="POST">
+        <div class="form-group">
+          <label for="name">Select Plant</label>
+          <select class="form-control" name="name" id="name" required>
+            <option value="">Select a Plant</option>
+            <option value="Kamote" data-harvest-time="120">Kamote</option>
+            <option value="Palay" data-harvest-time="150">Palay</option>
+            <option value="Kalabasa" data-harvest-time="90">Kalabasa</option>
+            <option value="Pakwan" data-harvest-time="100">Pakwan</option>
+            <option value="Sitaw" data-harvest-time="80">Sitaw</option>
+            <option value="Mongo" data-harvest-time="110">Mongo</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="plantingInstructions">Planting Instructions:</label>
+          <textarea name="plantingInstructions" class="form-control" required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="wateringSchedule">Watering Schedule:</label>
+          <select name="wateringSchedule" class="form-control" required>
+            <option value="Daily">Daily</option>
+            <option value="Every 2 Days">Every 2 Days</option>
+            <option value="Weekly">Weekly</option>
+            <option value="Every 2 Weeks">Every 2 Weeks</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="plantingDate">Planting Date:</label>
+          <input type="date" name="plantingDate" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-success">Add Plant</button>
+      </form>
     </div>
-    <div class="form-group">
-      <label for="plantingInstructions">Planting Instructions:</label>
-      <textarea name="plantingInstructions" class="form-control" required></textarea>
-    </div>
-    <div class="form-group">
-      <label for="wateringSchedule">Watering Schedule:</label>
-      <select name="wateringSchedule" class="form-control" required>
-        <option value="Daily">Daily</option>
-        <option value="Every 2 Days">Every 2 Days</option>
-        <option value="Weekly">Weekly</option>
-        <option value="Every 2 Weeks">Every 2 Weeks</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label for="plantingDate">Planting Date:</label>
-      <input type="date" name="plantingDate" class="form-control" required>
-    </div>
-    <button type="submit" class="btn btn-success">Add Plant</button>
-  </form>
+
 </div>
-</main>
 </div>
-</div>
+
+
 
 
 

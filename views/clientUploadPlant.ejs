@@ -1,65 +1,21 @@
 <%- include("partials/UserHeader.ejs") %>
-    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-          <p>Identification</p>
-      </div>
-    
+
+
+<div id="page-content-wrapper">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+      <button id="menu-toggle" class="btn">
+          <i class="fas fa-bars" id="menuIcon"></i>
+      </button>
+  </nav>
     <div class="container">
+
+    <p class="h4">Identification</p>
       <% if (error) { %>
         <div class="alert alert-danger" role="alert">
           <%= error %>
         </div>
       <% } %>
-      <style>
-        /* Hide the default file input */
-        .custom-file-upload input[type="file"] {
-            display: none;
-        }
 
-        /* Style the custom file upload button */
-        .custom-file-upload {
-            display: inline-block;
-            padding: 10px 20px;
-            font-size: 16px;
-            color: #fff;
-            background-color: #007bff;
-            border: 1px solid #007bff;
-            border-radius: 5px;
-            cursor: pointer;
-            text-align: center;
-        }
-
-        .custom-file-upload:hover {
-            background-color: #0056b3;
-            border-color: #0056b3;
-        }
-
-        /* Style the submit button */
-        .submit-button {
-            display: inline-block;
-            padding: 10px 20px;
-            font-size: 16px;
-            color: #fff;
-            background-color: #28a745;
-            border: 1px solid #28a745;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-left: 10px;
-        }
-
-        .submit-button:hover {
-            background-color: #218838;
-            border-color: #1e7e34;
-        }
-        .image-preview{
-          width: 200px; 
-          height: 200px;
-          object-fit: cover;
-        }
-    </style>
-
-
-<div class="container mt-4">
   <form action="/plant-identification" method="POST" enctype="multipart/form-data" class="upload-form">
       <label for="file-upload" class="custom-file-upload">
           Choose Image
@@ -68,8 +24,6 @@
       <button type="submit" class="submit-button">Identify</button>
   </form>
   <img id="image-preview" class="image-preview mt-2">
-</div>
-    
 
       <nav>
         <div class="nav nav-tabs" id="nav-tab" role="tablist">
@@ -84,7 +38,7 @@
       <div class="tab-content" id="nav-tabContent">
         <div class="tab-pane fade show active" id="nav-plant-identify" role="tabpanel" aria-labelledby="nav-home-tab" tabindex="0">
           <h2>Plant Identification</h2>
-          <img src="<%= imagePath %>" alt="Uploaded plant image" />
+          <img class="image-preview" src="<%= imagePath %>" alt="Uploaded plant image" />
           <p><strong>Plant Name:</strong> <%= plantName %></p>
           <p><strong>Common Names:</strong> <%= commonNames.join(', ') %></p>
           <p><strong>Description:</strong> <%= description %></p>
@@ -388,7 +342,6 @@ document.getElementById('file-upload').addEventListener('change', function(event
     </script>
 
     </main>
-  </div>
 </div>
 
 

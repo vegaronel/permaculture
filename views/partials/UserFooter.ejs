@@ -6,65 +6,42 @@
           <img src="/images/spinner.svg" alt="" width="100px" />
       </div>
   </div>
-  
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.3/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+   
    <script>
+$(document).ready(function() {
+    // Get the current path
+    var currentPath = window.location.pathname;
 
-      // Highlight the active navigation link based on the current URL path
-      document.addEventListener('DOMContentLoaded', function() {
-            const currentPath = window.location.pathname;
-            const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+    // Loop through each sidebar link
+    $('.side-nav-item').each(function() {
+        var linkPath = $(this).attr('href');
 
-            navLinks.forEach(link => {
-                if (link.getAttribute('href') === currentPath) {
-                    link.classList.add('active');
-                } else {
-                    link.classList.remove('active');
-                }
-            });
-        });
-        
-        window.addEventListener("load", function () {
-            document.getElementById("spinner").style.display = "none";
-        });
+        // Add 'active' class if the link's href matches the current path
+        if (linkPath === currentPath) {
+            $(this).addClass('addActive');
+        }
+    });
 
-        document.addEventListener("DOMContentLoaded", function () {
-            document.getElementById("spinner").style.display = "flex";
-        });
-       
-    $(document).ready(function(){
-    $("#termBox").hide();
-  
-    $("#agreeTerms").change(function(){
-   
-   if(this.checked){
-    document.getElementById('registerBtn').disabled = false;
-     $("#termBox").show();
-   }else{
-    document.getElementById('registerBtn').disabled = true;
-     $("#termBox").hide();
-   }
-  })
-  
-  })
-  
-  
-  $("#decline").click(function(event){
-    
-    event.preventDefault();
-    $("#termBox").hide();
-    document.getElementById('registerBtn').disabled = true;
-    document.getElementById('agreeTerms').checked = false;
-  
-   
-  })
-  $("#accept1").click(function(event){
-    $("#termBox").hide();
-    document.getElementById('registerBtn').disabled = false;
-    event.preventDefault();
-  })
-  
+    // Spinner functionality
+    $("#spinner").show(); // Show spinner when the page loads
+    $(window).on("load", function() {
+        $("#spinner").hide(); // Hide spinner when page finishes loading
+    });
+
+    // Menu toggle and X-bar transformation
+    $("#menu-toggle").on("click", function(e) {
+        e.preventDefault();
+        $("#wrapper").toggleClass("toggled");
+        var icon = $("#menuIcon");
+        icon.toggleClass("fa-bars fa-arrow-right rotated");
+    });
+});
+
+
+
    </script>
 </body>
 </html>

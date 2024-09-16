@@ -1,27 +1,35 @@
 <%- include("partials/UserHeader.ejs") %>
 
-<div class="container">
-     <h1>Plant Identification and Disease Detection Result</h1>
+<div id="page-content-wrapper">
+     <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+         <button id="menu-toggle" class="btn">
+             <i class="fas fa-bars" id="menuIcon"></i>
+         </button>
+     </nav>
 
-     <img src="<%= imagePath %>" alt="Uploaded plant image" />
+     <div class="container">
+          <h1>Plant Identification and Disease Detection Result</h1>
 
-     <h2>Plant Identification</h2>
-     <p><strong>Plant Name:</strong> <%= plantName %></p>
-     <p><strong>Common Names:</strong> <%= commonNames.join(', ') %></p>
-     <p><strong>Description:</strong> <%= description %></p>
+          <img src="<%= imagePath %>" alt="Uploaded plant image" />
 
-     <h2>Disease Detection</h2>
-     <% if (diseases.length > 0) { %> <% diseases.forEach(disease => { %>
-     <div class="disease">
-          <h3><%= disease.name %> (Probability: <%= (disease.probability * 100).toFixed(2) %>%)</h3>
-          <p><strong>Description:</strong> <%= disease.description %></p>
-          <p><strong>Treatment:</strong> <%= disease.treatment %></p>
+          <h2>Plant Identification</h2>
+          <p><strong>Plant Name:</strong> <%= plantName %></p>
+          <p><strong>Common Names:</strong> <%= commonNames.join(', ') %></p>
+          <p><strong>Description:</strong> <%= description %></p>
+
+          <h2>Disease Detection</h2>
+          <% if (diseases.length > 0) { %> <% diseases.forEach(disease => { %>
+          <div class="disease">
+               <h3><%= disease.name %> (Probability: <%= (disease.probability * 100).toFixed(2) %>%)</h3>
+               <p><strong>Description:</strong> <%= disease.description %></p>
+               <p><strong>Treatment:</strong> <%= disease.treatment %></p>
+          </div>
+          <% }); %> <% } else { %>
+          <p>No diseases detected.</p>
+          <% } %>
+
+          <a href="/plant-identification">Upload Another Image</a>
      </div>
-     <% }); %> <% } else { %>
-     <p>No diseases detected.</p>
-     <% } %>
 
-     <a href="/plant-identification">Upload Another Image</a>
+     <%- include("partials/UserFooter.ejs") %>
 </div>
-
-<%- include("partials/UserFooter.ejs") %>

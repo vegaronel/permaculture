@@ -1,41 +1,38 @@
 
 <%- include("partials/UserHeader.ejs") %>
-<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">Email</h1>
-    </div>
 
+<div id="page-content-wrapper">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+        <button id="menu-toggle" class="btn">
+            <i class="fas fa-bars" id="menuIcon"></i>
+        </button>
+    </nav>
 
-<section id="email-section">
-    <div class="container ">
-        <!-- EMAIL SECTION -->
-            <form class="form-container form-control form-control-sm p-4" action="/send-mail" method="post"> 
-            <% if(locals.emailSent){ %>
-                <p class="wrongCridentials bg-success hvr-wobble-horizontal"><%= emailSent %></p>
-            <% } %>
-           <div class="row">
-            <input hidden type="text" name="profilePicture"<% if (locals.profilePicture) { %>
-                 value="<%= profilePicture %>"
-            <% } %>>
-            <div hidden class="col-lg-3 col-md-12"><input class="form-control"  type="text" name="name" <% if(locals.name) { %>
-              value="<%= name %>"<% } %> placeholder="Name"></div>
+        <div class="container p-0 ">
+            <!-- EMAIL SECTION -->
+             <p class="h4 py-2">Email Us</p>
+                <form class="form-container form-control p-4" action="/send-mail" method="post"> 
+                <% if(locals.emailSent){ %>
+                    <p class="wrongCridentials bg-success hvr-wobble-horizontal"><%= emailSent %></p>
+                <% } %>
+            <div class="row">
+                <input hidden type="text" name="profilePicture"<% if (locals.profilePicture) { %>
+                    value="<%= profilePicture %>"
+                <% } %>>
+                <div hidden class="col-lg-3 col-md-12"><input class="form-control"  type="text" name="name" <% if(locals.name) { %>
+                value="<%= name %>"<% } %> placeholder="Name"></div>
 
-            <div hidden class="col-lg-3 col-md-12" ><input class="form-control" type="email" name="email"
-                <% if (locals.email) { %>
-                    value="<%= email %>"
-                <% } %> placeholder="Email"></div>
-            <div class="col-lg-3 col-md-12"><input class="form-control" type="text" name="subject" placeholder="Subject"></div>
-           </div>
-                <textarea class="form-control textMessage" name="message" id="" rows="7" placeholder="Message"></textarea>
-                <button type="submit" class="send-btn btn btn-success">Send</button>
-            </form>
-    </div>
-</section>
-   
-</main>
+                <div hidden class="col-lg-3 col-md-12" ><input class="form-control" type="email" name="email"
+                    <% if (locals.email) { %>
+                        value="<%= email %>"
+                    <% } %> placeholder="Email"></div>
+                <div class="col-lg-3 col-md-12"><input class="form-control" type="text" name="subject" placeholder="Subject"></div>
+            </div>
+                    <textarea class="form-control textMessage" name="message" id="" rows="7" placeholder="Message"></textarea>
+                    <button type="submit" class="send-btn btn btn-success">Send</button>
+                </form>
+        </div>
 </div>
-</div>
-
 
 
 <%- include("partials/UserFooter.ejs") %>

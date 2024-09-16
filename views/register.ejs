@@ -109,3 +109,38 @@
 </body>
 
 <%- include("partials/LoginFooter.ejs") %>
+
+<script>
+       $(document).ready(function(){
+    $("#termBox").hide();
+  
+    $("#agreeTerms").change(function(){
+   
+   if(this.checked){
+    document.getElementById('registerBtn').disabled = false;
+     $("#termBox").show();
+   }else{
+    document.getElementById('registerBtn').disabled = true;
+     $("#termBox").hide();
+   }
+  })
+  
+  })
+  
+  
+  $("#decline").click(function(event){
+    
+    event.preventDefault();
+    $("#termBox").hide();
+    document.getElementById('registerBtn').disabled = true;
+    document.getElementById('agreeTerms').checked = false;
+  
+   
+  })
+  $("#accept1").click(function(event){
+    $("#termBox").hide();
+    document.getElementById('registerBtn').disabled = false;
+    event.preventDefault();
+  })
+  
+</script>
