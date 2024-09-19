@@ -6,11 +6,11 @@
         <button id="menu-toggle" class="btn">
             <i class="fas fa-bars" id="menuIcon"></i>
         </button>
+        <p class="m-0">Email Us</p>
     </nav>
 
         <div class="container p-0 ">
             <!-- EMAIL SECTION -->
-             <p class="h4 py-2">Email Us</p>
                 <form class="form-container form-control p-4" action="/send-mail" method="post"> 
                 <% if(locals.emailSent){ %>
                     <p class="wrongCridentials bg-success hvr-wobble-horizontal"><%= emailSent %></p>
