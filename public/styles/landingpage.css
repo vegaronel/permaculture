@@ -324,7 +324,7 @@ div.col.col-sm-12.py-4.px-4 p:last-child {
     .carousel-item {
         min-height: 400px;
         text-align: center;
-        padding: 30px;
+        padding: 10px;
       }
       .custom-shadow{
         box-shadow: 1px 1px 10px black;
