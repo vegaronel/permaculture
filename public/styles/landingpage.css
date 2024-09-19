@@ -313,3 +313,39 @@ div.col.col-sm-12.py-4.px-4 p:last-child {
     height: 60px;
     width: 60px;
 }
+
+/* CUSTOMERS */
+.green-line{
+    width: 100px;
+    height: 2px;
+    background-color: #559701;
+}
+    /* Optional custom styling */
+    .carousel-item {
+        min-height: 400px;
+        text-align: center;
+        padding: 30px;
+      }
+      .custom-shadow{
+        box-shadow: 1px 1px 10px rgb(188, 188, 188);
+      }
+      .rating {
+        font-size: 24px;
+        color: #ffc107; /* Gold for stars */
+      }
+      .carousel-control-prev-icon,
+      .carousel-control-next-icon {
+        background-color: #000; /* Dark background for control icons */
+      }
+      /* Styling for the indicators */
+      .carousel-indicators [data-bs-target] {
+        background-color: #000;
+        border-radius: 50%;
+        width: 10px;
+        height: 10px;
+      }
+      .carousel-indicators {
+        position: static;
+        margin-top: 20px;
+      }
+  
