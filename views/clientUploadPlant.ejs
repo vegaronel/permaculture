@@ -6,103 +6,199 @@
       <button id="menu-toggle" class="btn">
           <i class="fas fa-bars" id="menuIcon"></i>
       </button>
+      <p class="m-0">Plant Identification</p>
   </nav>
-    <div class="container">
 
-    <p class="h4">Identification</p>
+  <div class="container d-flex row" style="height: 100%;">
+    <div class="upload-container col-lg-8 col-md-12">
+
       <% if (error) { %>
         <div class="alert alert-danger" role="alert">
           <%= error %>
         </div>
       <% } %>
 
-  <form action="/plant-identification" method="POST" enctype="multipart/form-data" class="upload-form">
-      <label for="file-upload" class="custom-file-upload">
-          Choose Image
-          <input id="file-upload" type="file" name="plantImage" accept="image/*" required>
-      </label>
-      <button type="submit" class="submit-button">Identify</button>
-  </form>
-  <img id="image-preview" class="image-preview mt-2">
-
-      <nav>
-        <div class="nav nav-tabs" id="nav-tab" role="tablist">
-          <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-plant-identify" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Identification</button>
-          <button class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-plant-disease" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">Disease Detection</button>
-          <button class="nav-link" id="nav-ai-tab" data-bs-toggle="tab" data-bs-target="#nav-plant-ai" type="button" role="tab" aria-controls="nav-ai" aria-selected="false">Ask AI</button>
-        </div>
-      </nav>
-
-      <% if (plantName) { %>
-      
-      <div class="tab-content" id="nav-tabContent">
-        <div class="tab-pane fade show active" id="nav-plant-identify" role="tabpanel" aria-labelledby="nav-home-tab" tabindex="0">
-          <h2>Plant Identification</h2>
-          <img class="image-preview" src="<%= imagePath %>" alt="Uploaded plant image" />
-          <p><strong>Plant Name:</strong> <%= plantName %></p>
-          <p><strong>Common Names:</strong> <%= commonNames.join(', ') %></p>
-          <p><strong>Description:</strong> <%= description %></p>
+    <div class="d-flex flex-lg-row flex-md-row flex-column-reverse gap-2 p-4">
+     
+      <form action="/plant-identification" method="POST" enctype="multipart/form-data" class="upload-form d-flex flex-column gap-3" style="width: 300px;">
+        <!-- Take Photo Section -->
+        <div>
+          <button type="button" id="take-photo" class="submit-button">Take Photo</button>
         </div>
 
-        <!-- Disease Detection Tab -->
-        <div class="tab-pane fade" id="nav-plant-disease" role="tabpanel" aria-labelledby="nav-profile-tab" tabindex="0">
-          <h2>Disease Detection</h2>
-          <% if (diseases.length > 0) { %>
-            <% diseases.forEach(disease => { %>
-              <div class="disease">
-                <h3><%= disease.name %> (Probability: <%= (disease.probability * 100).toFixed(2) %>%)</h3>
-                <p><strong>Description:</strong> <%= disease.description %></p>
-                <p><strong>Treatment:</strong> <%= disease.treatment %></p>
-              </div>
-            <% }); %>
-          <% } else { %>
-            <p>No diseases detected.</p>
-          <% } %>
+        <!-- Choose Image from File -->
+        <div>
+          <label for="file-upload" class="custom-file-upload submit-button">
+            Choose Image
+            <input id="file-upload" type="file" name="plantImage" accept="image/*">
+          </label>
         </div>
+        <!-- Submit Button -->
+        <div>
+          <button type="submit" class="submit-button">Identify</button>
+        </div>
+      </form>
 
-          <!-- AI Tab with Chatbot -->
-          <div class="tab-pane fade" id="nav-plant-ai" role="tabpanel" aria-labelledby="nav-ai-tab" tabindex="0">
+       <!-- Video Stream for Camera -->
+       <div>
+        <video class="camera-preview" id="camera" autoplay style=" display: none;"></video>
+        <canvas id="photo-canvas" style="display: none;"></canvas>
+      </div>
 
-            <!-- Chatbot Container -->
-            <div class="chat-container" id="chat-container">
-              <div class="chat-messages d-flex flex-column align-items-end" id="chat-messages">
-                <div id="predefined-options" class="d-flex gap-2">
-                  <button class="option-button" data-option="Can you suggest a care tips for this plant <%= plantName %>">Care tips</button>
-                  <button class="option-button" data-option="What are common diseases for this plant <%= plantName %>?">Common Plant Diseases</button>
-                  <button class="option-button" data-option="How much water does this plant <%= plantName %> need?">Watering Requirements</button>
-                </div>
-              </div>
-              <div class="chat-input d-flex align-items-center gap-2">
-                <input class="m-0" type="text" id="chat-input" placeholder="Type a message...">
-                <button id="send-button" class="btn">Send</button>
+      <!-- Hidden Input to Store Captured Photo -->
+      <input type="hidden" name="capturedImage" id="capturedImage">
+
+      <div class="camera-image-preview">
+        <!-- Image Preview and Camera view -->
+        <img id="image-preview" class="image-preview" alt="Image Preview" style="display:none; max-width: 100%; margin-top: 10px;">
+      </div>
+    </div>
+
+
+  <nav>
+    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+      <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-plant-identify" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Identification</button>
+      <button class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-plant-disease" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">Disease Detection</button>
+    </div>
+  </nav>
+
+  <% if (plantName) { %>
+  
+  <div class="tab-content" id="nav-tabContent">
+    <div class="tab-pane fade show active" id="nav-plant-identify" role="tabpanel" aria-labelledby="nav-home-tab" tabindex="0">
+      <h2>Plant Identification</h2>
+      <img class="image-preview" src="<%= imagePath %>" alt="Uploaded plant image" />
+      <p><strong>Plant Name:</strong> <%= plantName %></p>
+      <p><strong>Common Names:</strong> <%= commonNames.join(', ') %></p>
+      <p><strong>Description:</strong> <%= description %></p>
+    </div>
+
+    <!-- Disease Detection Tab -->
+    <div class="tab-pane fade" id="nav-plant-disease" role="tabpanel" aria-labelledby="nav-profile-tab" tabindex="0">
+      <h2>Disease Detection</h2>
+      <% if (diseases.length > 0) { %>
+        <% diseases.forEach(disease => { %>
+          <div class="disease">
+            <p class="h5"><%= disease.name %> (Probability: <%= (disease.probability * 100).toFixed(2) %>%)</p>
+            <p><strong>Description:</strong> <%= disease.description %></p>
+            <p><strong>Treatment:</strong> <%= disease.treatment %></p>
+          </div>
+        <% }); %>
+      <% } else { %>
+        <p>No diseases detected.</p>
+      <% } %>
+    </div>
+  </div>
+
+  <% }else{ %>
+      <p>No data available</p>
+  <% } %>
+
+
+    </div>
+
+<!-- CHATBOT -->
+    <div class="chat-bot-container col-md-12 col-lg-4" style="min-width: 400px;">
+
+          <div class="chat-container" id="chat-container">
+            <div class="chat-messages d-flex flex-column" id="chat-messages">
+              <div id="predefined-options" class="d-flex flex-wrap gap-2">
+                <button class="option-button" data-option="Can you suggest a care tips for this plant <%= plantName %>">Care tips</button>
+                <button class="option-button" data-option="What are common diseases for this plant <%= plantName %>?">Common Plant Diseases</button>
+                <button class="option-button" data-option="How much water does this plant <%= plantName %> need?">Watering Requirements</button>
               </div>
             </div>
+            <div class="chat-input d-flex align-items-center gap-2">
+              <input class="m-0" type="text" id="chat-input" placeholder="Type a message...">
+              <button id="send-button" class="btn">Send</button>
+            </div>
           </div>
-      </div>
-      </div>
 
-      <% }else{ %>
-          <p>No data available</p>
-      <% } %>
+    </div>
+  </div>
+
+
+
+
 
         
       
 
 <script>
+  // DOM elements
+  const takePhotoBtn = document.getElementById('take-photo');
+  const video = document.getElementById('camera');
+  const canvas = document.getElementById('photo-canvas');
+  const imagePreview = document.getElementById('image-preview');
+  const capturedImageInput = document.getElementById('capturedImage');
+  const fileUpload = document.getElementById('file-upload');
+  const cameraImagePreview = document.querySelector('.camera-image-preview');
 
-document.getElementById('file-upload').addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('image-preview').src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            } else {
-                document.getElementById('image-preview').src = '';
-            }
-        });
+  let stream;
+  let isCameraActive = false;
 
+  // Take Photo button click handler
+  takePhotoBtn.addEventListener('click', () => {
+    if (!isCameraActive) {
+      startCamera();
+    } else {
+      capturePhoto();
+    }
+  });
+
+  // Start camera function
+  function startCamera() {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(videoStream => {
+          stream = videoStream;
+          video.srcObject = stream;
+          video.style.display = 'block';
+          imagePreview.style.display = 'none';
+          cameraImagePreview.appendChild(video);
+          isCameraActive = true;
+          takePhotoBtn.textContent = 'Capture Photo';
+        })
+        .catch(err => console.error("Error accessing camera: ", err));
+    }
+  }
+
+  // Capture photo function
+  function capturePhoto() {
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    const imageData = canvas.toDataURL('image/png');
+    
+    imagePreview.src = imageData;
+    imagePreview.style.display = 'block';
+    video.style.display = 'none';
+
+    capturedImageInput.value = imageData;
+
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+    }
+
+    isCameraActive = false;
+    takePhotoBtn.textContent = 'Take Photo';
+  }
+
+  // File upload handler
+  fileUpload.addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        imagePreview.src = e.target.result;
+        imagePreview.style.display = 'block';
+        video.style.display = 'none';
+        capturedImageInput.value = '';  // Clear any previously captured image
+      };
+      reader.readAsDataURL(file);
+    }
+  });
 
   document.addEventListener('DOMContentLoaded', () => 
   {
@@ -153,19 +249,6 @@ document.getElementById('file-upload').addEventListener('change', function(event
     }
   });
 
-    // Minimize button handler
-    document.getElementById('minimize-button').addEventListener('click', () => 
-    {
-        const chatContainer = document.getElementById('chat-container');
-        chatContainer.classList.toggle('minimized');
-    });
-
-    // Close button handler
-    document.getElementById('close-button').addEventListener('click', () => 
-    {
-        const chatContainer = document.getElementById('chat-container');
-        chatContainer.style.display = 'none';
-    });
 
     // Handle predefined option clicks
     document.querySelectorAll('.option-button').forEach(button => 
