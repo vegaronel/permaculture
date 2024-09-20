@@ -2,11 +2,18 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const isAuthenticated = require('../middleware/athenticateUser');
 const User = require("../models/user");
+const axios = require('axios');
 const Plant = require("../models/Plant");
 const getCurrentGrowthStage = require('../public/js/growthStage'); 
 const app = express();
 
+require("dotenv").config();
+
 app.get('/dashboard', isAuthenticated, async (req, res) => {
+  const lat = 14.163742603744133;  // Latitude for the barangay
+  const lon = 122.88500203498731;  // Longitude for the barangay
+  const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${process.env.WEATHER_API}&units=metric`;
+
   const filter = req.query.filter;
   const page = parseInt(req.query.page) || 1;
   const limit = 10;
@@ -19,6 +26,11 @@ app.get('/dashboard', isAuthenticated, async (req, res) => {
   }
 
   try {
+    // Fetch weather data using the coordinates
+    const response = await axios.get(url);
+    const weatherData = response.data;
+
+    // Fetch plant data from the database
     const plants = await Plant.find(query)
       .skip(skip)
       .limit(limit)
@@ -69,13 +81,20 @@ app.get('/dashboard', isAuthenticated, async (req, res) => {
     const count = await Plant.countDocuments(query);
     const totalPages = Math.ceil(count / limit);
 
-    res.render('index', { plants: updatedPlants, page, totalPages, filter, name: req.session.firstname + " "+ req.session.lastname });
+    // Render the dashboard with weather and plant data
+    res.render('index', {
+      weather: weatherData,
+      plants: updatedPlants,
+      page,
+      totalPages,
+      filter,
+      name: req.session.firstname + " " + req.session.lastname
+    });
   } catch (error) {
     console.error(error);
     res.status(500).send("Error retrieving plants");
   }
 });
-
 
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;

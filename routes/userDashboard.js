@@ -40,6 +40,7 @@ app.post("/chat", isAuthenticated, async (req, res) => {
     const chatCompletion = await getGroqChatCompletion(content);
     let response = chatCompletion.choices[0]?.message?.content || "I'm sorry, I couldn't understand that.";
 
+    console.log(response);
     res.json({ response });
   } catch (error) {
     console.error('Error:', error);
