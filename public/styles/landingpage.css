@@ -66,6 +66,9 @@ input {
     background-image: url(/images/main-bg.svg);
     background-repeat: no-repeat;
     background-size: cover;
+    width: 100%;
+    background-position: center; /* Keeps the image centered */
+    
 }
 
 .title-container {
