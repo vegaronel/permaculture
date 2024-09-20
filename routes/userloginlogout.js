@@ -10,6 +10,7 @@ const app = express();
 require("dotenv").config();
 
 app.get('/dashboard', isAuthenticated, async (req, res) => {
+  
   const lat = 14.163742603744133;  // Latitude for the barangay
   const lon = 122.88500203498731;  // Longitude for the barangay
   const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${process.env.WEATHER_API}&units=metric`;
@@ -97,6 +98,7 @@ app.get('/dashboard', isAuthenticated, async (req, res) => {
 });
 
 app.post("/login", async (req, res) => {
+  
   const { email, password } = req.body;
 
   try {

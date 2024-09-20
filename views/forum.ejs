@@ -1,0 +1,25 @@
+
+
+<% posts.forEach(post => { %>
+    <div class="post">
+      <h2><%= post.userId.username %></h2>
+      <p><%= post.content %></p>
+      <% if (post.image) { %>
+        <img src="/uploads/<%= post.image %>" alt="Post Image" />
+      <% } %>
+  
+      <!-- Comments Section -->
+      <h3>Comments:</h3>
+      <ul>
+        <% post.comments.forEach(comment => { %>
+          <li><%= comment.comment %> by <%= comment.userId.username %></li>
+        <% }) %>
+      </ul>
+  
+      <form action="/comment/<%= post._id %>" method="POST">
+        <textarea name="comment" placeholder="Add a comment"></textarea>
+        <button type="submit">Submit</button>
+      </form>
+    </div>
+  <% }) %>
+  
