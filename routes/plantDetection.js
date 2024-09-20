@@ -30,7 +30,8 @@ app.get('/plant-identification', (req, res) => {
     description: '',
     diseases: [],
     imagePath: '',
-    error: null
+    error: null,
+    name: req.session.firstname + " "+ req.session.lastname,
   });
 });
 

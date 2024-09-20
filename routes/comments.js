@@ -9,7 +9,7 @@ router.get('/comments', isAuthenticated, async (req, res) => {
         const comments = await Comment.find().sort({ createdAt: -1 });
         res.json(comments);
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        res.status(500).json({ message: err.message, name: req.session.username + " " + req.session.lastname});
     }
 });
 

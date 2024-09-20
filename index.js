@@ -76,7 +76,7 @@ app.get("/login", (req, res) => {
 
 app.get("/community", isAuthenticated, (req, res) => {
   const name = req.session.firstname + " " + req.session.lastname;
-  res.render("community.ejs", { username: name });
+  res.render("community.ejs", { username: name ,name: req.session.firstname + " " + req.session.lastname});
 });
 
 app.use((req, res, next) => {

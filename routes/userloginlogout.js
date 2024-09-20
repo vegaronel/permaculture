@@ -69,7 +69,7 @@ app.get('/dashboard', isAuthenticated, async (req, res) => {
     const count = await Plant.countDocuments(query);
     const totalPages = Math.ceil(count / limit);
 
-    res.render('index', { plants: updatedPlants, page, totalPages, filter, name: req.session.firstname});
+    res.render('index', { plants: updatedPlants, page, totalPages, filter, name: req.session.firstname + " "+ req.session.lastname });
   } catch (error) {
     console.error(error);
     res.status(500).send("Error retrieving plants");

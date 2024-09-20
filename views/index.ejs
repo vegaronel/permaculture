@@ -1,24 +1,9 @@
 <%- include("partials/UserHeader.ejs") %>
 
 
-   <div id="page-content-wrapper">
-    <nav class="navbar navbar-expand-lg bg-light navbar-light d-flex align-items-center">
-        <div>
-            <button id="menu-toggle" class="btn">
-                <i class="fas fa-bars" id="menuIcon"></i>
-            </button>
-        </div>
-        <div>
-            <p class="h3 m-0">Welcome Back, <strong><%= name  %>!</strong></p>
-        </div>
-      
-      
     </nav>
        <!-- Page Content -->
         <div class="container">    
-            <div class="chart-container">
-                <canvas id="myChart"></canvas>
-              </div>
             <p class="h5">Plants That Need to Be Watered</p>
             <% if(locals.plant){ %>
                 <div class="container-water d-flex gap-3">
@@ -40,66 +25,40 @@
             <a href="/add-plant" class="btn btn-primary mb-3 my-3">Add plant</a>
             <p class="h5">My Plants</p>
     
-            <% if (plants && plants.length > 0) { %>
-                <table id="plantsTable" class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Plant Name</th>
-                            <th>Planting Instructions</th>
-                            <th>Watering Schedule</th>
-                            <th>Estimated Harvest Time</th>
-                            <th>Current Stage</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% plants.forEach(plant => { %>
+            <div class="table-responsive">
+                <% if (plants && plants.length > 0) { %>
+                    <table id="plantsTable" class="table table-striped">
+                        <thead>
                             <tr>
-                                <td><%= plant.name %></td>
-                                <td><%= plant.plantingInstructions %></td>
-                                <td><%= plant.wateringSchedule %></td>
-                                <td><%= new Date(plant.harvestDate).toLocaleDateString() %></td>
-                                <td><%= plant.growthStage %></td>
+                                <th>Plant Name</th>
+                                <th>Planting Instructions</th>
+                                <th>Watering Schedule</th>
+                                <th>Estimated Harvest Time</th>
+                                <th>Current Stage</th>
                             </tr>
-                        <% }) %>
-                    </tbody>
-                </table>
-            <% } else { %>
-                <p>No plants found. Start by adding a new plant!</p>
-            <% } %>
+                        </thead>
+                        <tbody>
+                            <% plants.forEach(plant => { %>
+                                <tr>
+                                    <td><%= plant.name %></td>
+                                    <td><%= plant.plantingInstructions %></td>
+                                    <td><%= plant.wateringSchedule %></td>
+                                    <td><%= new Date(plant.harvestDate).toLocaleDateString() %></td>
+                                    <td><%= plant.growthStage %></td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                <% } else { %>
+                    <p>No plants found. Start by adding a new plant!</p>
+                <% } %>
+            </div>
+        
         </div>
 </div>
 <!-- /#page-content-wrapper -->
 </div>
 <!-- /#wrapper -->
 
+
 <%- include("partials/UserFooter.ejs") %>
-<!-- jQuery and DataTables JS -->
-
-<script>
-    
-    var ctx = document.getElementById('myChart').getContext('2d');
-  var myChart = new Chart(ctx, {
-      type: 'line', // Change this to 'bar', 'pie', etc., depending on the chart type you want
-      data: {
-          labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-          datasets: [{
-              label: 'My First Dataset',
-              data: [65, 59, 80, 81, 56, 55, 40],
-              fill: false,
-              borderColor: 'rgb(75, 192, 192)',
-              tension: 0.1
-          }]
-      },
-      options: {
-          scales: {
-              y: {
-                  beginAtZero: true
-              }
-          }
-      }
-  });
-
-     $(document).ready(function() {
-       $('#plantsTable').DataTable();
-     });
-   </script>
