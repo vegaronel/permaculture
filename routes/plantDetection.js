@@ -56,7 +56,8 @@ app.post('/plant-identification', upload.single('plantImage'), async (req, res) 
         commonNames: [],
         description: '',
         diseases: [],
-        imagePath: ''
+        imagePath: '',
+        name: req.session.firstname + " "+ req.session.lastname,
       });
     }
 
@@ -83,6 +84,7 @@ app.post('/plant-identification', upload.single('plantImage'), async (req, res) 
         description: '',
         diseases: [],
         imagePath: '',
+        name: req.session.firstname + " "+ req.session.lastname,
         error: 'The uploaded image might not be a plant or the identification is uncertain. Please upload a clear image of the plant.'
       });
     }
@@ -126,6 +128,7 @@ app.post('/plant-identification', upload.single('plantImage'), async (req, res) 
       description, 
       diseases,
       imagePath: req.file ? '/uploads/' + req.file.filename : req.body.capturedImage,
+      name: req.session.firstname + " "+ req.session.lastname,
       error: null
     });
   } catch (error) {
@@ -136,7 +139,8 @@ app.post('/plant-identification', upload.single('plantImage'), async (req, res) 
       commonNames: [],
       description: '',
       diseases: [],
-      imagePath: ''
+      imagePath: '',
+      name: req.session.firstname + " "+ req.session.lastname,
     });
   }
 });
