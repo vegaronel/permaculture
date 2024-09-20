@@ -6,13 +6,15 @@ const session = require('express-session');
 const middleWare = require("./middleware/middleware");
 const MemoryStore = require('memorystore')(session);
 const email = require("./routes/emails");
-const comments = require("./routes/comments");
+const comments = require("./routes/commentsRoutes");
 const userLogin = require("./routes/userloginlogout");
 const isAuthenticated = require('./middleware/athenticateUser');
 const userDashboard = require("./routes/userDashboard");
 const registration = require("./routes/registration");
 const plantIdentification = require("./routes/plantDetection");
 const dashboardPlants = require("./routes/dashboardPlants");
+const commentsRoutes = require("./routes/commentsRoutes");
+const postRoutes = require("./routes/postRoutes");
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -57,6 +59,9 @@ app.use(userLogin);
 app.use(userDashboard);
 app.use(registration);
 app.use(dashboardPlants);
+
+app.use(commentsRoutes);
+app.use(postRoutes);
 
 app.get("/", (req, res) => {
   res.render("homepage.ejs");

@@ -1,0 +1,16 @@
+<h1>Posts</h1>
+
+<% posts.forEach(post => { %>
+  <div>
+    <p><strong><%= post.userId.firstname %> <%= post.userId.lastname %>:</strong> <%= post.content %></p>
+    <p><a href="/post/<%= post._id %>">View Post</a></p>
+  </div>
+  <hr>
+<% }) %>
+
+<!-- Form to create a new post -->
+<h2>Create a New Post</h2>
+<form action="/create" method="POST">
+  <textarea name="content" placeholder="Write something..." required></textarea>
+  <button type="submit">Post</button>
+</form>

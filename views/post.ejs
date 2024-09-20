@@ -1,0 +1,18 @@
+<h1>Post by <%= post.userId.firstname %> <%= post.userId.lastname %></h1>
+<p><%= post.content %></p>
+
+<h2>Comments</h2>
+<% comments.forEach(comment => { %>
+  <div>
+    <p><strong><%= comment.userId.firstname %> <%= comment.userId.lastname %>:</strong> <%= comment.comment %></p>
+    <small>Posted on: <%= comment.createdAt.toDateString() %></small>
+  </div>
+  <hr>
+<% }) %>
+
+<!-- Form to add a comment -->
+<h3>Add a Comment</h3>
+<form action="/comment/<%= post._id %>" method="POST">
+  <textarea name="comment" placeholder="Write your comment here..." required></textarea>
+  <button type="submit">Add Comment</button>
+</form>
