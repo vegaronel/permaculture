@@ -1,3 +1,8 @@
+<%- include("partials/UserHeader.ejs") %>
+
+<div class="container">
+
+
 <h1>Posts</h1>
 
 <% posts.forEach(post => { %>
@@ -8,9 +13,23 @@
   <hr>
 <% }) %>
 
-<!-- Form to create a new post -->
 <h2>Create a New Post</h2>
-<form action="/create" method="POST">
-  <textarea name="content" placeholder="Write something..." required></textarea>
-  <button type="submit">Post</button>
+<form action="/create" method="POST" enctype="multipart/form-data">
+  <div>
+    <label for="title">Post Title</label>
+    <input type="text" name="title" placeholder="Enter title" required>
+  </div>
+  <div>
+    <label for="content">Post Description</label>
+    <br>
+    <textarea  class="form-control" name="content" placeholder="Write something..." required></textarea>
+  </div>
+  <div>
+    <label for="image">Upload an Image</label>
+    <input type="file" class="form-control" name="image" accept="image/*">
+  </div>
+  <button type="submit" class="btn btn-primary">Post</button>
 </form>
+
+</div>
+<%- include("partials/UserFooter.ejs") %>
