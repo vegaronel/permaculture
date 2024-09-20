@@ -31,6 +31,8 @@
         <div>
           <button type="submit" class="btn picture-btn py-2">Identify</button>
         </div>
+         <!-- Hidden Input to Store Captured Photo -->
+        <input type="hidden" name="capturedImage" id="capturedImage">
       </form>
 
        <!-- Video Stream for Camera -->
@@ -40,8 +42,7 @@
       </div>
  
    
-      <!-- Hidden Input to Store Captured Photo -->
-      <input type="hidden" name="capturedImage" id="capturedImage">
+     
 
       <div class="camera-image-preview d-flex flex-column-reverse ">
         <!-- Image Preview and Camera view -->
@@ -179,25 +180,27 @@
         }
     }
 
-    // Capture photo function
     function capturePhoto() {
-        $canvas[0].width = $video[0].videoWidth;
-        $canvas[0].height = $video[0].videoHeight;
-        $canvas[0].getContext('2d').drawImage($video[0], 0, 0, $canvas[0].width, $canvas[0].height);
+    $canvas[0].width = $video[0].videoWidth;
+    $canvas[0].height = $video[0].videoHeight;
+    const context = $canvas[0].getContext('2d');
+    context.drawImage($video[0], 0, 0, $canvas[0].width, $canvas[0].height);
 
-        const imageData = $canvas[0].toDataURL('image/png');
-        $imagePreview.attr('src', imageData).show();
-        $video.hide();
-        $capturedImageInput.val(imageData);
+    const imageData = $canvas[0].toDataURL('image/png');
+    $imagePreview.attr('src', imageData).show();
+    $video.hide();
+    $capturedImageInput.val(imageData);  // Store image in hidden input
 
-        if (stream) {
-            stream.getTracks().forEach(track => track.stop());
-        }
-
-        isCameraActive = false;
-        $takePhotoBtn.text('Take Photo');
-        $switchCameraBtn.hide(); // Hide switch camera button when camera is stopped
+    // Stop the camera stream
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
     }
+
+    isCameraActive = false;
+    $takePhotoBtn.text('Take Photo');
+    $switchCameraBtn.hide();  // Hide switch camera button when camera is stopped
+}
+
 
     // Switch camera handler
     $switchCameraBtn.on('click', function () {
