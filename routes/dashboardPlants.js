@@ -25,7 +25,8 @@ app.get('/plants/:id', async (req, res) => {
 
 
 app.get('/add-plant', (req, res) => {
-  res.render('addPlant.ejs');
+
+  res.render('addPlant.ejs', {name:req.session.username});
 });
 app.post('/add-plant', async (req, res) => {
   const { name, plantingInstructions, wateringSchedule, plantingDate } = req.body;
