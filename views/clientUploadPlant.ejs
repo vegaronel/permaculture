@@ -3,8 +3,8 @@
 
 
 
-  <div class="container d-flex row" style="height: 100%;">
-    <div class="upload-container col-lg-8 col-md-12">
+  <div class="container d-flex row hidden-scroll">
+    <div class="upload-container col-lg-8 col-md-12 hidden-scroll">
 
       <% if (error) { %>
         <div class="alert alert-danger" role="alert">
@@ -227,8 +227,8 @@
         }
     });
 
-    const $messagesContainer = $('#chat-messages');
-    const $predefinedOptions = $('#predefined-options');
+  const $messagesContainer = $('#chat-messages');
+const $predefinedOptions = $('#predefined-options');
 
     // Handle predefined option clicks
     $predefinedOptions.on('click', '.option-button', async function () {
@@ -254,9 +254,10 @@
             const data = await response.json();
 
             // Display bot's message
-            const botMessage = $('<div>').addClass('message received').html(`<p class="fsize-13">${data.response}</p><span class="timestamp">${new Date().toLocaleTimeString()}</span>`);
+            const botMessage = $('<div>')
+              .addClass('message received p-0 mt-2')
+              .html(`<p class="fsize-13 received-response m-0">${data.response.replace(/\n/g, '<br>')}</p><span class="timestamp">${new Date().toLocaleTimeString()}</span>`);
             $messagesContainer.append(botMessage);
-            $messagesContainer.scrollTop($messagesContainer[0].scrollHeight);
         } catch (error) {
             console.error('Error:', error);
         }
@@ -272,41 +273,43 @@
 
     updateOptionsVisibility();
 
-    // Send button handler
-    $('#send-button').on('click', async function () {
-        const $input = $('#chat-input');
-        const message = $input.val().trim();
-        if (!message) return;
+ // Send button handler
+$('#send-button').on('click', async function () {
+    const $input = $('#chat-input');
+    const message = $input.val().trim();
+    if (!message) return;
 
-        // Display user's message
-        const userMessage = $('<div>').addClass('message sent').html(`<p class="fsize-13">${message}</p><span class="timestamp">${new Date().toLocaleTimeString()}</span>`);
-        $messagesContainer.append(userMessage);
-        $input.val('');
+    // Display user's message
+    const userMessage = $('<div>').addClass('message sent').html(`<p class="fsize-13">${message}</p><span class="timestamp">${new Date().toLocaleTimeString()}</span>`);
+    $messagesContainer.append(userMessage);
+    $input.val('');
+    $messagesContainer.scrollTop($messagesContainer[0].scrollHeight);
+    $predefinedOptions.hide();
+
+    // Send the message to the server
+    try {
+        const response = await fetch('/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ content: message })
+        });
+
+        const data = await response.json();
+
+        // Display bot's message with line breaks
+        const botMessage = $('<div>')
+            .addClass('message received')
+            .html(`<p class="fsize-13">${data.response.replace(/\n/g, '<br>')}</p><span class="timestamp">${new Date().toLocaleTimeString()}</span>`);
+        $messagesContainer.append(botMessage);
         $messagesContainer.scrollTop($messagesContainer[0].scrollHeight);
-        $predefinedOptions.hide();
 
-        // Send the message to the server
-        try {
-            const response = await fetch('/chat', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ content: message })
-            });
-
-            const data = await response.json();
-
-            // Display bot's message
-            const botMessage = $('<div>').addClass('message received').html(`<p class="fsize-13">${data.response}</p><span class="timestamp">${new Date().toLocaleTimeString()}</span>`);
-            $messagesContainer.append(botMessage);
-            $messagesContainer.scrollTop($messagesContainer[0].scrollHeight);
-
-            updateOptionsVisibility();
-        } catch (error) {
-            console.error('Error:', error);
-        }
-    });
+        updateOptionsVisibility();
+    } catch (error) {
+        console.error('Error:', error);
+    }
+});
 
     // Minimize button handler
     $('#minimize-button').on('click', function () {

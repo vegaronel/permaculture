@@ -27,6 +27,22 @@ $(document).ready(function() {
         }
     });
 
+    document.addEventListener('DOMContentLoaded', () => {
+        const pageTitle = document.getElementById('page-title');
+        const currentUrl = window.location.pathname; // Get the current URL path
+    
+        // Change the text based on URL
+        if (currentUrl.includes('/dashboard')) {
+        pageTitle.textContent = 'DASHBOARD';
+        } else if (currentUrl.includes('/plant-identification')) {
+        pageTitle.textContent = 'PLANT IDENTIFICATION';
+        } else if (currentUrl.includes('/community')) {
+        pageTitle.textContent = 'COMMUNITY';
+        } else if (currentUrl.includes('/email')) {
+        pageTitle.textContent = 'EMAIL US';
+        }
+    });
+
     // Spinner functionality
     $("#spinner").show(); // Show spinner when the page loads
     $(window).on("load", function() {

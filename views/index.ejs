@@ -3,7 +3,15 @@
 
     </nav>
        <!-- Page Content -->
-        <div class="container">    
+        <div class="container hidden-scroll" > 
+            <p>Weather</p>
+            <div class="bg-primary text-white btn">
+                <p>City: <%= weather.name %></p>
+                <p>Temperature<%= weather.main.temp %></p>
+                <p>Description: <%= weather.weather[0].description, %></p>
+            </div>
+           
+            
             <p class="h5">Plants That Need to Be Watered</p>
             <% if(locals.plant){ %>
                 <div class="container-water d-flex gap-3">
