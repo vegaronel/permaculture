@@ -21,7 +21,9 @@ $(document).ready(function() {
 
         // Add 'active' class if the link's href matches the current path
         if (linkPath === currentPath) {
-            $(this).addClass('addActive');
+            $(this).removeClass('text-white')
+            $(this).addClass('addActive text-black');
+            $(this).find('img').addClass('active-class-green');
         }
     });
 

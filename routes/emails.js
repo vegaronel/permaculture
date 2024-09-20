@@ -59,7 +59,7 @@ app.get('/admin/email/:id', async (req, res) => {
 
 
 app.get("/email",isAuthenticated, (req, res)=>{
-    res.render("email.ejs", {name:req.session.firstname + " "+ req.session.lastname, email: req.session.email, profilePicture: req.session.profilePicture});
+    res.render("email.ejs", {name: req.session.firstname + " "+ req.session.lastname, email: req.session.email, profilePicture: req.session.profilePicture});
 })
 
 app.post("/admin/emails/delete/:id", async (req, res) => {
