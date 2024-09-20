@@ -2,49 +2,57 @@ const express = require('express');
 const Post = require('../models/Post');
 const Comment = require('../models/comment');
 const path = require('path');
+const fs = require('fs');
 const auth = require('../middleware/athenticateUser');
 const app = express();
-
-
 const multer = require('multer');
-// Set up multer for file uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/'); // Directory to store images
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname)); // Rename the file with a timestamp
-  }
+const cloudinary = require('cloudinary').v2;
+
+require('dotenv').config();
+
+
+
+cloudinary.config({ 
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const upload = multer({
-  storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 } // Limit file size to 5MB
-});
+const upload = multer({ dest: 'uploads/' }); // Temporary storage
+
 
 // Serve static files from the uploads directory
 app.use('/uploads', express.static('uploads'));
 
 // Create a new post
+// Route to create a new post with an image
 app.post('/create', upload.single('image'), async (req, res) => {
   const { title, content } = req.body;
-  const userId = req.session.userId; // Assuming you're storing the user ID in the session
 
   try {
-    const newPost = new Post({
-      userId: userId,  // Get the userId from session
-      title: title,    // Post title
-      content: content, // Post description
-      image: req.file ? req.file.path : null, // Store the image file path if uploaded
-    });
+      // Upload the image to Cloudinary
+      const result = await cloudinary.uploader.upload(req.file.path);
 
-    await newPost.save();
-    res.redirect('/posts'); // Redirect to posts list
+      // Create a new post with the image URL from Cloudinary
+      const newPost = new Post({
+          userId: req.session.userId,
+          title,
+          content,
+          image: result.secure_url // Store the secure URL
+      });
+
+      await newPost.save();
+
+      // Remove the temporary file after upload
+      fs.unlinkSync(req.file.path);
+
+      res.redirect('/posts'); // Redirect to the dashboard or the newly created post
   } catch (error) {
-    console.error('Error creating post:', error);
-    res.status(500).send('Error creating post');
+      console.error('Error uploading image:', error);
+      res.status(500).send('Error creating post');
   }
 });
+
 
 // Get all posts
 app.get('/posts',auth, async (req, res) => {
