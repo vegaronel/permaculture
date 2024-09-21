@@ -82,6 +82,11 @@ app.get('/dashboard', isAuthenticated, async (req, res) => {
     const count = await Plant.countDocuments(query);
     const totalPages = Math.ceil(count / limit);
 
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+const today = new Date();
+const formattedDate = today.toLocaleDateString('en-US', options);
+
+
     // Render the dashboard with weather and plant data
     res.render('index', {
       weather: weatherData,
@@ -89,7 +94,8 @@ app.get('/dashboard', isAuthenticated, async (req, res) => {
       page,
       totalPages,
       filter,
-      name: req.session.firstname + " " + req.session.lastname
+      name: req.session.firstname + " " + req.session.lastname,
+      dateToday:formattedDate
     });
   } catch (error) {
     console.error(error);
