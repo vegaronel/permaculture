@@ -201,9 +201,8 @@ a{
 /* SIDEBAR */
 .side-nav-item{
     margin: auto;
-    width: 200px;
     background-color: transparent;
-    padding: 8px 8px 8px 25px;
+    padding: 10px;
     
 }
 .active-class-green {
@@ -211,7 +210,12 @@ a{
 }
 .side-nav-item.addActive {
     background-color: white;
-    border-radius: 20px;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* UPLOAD PLANT */
@@ -300,7 +304,7 @@ a{
   /* SIDEBAR */
   #sidebar-wrapper {
     min-height: 100vh;
-    margin-left: -15rem;
+    margin-left: -5rem;
     transition: margin 0.25s ease-out;
 }
 
@@ -310,7 +314,7 @@ a{
 }
 
 #sidebar-wrapper .list-group {
-    width: 15rem;
+    width: auto;
 }
 
 #page-content-wrapper {
@@ -332,7 +336,7 @@ a{
     }
 
     #wrapper.toggled #sidebar-wrapper {
-        margin-left: -15rem;
+        margin-left: -5rem;
     }
 }
 
