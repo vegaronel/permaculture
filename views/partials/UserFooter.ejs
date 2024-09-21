@@ -21,27 +21,26 @@ $(document).ready(function() {
 
         // Add 'active' class if the link's href matches the current path
         if (linkPath === currentPath) {
-            $(this).removeClass('text-white')
+            $(this).removeClass('text-white');
             $(this).addClass('addActive text-black');
             $(this).find('img').addClass('active-class-green');
         }
     });
 
-    document.addEventListener('DOMContentLoaded', () => {
-        const pageTitle = document.getElementById('page-title');
-        const currentUrl = window.location.pathname; // Get the current URL path
+    // Change the text based on URL
+    const pageTitle = $('#page-title');
     
-        // Change the text based on URL
-        if (currentUrl.includes('/dashboard')) {
-        pageTitle.textContent = 'DASHBOARD';
-        } else if (currentUrl.includes('/plant-identification')) {
-        pageTitle.textContent = 'PLANT IDENTIFICATION';
-        } else if (currentUrl.includes('/community')) {
-        pageTitle.textContent = 'COMMUNITY';
-        } else if (currentUrl.includes('/email')) {
-        pageTitle.textContent = 'EMAIL US';
-        }
-    });
+    if (currentPath.includes('/dashboard')) {
+        pageTitle.text('DASHBOARD');
+    } else if (currentPath.includes('/plant-identification')) {
+        pageTitle.text('PLANT IDENTIFICATION');
+    } else if (currentPath.includes('/community')) {
+        pageTitle.text('COMMUNITY');
+    } else if (currentPath.includes('/email')) {
+        pageTitle.text('EMAIL US');
+    }else if(currentPath.includes('/posts')){
+        pageTitle.text('POSTS');
+    }
 
     // Spinner functionality
     $("#spinner").show(); // Show spinner when the page loads
