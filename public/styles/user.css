@@ -14,6 +14,19 @@
     font-style: normal;
     font-display: swap;
 }
+
+/* BOOTSTRAP CUSTOM */
+
+
+.row>*{
+    padding-right: 0;
+    padding-left: 0;
+  }
+  .row{
+    margin: 0;
+  }
+/*  */
+
 /* CUSTOM FONTSIZE */
 *{
     font-size: 14px;
@@ -235,7 +248,13 @@ a{
   overflow: auto;
   
 }
-/* SIDEBAR */
+/* SIDEBAR - BREADCRUMBS*/
+.bread-crumbs{
+    font-size: clamp(16px, 2vw, 25px);
+}
+#menuIcon{
+    font-size: 25px;
+}
 .side-nav-item{
     margin: auto;
     background-color: transparent;
@@ -397,4 +416,3 @@ a{
     display: none; /* For Chrome, Safari, and Edge */
   }
 
-  
