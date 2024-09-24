@@ -5,6 +5,7 @@
     --button-hover: #48a2fd;
     --light-placeholder:#6E829F;
     --white-text:#FFFFFF;
+    --gray-text:#505050;
   }
   @font-face {
     font-family: "Nexa-Black";
@@ -13,9 +14,45 @@
     font-style: normal;
     font-display: swap;
 }
-  .black-text{
-    color: black;
-  }
+/* CUSTOM FONTSIZE */
+*{
+    font-size: 14px;
+}
+.arial{
+    font-family: Arial, Helvetica, sans-serif;
+}
+.nexa-black{
+    font-family: "Nexa-Black";
+}
+.center-items{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.b-radius-50{
+    border-radius: 50px;
+}
+.fs-13{
+    font-size: 13px;
+}
+.fs-14{
+    font-size: 14px;
+}
+.fs-30{
+    font-size: clamp(20px, 2vw, 30px);
+}
+.fs-80{
+    font-size: clamp(40px, 5vw,  80px) ;
+}
+.black-text{
+color: black;
+}
+.gray-text{
+    color: #505050;
+}
+.weather-card{
+    background-color: #F9FAFA;
+}
 p{
     font-size: 16px;
 }
@@ -304,7 +341,7 @@ a{
   /* SIDEBAR */
   #sidebar-wrapper {
     min-height: 100vh;
-    margin-left: -5rem;
+    margin-left: -5.3rem;
     transition: margin 0.25s ease-out;
 }
 
@@ -336,7 +373,7 @@ a{
     }
 
     #wrapper.toggled #sidebar-wrapper {
-        margin-left: -5rem;
+        margin-left: -5.3rem;
     }
 }
 
@@ -359,3 +396,5 @@ a{
 .scrollable-container::-webkit-scrollbar {
     display: none; /* For Chrome, Safari, and Edge */
   }
+
+  
