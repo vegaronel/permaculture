@@ -2,65 +2,71 @@
 
 <div class="container">
   <h1>Pending Registration</h1>
-  <table id="pendingUsersTable" class="display table mt-5">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Email</th>
-        <th>Status</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% pendingUsers.forEach(user => { %>
+  <div class="table-responsive">
+    <table id="pendingUsersTable" class="display table mt-5">
+      <thead>
         <tr>
-          <td><%= user.firstname %> <%= user.lastname %></td>
-          <td><%= user.email %></td>
-          <td><%= user.status %></td>
-          <td>
-            <form action="/admin/verify-user/<%= user._id %>" method="POST" style="display:inline;">
-              <button type="submit" class="btn btn-success btn-sm">Verify</button>
-            </form>
-            <form action="/admin/reject-user/<%= user._id %>" method="POST" style="display:inline;">
-              <button type="submit" class="btn btn-danger btn-sm">Reject</button>
-            </form>
-          </td>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Status</th>
+          <th>Actions</th>
         </tr>
-      <% }) %>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        <% pendingUsers.forEach(user => { %>
+          <tr>
+            <td><%= user.firstname %> <%= user.lastname %></td>
+            <td><%= user.email %></td>
+            <td><%= user.status %></td>
+            <td>
+              <form action="/admin/verify-user/<%= user._id %>" method="POST" style="display:inline;">
+                <button type="submit" class="btn btn-success btn-sm">Verify</button>
+              </form>
+              <form action="/admin/reject-user/<%= user._id %>" method="POST" style="display:inline;">
+                <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+ 
 
   <h4>Received Emails</h4>
-  <table id="example" class="display table mt-5">
-    <thead>
-      <tr>
-        <th class="col-lg-1">Profile</th>
-        <th>Status</th>
-        <th>Email</th>
-        <th>Subject</th>
-        <th>Date Sent</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% emails.forEach(email => { %>
+  <div class="table-responsive">
+    <table id="example" class="display table mt-5">
+      <thead>
         <tr>
-          <td class="d-flex justify-content-center"> <img src="/<%= email.profilePicture  %>" alt="" width="50" height="50"></td>
-          <td><%= email.read ? '📤' : '✉️' %></td>
-          <td>
-            <a href="#" class="email-link" data-id="<%= email._id %>"><%= email.email %></a>
-          </td>
-          <td><%= email.subject %></td>
-          <td><%= email.dateSent.toLocaleString() %></td>
-          <td>
-            <a class="btn btn-primary btn-sm" href="/admin/email/<%= email._id %>">View</a>
-            <button type="button" class="btn btn-danger btn-sm delete-button" data-id="<%= email._id %>">Delete</button>
-            <form id="delete-form-<%= email._id %>" action="/admin/emails/delete/<%= email._id %>" method="POST" style="display:none;"></form>
-          </td>
+          <th class="col-lg-1">Profile</th>
+          <th>Status</th>
+          <th>Email</th>
+          <th>Subject</th>
+          <th>Date Sent</th>
+          <th>Actions</th>
         </tr>
-      <% }) %>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        <% emails.forEach(email => { %>
+          <tr>
+            <td class="d-flex justify-content-center"> <img src="/<%= email.profilePicture  %>" alt="" width="50" height="50"></td>
+            <td><%= email.read ? '📤' : '✉️' %></td>
+            <td>
+              <a href="#" class="email-link" data-id="<%= email._id %>"><%= email.email %></a>
+            </td>
+            <td><%= email.subject %></td>
+            <td><%= email.dateSent.toLocaleString() %></td>
+            <td>
+              <a class="btn btn-primary btn-sm" href="/admin/email/<%= email._id %>">View</a>
+              <button type="button" class="btn btn-danger btn-sm delete-button" data-id="<%= email._id %>">Delete</button>
+              <form id="delete-form-<%= email._id %>" action="/admin/emails/delete/<%= email._id %>" method="POST" style="display:none;"></form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+  
 </div>
 
 <!-- Confirmation Modal -->
