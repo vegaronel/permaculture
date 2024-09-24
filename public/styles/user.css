@@ -66,6 +66,11 @@ color: black;
 .weather-card{
     background-color: #F9FAFA;
 }
+.weather-icon-lg{
+    width: 100%; 
+    max-width: 150px;
+    min-width: 130px;
+}
 p{
     font-size: 16px;
 }
@@ -416,3 +421,7 @@ a{
     display: none; /* For Chrome, Safari, and Edge */
   }
 
+.todo-text{
+    position: relative; 
+    right: 20px;
+}
