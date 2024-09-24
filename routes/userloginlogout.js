@@ -8,12 +8,11 @@ const getCurrentGrowthStage = require('../public/js/growthStage');
 const app = express();
 
 require("dotenv").config();
-
 app.get('/dashboard', isAuthenticated, async (req, res) => {
-  
   const lat = 14.163742603744133;  // Latitude for the barangay
   const lon = 122.88500203498731;  // Longitude for the barangay
-  const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${process.env.WEATHER_API}&units=metric`;
+  const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${process.env.WEATHER_API}&units=metric`;
+  const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${process.env.WEATHER_API}&units=metric`;
 
   const filter = req.query.filter;
   const page = parseInt(req.query.page) || 1;
@@ -27,9 +26,18 @@ app.get('/dashboard', isAuthenticated, async (req, res) => {
   }
 
   try {
-    // Fetch weather data using the coordinates
-    const response = await axios.get(url);
-    const weatherData = response.data;
+    // Fetch current weather data
+    const currentWeatherResponse = await axios.get(currentWeatherUrl);
+    const weatherData = currentWeatherResponse.data;
+
+    // Fetch 5-day weather forecast
+    const forecastResponse = await axios.get(forecastUrl);
+    const forecastData = forecastResponse.data.list;
+
+    // Extract daily forecasts (filter data for every 24 hours)
+    const dailyForecasts = forecastData.filter((entry) => {
+      return entry.dt_txt.includes("12:00:00");  // Pick the weather data for 12:00 PM each day
+    });
 
     // Fetch plant data from the database
     const plants = await Plant.find(query)
@@ -76,26 +84,31 @@ app.get('/dashboard', isAuthenticated, async (req, res) => {
         needsWatering = dayDiff >= 7;
       }
 
-      return { ...plant.toObject(), growthStage: currentStage, needsWatering };
+      return { ...plant.toObject(), growthStage: currentStage, needsWatering, s: req.session.profilePictures };
     });
 
     const count = await Plant.countDocuments(query);
     const totalPages = Math.ceil(count / limit);
 
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-const today = new Date();
-const formattedDate = today.toLocaleDateString('en-US', options);
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString('en-PH', options);
 
+    const [weekday, month, dayWithComma, year] = formattedDate.split(', ');
+    const [day] = dayWithComma.split(' '); // Extract the day without the comma
 
-    // Render the dashboard with weather and plant data
+    // Render the dashboard with current weather, forecast, and plant data
     res.render('index', {
       weather: weatherData,
       plants: updatedPlants,
+      forecast: dailyForecasts, // 5-day forecast
       page,
       totalPages,
       filter,
       name: req.session.firstname + " " + req.session.lastname,
-      dateToday:formattedDate
+      day: weekday,
+      dateToday:  " "+ month + " " + day
+ 
     });
   } catch (error) {
     console.error(error);

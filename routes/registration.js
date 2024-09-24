@@ -85,7 +85,6 @@ app.post("/send-verification-code", async (req, res) => {
         return res.status(500).json({ success: false, message: "Server error" });
     }
 });
-// Verify code and register user
 app.post("/register", upload.single("profilePicture"), async (req, res) => {
     const { firstname, lastname, email, password, verificationCode } = req.body;
 
@@ -98,12 +97,18 @@ app.post("/register", upload.single("profilePicture"), async (req, res) => {
 
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Use the uploaded profile picture if available, otherwise use the default
+        const profilePicture = req.file ? `/uploads/${req.file.filename}` : '/uploads/default-profile-picture.jpg';
+
         const newUser = new User({
             firstname,
             lastname,
             email,
-            password: hashedPassword
+            password: hashedPassword,
+            profilePicture
         });
+
         await newUser.save();
 
         // Clear OTP session data
