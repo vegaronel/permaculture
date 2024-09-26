@@ -1,49 +1,134 @@
 <%- include("partials/UserHeader.ejs") %>
 
+<div class="container-fluid">
+    <h1>Add New Plant</h1>
+    <form action="/add-new-plant" method="POST">
+        <input type="hidden" name="userId" value="<%= userId %>"> <!-- Use passed userId here -->
+
+        <div class="form-group">
+            <label for="plantCollectionId">Select Plant</label>
+            <select class="form-control" name="plantCollectionId" id="plantCollectionId" required>
+                <option value="">Select a Plant</option>
+                <% plantCollections.forEach(function(plant) { %>
+                    <option value="<%= plant._id %>" data-harvest-time="<%= plant.harvestTime %>">
+                        <%= plant.name %>
+                    </option>
+                <% }); %>
+            </select>
+            <input type="text" name="plantingInstructions" hidden>
+            <input type="text" name="harvestTime" hidden>
+        </div>
+
+        <div class="form-group">
+            <label for="plantingDate">Planting Date:</label>
+            <input type="date" name="plantingDate" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+            <label for="location">Select Location</label>
+            <select class="form-control" name="location" id="location" required>
+                <option value="">Select a Location</option>
+                <% locations.forEach(function(loc) { %>
+                    <option value="<%= loc._id %>"><%= loc.name %></option>
+                <% }); %>
+                <option value="custom">Add Custom Location</option>
+            </select>
+            <input type="text" id="customLocation" name="customLocation" class="form-control" placeholder="Enter custom location" style="display: none;">
+            <button type="button" class="btn btn-warning" id="submitCustomLocation" style="display: none;">Submit Custom Location</button>
+        </div>
 
 
-    <div class="container-fluid">
-      <h1>Add New Plant</h1>
-      <form action="/add-plant" method="POST">
-        <div class="form-group">
-          <label for="name">Select Plant</label>
-          <select class="form-control" name="name" id="name" required>
-            <option value="">Select a Plant</option>
-            <option value="Kamote" data-harvest-time="120">Kamote</option>
-            <option value="Palay" data-harvest-time="150">Palay</option>
-            <option value="Kalabasa" data-harvest-time="90">Kalabasa</option>
-            <option value="Pakwan" data-harvest-time="100">Pakwan</option>
-            <option value="Sitaw" data-harvest-time="80">Sitaw</option>
-            <option value="Mongo" data-harvest-time="110">Mongo</option>
-          </select>
+        <!-- Display Plant Details -->
+        <div id="plantDetails" style="display: none;">
+            <h4>Plant Details</h4>
+            <p><strong>Name:</strong> <span id="plantName"></span></p>
+            <p><strong>Planting Instructions:</strong> <span id="plantingInstructions"></span></p>
+            <p><strong>Watering Schedule:</strong> <span id="wateringSchedule"></span></p>
+            <p><strong>Harvest Time:</strong> <span id="harvestTime"></span></p>
         </div>
-        <div class="form-group">
-          <label for="plantingInstructions">Planting Instructions:</label>
-          <textarea name="plantingInstructions" class="form-control" required></textarea>
-        </div>
-        <div class="form-group">
-          <label for="wateringSchedule">Watering Schedule:</label>
-          <select name="wateringSchedule" class="form-control" required>
-            <option value="Daily">Daily</option>
-            <option value="Every 2 Days">Every 2 Days</option>
-            <option value="Weekly">Weekly</option>
-            <option value="Every 2 Weeks">Every 2 Weeks</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="plantingDate">Planting Date:</label>
-          <input type="date" name="plantingDate" class="form-control" required>
-        </div>
+
         <button type="submit" class="btn btn-success">Add Plant</button>
-      </form>
-    </div>
-
+    </form>
 </div>
-</div>
-
-
-
-
-
 
 <%- include("partials/UserFooter.ejs") %>
+
+<script>
+document.getElementById('location').addEventListener('change', function() {
+    const selectedValue = this.value;
+    const customLocationInput = document.getElementById('customLocation');
+    const submitButton = document.getElementById('submitCustomLocation');
+
+    if (selectedValue === 'custom') {
+        customLocationInput.style.display = 'block';
+        customLocationInput.value = ''; // Clear the input field
+        submitButton.style.display = 'block'; // Show the submit button
+    } else {
+        customLocationInput.style.display = 'none';
+        customLocationInput.value = ''; // Clear the input field if not custom
+        submitButton.style.display = 'none'; // Hide the submit button
+    }
+});
+
+// Add functionality to the submit button for the custom location
+document.getElementById('submitCustomLocation').addEventListener('click', function() {
+    const customLocation = document.getElementById('customLocation').value;
+
+    if (customLocation) {
+        fetch('/add-custom-location', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ name: customLocation }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const locationsDropdown = document.getElementById('location');
+                const newOption = document.createElement('option');
+                newOption.value = data.location._id; // Assuming you return the new location object with its ID
+                newOption.textContent = data.location.name;
+                locationsDropdown.appendChild(newOption);
+                locationsDropdown.value = newOption.value; // Set the newly added location as selected
+                $('#addLocationModal').modal('hide'); // Close the modal if you're using one
+                document.getElementById('customLocation').value = ''; // Clear input
+            } else {
+                alert('Error adding custom location: ' + data.message);
+            }
+        })
+        .catch(err => {
+            console.error('Error:', err);
+            alert('Failed to add custom location.');
+        });
+    } else {
+        alert('Please enter a custom location.');
+    }
+});
+
+document.getElementById('plantCollectionId').addEventListener('change', function() {
+    const plantId = this.value;
+
+    if (plantId) {
+        fetch(`/plant-details/${plantId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('plantDetails').style.display = 'block';
+                    document.getElementById('plantName').textContent = data.plant.name;
+                    document.getElementById('plantingInstructions').textContent = data.plant.plantingInstructions;
+                    document.getElementById('wateringSchedule').textContent = data.plant.wateringSchedule;
+                    document.getElementById('harvestTime').textContent = data.plant.harvestTime;
+                } else {
+                    document.getElementById('plantDetails').style.display = 'none';
+                }
+            })
+            .catch(err => {
+                console.error('Error fetching plant details:', err);
+                document.getElementById('plantDetails').style.display = 'none';
+            });
+    } else {
+        document.getElementById('plantDetails').style.display = 'none';
+    }
+});
+</script>

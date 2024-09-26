@@ -31,7 +31,6 @@
       </tbody>
     </table>
   </div>
- 
 
   <h4>Received Emails</h4>
   <div class="table-responsive">
@@ -66,67 +65,59 @@
       </tbody>
     </table>
   </div>
+
+  <h4>Plant Collection</h4>
+  <div class="table-responsive">
+    <table class="display table mt-5">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Planting Instructions</th>
+          <th>Watering Schedule</th>
+          <th>Harvest Time</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% plants.forEach(plant => { %>
+          <tr>
+            <td><%= plant.name %></td>
+            <td><%= plant.plantingInstructions %></td>
+            <td><%= plant.wateringSchedule %></td>
+            <td><%= plant.harvestTime %></td>
+            <td>
+              <a class="btn btn-warning btn-sm" href="/admin/plants/edit/<%= plant._id %>">Edit</a>
+              <form action="/admin/plants/delete/<%= plant._id %>" method="POST" style="display:inline;">
+                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <h4>Add New Plant</h4>
+  <form action="/add-plant" method="POST" class="mt-4">
+    <div class="form-group">
+      <label for="name">Plant Name:</label>
+      <input type="text" class="form-control" id="name" name="name" required>
+    </div>
+    <div class="form-group">
+      <label for="plantingInstructions">Planting Instructions:</label>
+      <textarea class="form-control" id="plantingInstructions" name="plantingInstructions" rows="3" required></textarea>
+    </div>
+    <div class="form-group">
+      <label for="wateringSchedule">Watering Schedule:</label>
+      <input type="text" class="form-control" id="wateringSchedule" name="wateringSchedule" required>
+    </div>
+    <div class="form-group">
+      <label for="harvestTime">Estimated Harvest Time:</label>
+      <input type="text" class="form-control" id="harvestTime" name="harvestTime" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Add Plant</button>
+  </form>
   
 </div>
-
-<!-- Confirmation Modal -->
-<div id="confirmationModal" class="modal" tabindex="-1" role="dialog">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Confirm Deletion</h5>
-      </div>
-      <div class="modal-body">
-        <p>Are you sure you want to delete this email?</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-light" id="cancelDelete" data-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-warning" id="confirmDelete">Delete</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
- document.addEventListener("DOMContentLoaded", function() {
-    // Initialize DataTables
-    new DataTable('#pendingUsersTable');
-    new DataTable('#example');
-
-    var emailLinks = document.querySelectorAll(".email-link");
-
-    emailLinks.forEach(function(link) {
-      link.addEventListener("click", function(event) {
-        event.preventDefault();
-        var emailId = link.getAttribute("data-id");
-        // Add your code to handle the email link click event
-      });
-    });
-    var deleteButtons = document.querySelectorAll(".delete-button");
-    var modal = document.getElementById("confirmationModal");
-    var confirmDeleteButton = document.getElementById("confirmDelete");
-    var emailIdToDelete;
-
-    deleteButtons.forEach(function(button) {
-      button.addEventListener("click", function(event) {
-        emailIdToDelete = button.getAttribute("data-id");
-        modal.style.display = "block";
-      });
-    });
-    confirmDeleteButton.addEventListener("click", function() {
-      var form = document.getElementById("delete-form-" + emailIdToDelete);
-      form.submit();
-    });
-    document.getElementById("cancelDelete").addEventListener("click", function() {
-      modal.style.display = "none";
-    });
-    // Close the modal when the user clicks outside of it
-    window.onclick = function(event) {
-      if (event.target == modal) {
-        modal.style.display = "none";
-      }
-    };
-  });
-</script>
 
 <%- include("partials/AdminFooter.ejs") %>

@@ -79,39 +79,35 @@
                                 <% }else{ %>
                                     <p>Nice, all plants are hydrated.</p>
                                 <% } %>
-                                <a href="/add-plant" class="btn btn-primary ">Add plant</a>
-
                                 <div class="d-flex align-items-center mt-2">
                                     <img src="/images/my-plants.svg" alt="">
                                     <p class="h5 m-0">My Plants</p>
                                 </div>
-                                
-
                             <div class="table-responsive">
                                 <% if (plants && plants.length > 0) { %>
                                     <table id="plantsTable" class="table table-striped">
                                         <thead>
-                                            <tr>
-                                                <th>Plant Name</th>
-                                                <th>Planting Instructions</th>
-                                                <th>Watering Schedule</th>
-                                                <th>Estimated Harvest Time</th>
-                                                <th>Current Stage</th>
-                                            </tr>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Plant Name</th>
+                                                    <th>Location</th>
+                                                    <th>Estimated Harvest Time</th>
+                                                    <th>Current Stage</th>
+                                                </tr>
                                         </thead>
                                         <tbody>
                                             <% plants.forEach(plant => { %>
                                                 <tr>
+                                                    <td><%= plant.customId %></td> <!-- Display the plant's customId -->
                                                     <td><%= plant.name %></td>
-                                                    <td><%= plant.plantingInstructions %></td>
-                                                    <td><%= plant.wateringSchedule %></td>
-                                                    <td><%= new Date(plant.harvestDate).toLocaleDateString() %></td>
+                                                    <td><%= plant.location %></td>
+                                                    <td><%= new Date(plant.estimatedHarvestTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) %></td>
                                                     <td><%= plant.growthStage %></td>
                                                 </tr>
                                             <% }) %>
                                         </tbody>
                                     </table>
-                                <% } else { %>
+                                  <% } else { %>
                                     <p>No plants found. Start by adding a new plant!</p>
                                 <% } %>
                             </div>

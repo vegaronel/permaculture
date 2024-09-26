@@ -12,6 +12,15 @@
    
    <script>
 $(document).ready(function() {
+
+    // PLANTS TABLE
+    $('#plantsTable').DataTable({
+      "paging": true,   
+      "searching": true,   
+      "lengthChange": true
+    });
+  
+
     // Get the current path
     var currentPath = window.location.pathname;
 
