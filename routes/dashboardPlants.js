@@ -1,70 +1,137 @@
 const Plant = require('../models/Plant');
 const express = require("express");
 const getCurrentGrowthStage = require('../public/js/growthStage');
+const PlantCollection = require('../models/plantCollections');
 const isAuthenticated = require('../middleware/athenticateUser')
+const Counter = require('../models/Counter');
+const Location = require('../models/Location');
 const app = express();
 
+async function getNextSequence(name) {
+  const counter = await Counter.findOneAndUpdate(
+      { _id: name },
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true }
+  );
+  return counter.seq;
+}
 
-app.get('/plants/:id', async (req, res) => {
-  const userId = req.user._id; // Assuming `req.user` contains the authenticated user's information
-
+app.post('/add-custom-location', isAuthenticated, async (req, res) => {
   try {
-    const plant = await Plant.findOne({ _id: req.params.id, user: userId }); // Ensure the plant belongs to the user
-    if (plant) {
-      plant.currentStage = getCurrentGrowthStage(plant);
-      await plant.save();
-      res.render('plantDetails', { plant });
-    } else {
-      res.status(404).send('Plant not found or not owned by you');
-    }
+      const { name } = req.body;
+      const newLocation = new Location({
+          name,
+          userId: req.session.userId // Associate the location with the logged-in user
+      });
+
+      await newLocation.save();
+      
+      // Return the new location in the response
+      res.json({ success: true, location: newLocation });
   } catch (error) {
-    console.error(error);
-    res.status(500).send("Error retrieving plant details");
+      console.error('Error adding custom location:', error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 });
 
 
-app.get('/add-plant', (req, res) => {
+app.get('/plant-details/:id', isAuthenticated, async (req, res) => {
+  try {
+    const plantId = req.params.id;
 
-  res.render('addPlant.ejs', {name:req.session.username});
+    // Fetch plant details from PlantCollection
+    const plant = await PlantCollection.findById(plantId);
+
+    if (!plant) {
+      return res.json({ success: false, message: 'Plant not found' });
+    }
+
+    // Return plant details as JSON
+    res.json({
+      success: true,
+      plant: {
+        name: plant.name,
+        plantingInstructions: plant.plantingInstructions,
+        harvestTime: plant.harvestTime,
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching plant details:', error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
 });
-app.post('/add-plant', async (req, res) => {
-  const { name, plantingInstructions, wateringSchedule, plantingDate } = req.body;
+
+
+app.get('/add-new-plant', isAuthenticated, async (req, res) => {
+  try {
+    const locations = await Location.find({ userId: req.session.userId });
+      const plantCollections = await PlantCollection.find(); // Fetch all plant collections from the database
+      const userId = req.session.userId; // Assuming you're storing userId in the session
+
+      res.render('addPlant.ejs', { name: req.session.username, plantCollections, userId, locations  }); // Pass userId to the view
+  } catch (error) {
+      console.error(error);
+      res.status(500).send("Error fetching plant collections");
+  }
+});
+
+app.post('/add-new-plant', isAuthenticated, async (req, res) => {
+  const { plantCollectionId, plantingDate, userId, location, customLocation } = req.body;
 
   try {
-    const harvestTimes = {
-      "Kamote": 120,
-      "Palay": 150,
-      "Kalabasa": 90,
-      "Pakwan": 100,
-      "Sitaw": 80,
-      "Mongo": 110
-    };
+    // Fetch the selected plant
+    const plantCollection = await PlantCollection.findById(plantCollectionId);
+    if (!plantCollection) {
+      return res.status(400).send('Invalid plant selected.');
+    }
 
-    const harvestTime = harvestTimes[name];
+    // Check if the user added a custom location
+    let selectedLocation;
+    if (location === 'custom') {
+      // Create and save the custom location
+      const newLocation = new Location({
+        name: customLocation,
+        userId: userId, // Associate the location with the user
+      });
+      await newLocation.save();
+      selectedLocation = newLocation._id; // Use the ID of the new location
+    } else {
+      selectedLocation = location; // Use the existing location ID
+    }
+
+    // Convert the plantingDate string to a Date object
     const plantingDateObj = new Date(plantingDate);
-    const harvestDate = new Date(plantingDateObj);
-    harvestDate.setDate(plantingDateObj.getDate() + harvestTime);
-    
-    // Format harvestDate as "MM/DD/YYYY"
-    const formattedHarvestDate = `${harvestDate.getMonth() + 1}/${harvestDate.getDate()}/${harvestDate.getFullYear()}`;
 
+    const customId = await getNextSequence('plant');
+
+    // Calculate estimated harvest time
+    const harvestTimeInDays = plantCollection.harvestTime;
+    const estimatedHarvestTime = new Date(plantingDateObj);
+    estimatedHarvestTime.setDate(plantingDateObj.getDate() + harvestTimeInDays);
+
+    // Create a new plant instance
     const newPlant = new Plant({
-      name,
-      plantingInstructions,
-      wateringSchedule,
+      name: plantCollection.name,
+      customId: customId.toString().padStart(5, '0'),
+      plantingInstructions: plantCollection.plantingInstructions,
+      wateringSchedule: plantCollection.wateringSchedule,
       plantingDate: plantingDateObj,
-      harvestDate: formattedHarvestDate,
-      userId: req.session.userId // Set the current user's ID
+      estimatedHarvestTime,
+      userId,
+      plantCollectionId,
+      lastWatered: new Date(),
+      growthStage: 'Seedling',
+      location: selectedLocation // Save the selected location ID
     });
 
     await newPlant.save();
-    res.redirect('/dashboard');
+    res.redirect('/dashboard'); // Redirect after adding
   } catch (error) {
     console.error(error);
-    res.status(500).send("Error adding plant");
+    res.status(500).send('Internal Server Error');
   }
 });
+
 app.post('/water-plant/:id', isAuthenticated, async (req, res) => {
   const plantId = req.params.id;
 

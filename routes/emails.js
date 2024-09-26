@@ -2,8 +2,9 @@ const express = require("express")
 const Email = require("../models/message")
 const User = require("../models/user")
 const isAuthenticated = require('../middleware/athenticateUser')
+const PlantCollection = require('../models/plantCollections'); // Import the PlantCollection model
 const app = express();
-
+// Update the /admin route to fetch plants
 app.get("/admin", async (req, res) => {
     try {
         // Fetch all emails from the database
@@ -12,11 +13,73 @@ app.get("/admin", async (req, res) => {
         // Fetch all users with status 'pending'
         const pendingUsers = await User.find({ status: 'pending' });
         
-        // Render the admin view with both pending users and emails
-        res.render("admin.ejs", { emails, pendingUsers });
+        // Fetch all plants from the database
+        const plants = await PlantCollection.find();
+
+        // Render the admin view with emails, pending users, and plants
+        res.render("admin.ejs", { emails, pendingUsers, plants });
     } catch (err) {
         console.error(err);
         res.status(500).send('Error fetching data');
+    }
+});
+
+// Route to delete a plant
+app.post("/admin/plants/delete/:id", async (req, res) => {
+    try {
+        await PlantCollection.findByIdAndDelete(req.params.id);
+        res.redirect("/admin");
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error deleting plant');
+    }
+});
+
+// Route to update a plant (rendering the edit form)
+app.get("/admin/plants/edit/:id", async (req, res) => {
+    try {
+        const plant = await PlantCollection.findById(req.params.id);
+        res.render("editPlant.ejs", { plant });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error fetching plant');
+    }
+});
+
+// Route to update a plant (processing the form submission)
+app.post("/admin/plants/update/:id", async (req, res) => {
+    const { name, plantingInstructions, wateringSchedule, harvestTime } = req.body;
+
+    try {
+        await PlantCollection.findByIdAndUpdate(req.params.id, {
+            name,
+            plantingInstructions,
+            wateringSchedule,
+            harvestTime
+        });
+        res.redirect("/admin");
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Error updating plant");
+    }
+});
+// Route for adding a new plant collection
+app.post('/add-plant', async (req, res) => {
+    const { name, plantingInstructions, wateringSchedule, harvestTime } = req.body;
+  
+    try {
+      const newPlant = new PlantCollection({
+        name,
+        plantingInstructions,
+        wateringSchedule,
+        harvestTime
+      });
+  
+      await newPlant.save();
+      res.redirect('/admin'); // Redirect back to the admin page or wherever you want
+    } catch (error) {
+      console.error(error);
+      res.status(500).send("Error adding plant to collection");
     }
 });
 

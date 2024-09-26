@@ -1,0 +1,26 @@
+<%- include("partials/AdminHeader.ejs") %>
+
+<div class="container">
+  <h1>Edit Plant: <%= plant.name %></h1>
+  <form action="/admin/plants/update/<%= plant._id %>" method="POST">
+    <div class="form-group">
+      <label for="name">Plant Name:</label>
+      <input type="text" class="form-control" id="name" name="name" value="<%= plant.name %>" required>
+    </div>
+    <div class="form-group">
+      <label for="plantingInstructions">Planting Instructions:</label>
+      <textarea class="form-control" id="plantingInstructions" name="plantingInstructions" rows="3" required><%= plant.plantingInstructions %></textarea>
+    </div>
+    <div class="form-group">
+      <label for="wateringSchedule">Watering Schedule:</label>
+      <input type="text" class="form-control" id="wateringSchedule" name="wateringSchedule" value="<%= plant.wateringSchedule %>" required>
+    </div>
+    <div class="form-group">
+      <label for="harvestTime">Estimated Harvest Time:</label>
+      <input type="text" class="form-control" id="harvestTime" name="harvestTime" value="<%= plant.harvestTime %>" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Update Plant</button>
+  </form>
+</div>
+
+<%- include("partials/AdminFooter.ejs") %>
