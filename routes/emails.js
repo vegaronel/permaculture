@@ -2,33 +2,57 @@ const express = require("express")
 const Email = require("../models/message")
 const User = require("../models/user")
 const isAuthenticated = require('../middleware/athenticateUser')
-const PlantCollection = require('../models/plantCollections'); // Import the PlantCollection model
+const PlantCollection = require('../models/plantCollections');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+const cloudinary = require('../config/cloudinary');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+
 const app = express();
+
+
+// Configure multer storage for Cloudinary
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+      folder: 'plants', // Cloudinary folder where images will be stored
+      allowed_formats: ['jpg', 'png'],
+      transformation: [{ width: 500, height: 500, crop: 'limit' }] // Optional image transformations
+    }
+  });
+
+  const upload = multer({ storage: storage });
+
 // Update the /admin route to fetch plants
-app.get("/admin", async (req, res) => {
+app.get("/admin",upload.single('plantImage'), async (req, res) => {
     try {
         // Fetch all emails from the database
         const emails = await Email.find().sort({ dateSent: -1 });
         
         // Fetch all users with status 'pending'
         const pendingUsers = await User.find({ status: 'pending' });
-        
-        // Fetch all plants from the database
-        const plants = await PlantCollection.find();
 
         // Render the admin view with emails, pending users, and plants
-        res.render("admin.ejs", { emails, pendingUsers, plants });
+        res.render("admin.ejs", { emails, pendingUsers });
     } catch (err) {
         console.error(err);
         res.status(500).send('Error fetching data');
     }
 });
 
+app.get("/plant-collection", async(req,res)=>{
+      // Fetch all plants from the database
+      const plants = await PlantCollection.find();
+    
+      res.render("adminPlantCollection.ejs", {plants,plantAdded: "Success"});
+})
+
 // Route to delete a plant
 app.post("/admin/plants/delete/:id", async (req, res) => {
     try {
         await PlantCollection.findByIdAndDelete(req.params.id);
-        res.redirect("/admin");
+        res.redirect("/plant-collection");
     } catch (err) {
         console.error(err);
         res.status(500).send('Error deleting plant');
@@ -46,37 +70,51 @@ app.get("/admin/plants/edit/:id", async (req, res) => {
     }
 });
 
-// Route to update a plant (processing the form submission)
-app.post("/admin/plants/update/:id", async (req, res) => {
-    const { name, plantingInstructions, wateringSchedule, harvestTime } = req.body;
+app.post("/admin/plants/update/:id", upload.single('plantImage'), async (req, res) => {
+    const { name, plantingInstructions, harvestTime } = req.body;
+    let imageUrl = req.body.existingImage; // Store existing image URL
+
+    // If a new image is uploaded, use the new Cloudinary URL
+    if (req.file) {
+        imageUrl = req.file.path || req.file.url || req.file.secure_url;
+    }
 
     try {
         await PlantCollection.findByIdAndUpdate(req.params.id, {
             name,
             plantingInstructions,
-            wateringSchedule,
-            harvestTime
+            harvestTime,
+            image: imageUrl // Use the updated or existing image URL
         });
-        res.redirect("/admin");
+        res.redirect("/plant-collection");
     } catch (error) {
         console.error(error);
         res.status(500).send("Error updating plant");
     }
 });
 // Route for adding a new plant collection
-app.post('/add-plant', async (req, res) => {
-    const { name, plantingInstructions, wateringSchedule, harvestTime } = req.body;
+app.post('/add-plant',upload.single('plantImage'), async (req, res) => {
+    const { name, plantingInstructions, harvestTime } = req.body;
   
+    console.log(req.file);
+
+      const imageUrl = req.file.path || req.file.url || req.file.secure_url; // Cloudinary URL
+
+          // Check if the imageUrl is defined
+          if (!imageUrl) {
+            throw new Error('Image URL is missing');
+         }
+
     try {
       const newPlant = new PlantCollection({
         name,
         plantingInstructions,
-        wateringSchedule,
-        harvestTime
+        harvestTime,
+        image: imageUrl
       });
   
       await newPlant.save();
-      res.redirect('/admin'); // Redirect back to the admin page or wherever you want
+      res.redirect('/plant-collection'); // Redirect back to the admin page or wherever you want
     } catch (error) {
       console.error(error);
       res.status(500).send("Error adding plant to collection");

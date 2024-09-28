@@ -37,17 +37,30 @@
             <button type="button" class="btn btn-warning" id="submitCustomLocation" style="display: none;">Submit Custom Location</button>
         </div>
 
+        <div class="form-group">
+            <label for="initialGrowthStage">Initial Growth Stage</label>
+            <select class="form-control" id="initialGrowthStage" name="initialGrowthStage" required>
+              <option value="">Select Initial Growth Stage</option>
+              <option value="Seedling">Seedling</option>
+              <option value="Sprout">Sprout</option>
+              <option value="Vegetating">Vegetating</option>
+              <option value="Budding">Budding</option>
+              <option value="Flowering">Flowering</option>
+              <option value="Ripening">Ripening</option>
+            </select>
+          </div>
+
 
         <!-- Display Plant Details -->
         <div id="plantDetails" style="display: none;">
             <h4>Plant Details</h4>
             <p><strong>Name:</strong> <span id="plantName"></span></p>
             <p><strong>Planting Instructions:</strong> <span id="plantingInstructions"></span></p>
-            <p><strong>Watering Schedule:</strong> <span id="wateringSchedule"></span></p>
-            <p><strong>Harvest Time:</strong> <span id="harvestTime"></span></p>
+            <p><strong>Harvest Time:</strong> <span id="harvestTime"> days</span></p>
+            <img id="plantImage" alt="Plant Image">
         </div>
 
-        <button type="submit" class="btn btn-success">Add Plant</button>
+        <button type="submit" class="btn btn-success mt-3">Add Plant</button>
     </form>
 </div>
 
@@ -117,7 +130,7 @@ document.getElementById('plantCollectionId').addEventListener('change', function
                     document.getElementById('plantDetails').style.display = 'block';
                     document.getElementById('plantName').textContent = data.plant.name;
                     document.getElementById('plantingInstructions').textContent = data.plant.plantingInstructions;
-                    document.getElementById('wateringSchedule').textContent = data.plant.wateringSchedule;
+                    document.getElementById('plantImage').src = data.plant.image;
                     document.getElementById('harvestTime').textContent = data.plant.harvestTime;
                 } else {
                     document.getElementById('plantDetails').style.display = 'none';

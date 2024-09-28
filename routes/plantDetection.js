@@ -6,7 +6,6 @@ const fs = require('fs');
 require('dotenv').config();
 
 const app = express();
-const port = 3000;
 
 app.set('view engine', 'ejs');
 app.use(express.static('public'));

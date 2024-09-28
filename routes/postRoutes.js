@@ -6,56 +6,52 @@ const fs = require('fs');
 const auth = require('../middleware/athenticateUser');
 const app = express();
 const multer = require('multer');
-const cloudinary = require('cloudinary').v2;
+const cloudinary = require('../config/cloudinary');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
 require('dotenv').config();
 
 
-
-cloudinary.config({ 
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+// Multer storage configuration to upload directly to Cloudinary
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'posts', // Folder name in Cloudinary
+    allowed_formats: ['jpg', 'png'], // Allowed image formats
+    transformation: [{ width: 500, height: 500, crop: 'limit' }] // Optional: Resize images
+  },
 });
 
-const upload = multer({ dest: 'uploads/' }); // Temporary storage
+const upload = multer({ storage: storage }); // Use Cloudinary storage
 
 
 // Serve static files from the uploads directory
 app.use('/uploads', express.static('uploads'));
 
-// Create a new post
 // Route to create a new post with an image
 app.post('/create', upload.single('image'), async (req, res) => {
   const { title, content } = req.body;
 
   try {
-      // Upload the image to Cloudinary
-      const result = await cloudinary.uploader.upload(req.file.path);
-
       // Create a new post with the image URL from Cloudinary
       const newPost = new Post({
           userId: req.session.userId,
           title,
           content,
-          image: result.secure_url // Store the secure URL
+          image: req.file ? req.file.path : null // Use null if no image is uploaded
       });
 
       await newPost.save();
 
-      // Remove the temporary file after upload
-      fs.unlinkSync(req.file.path);
-
-      res.redirect('/posts'); // Redirect to the dashboard or the newly created post
+      res.redirect('/posts');
   } catch (error) {
       console.error('Error uploading image:', error);
       res.status(500).send('Error creating post');
   }
 });
 
-
 // Get all posts
-app.get('/posts',auth, async (req, res) => {
+app.get('/posts', auth, async (req, res) => {
   try {
     const posts = await Post.find().populate('userId', 'firstname lastname email').sort({ createdAt: -1 });
     res.render('posts', { posts, name: req.session.firstname +" " + req.session.lastname });
@@ -66,7 +62,7 @@ app.get('/posts',auth, async (req, res) => {
 });
 
 // Get a specific post with comments
-app.get('/post/:postId',auth, async (req, res) => {
+app.get('/post/:postId', auth, async (req, res) => {
   const { postId } = req.params;
 
   try {
