@@ -11,7 +11,7 @@ require("dotenv").config();
 
 app.post('/complete-tutorial', isAuthenticated, async (req, res) => {
   try {
-    await User.findByIdAndUpdate(req.session.userId, { doneToturial: true });
+    await User.findByIdAndUpdate(req.session.userId, { doneTutorial: true });
     res.redirect('/dashboard');
   } catch (error) {
     console.error(error);
@@ -133,9 +133,11 @@ app.post("/login", async (req, res) => {
 
         if(user.doneTutorial != true){
           return res.redirect('/tutorial');
+        }else{
+          return res.redirect('/dashboard');
         }
 
-        return res.redirect('/dashboard');
+        
       } 
       else {
         const wrongInfo = "Wrong email or password";
