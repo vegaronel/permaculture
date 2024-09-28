@@ -8,6 +8,7 @@ const app = express();
 
 require("dotenv").config();
 
+
 app.post('/complete-tutorial', isAuthenticated, async (req, res) => {
   try {
     await User.findByIdAndUpdate(req.session.userId, { doneToturial: true });
@@ -20,7 +21,6 @@ app.post('/complete-tutorial', isAuthenticated, async (req, res) => {
 
 app.get('/dashboard', isAuthenticated, async (req, res) => {
   try {
-    
     const user = await User.findById(req.session.userId);
 
     if (!user) {
@@ -52,10 +52,10 @@ app.get('/dashboard', isAuthenticated, async (req, res) => {
       axios.get(currentWeatherUrl),
       axios.get(forecastUrl),
       Plant.find(query)
-      .populate('location')  // Populate the location field
-      .skip(skip)
-      .limit(limit)
-      .sort({ plantingDate: -1 }),
+        .populate('location')  // Populate the location field
+        .skip(skip)
+        .limit(limit)
+        .sort({ plantingDate: -1 }),
     ]);
 
     const weatherData = currentWeatherResponse.data;
@@ -63,30 +63,11 @@ app.get('/dashboard', isAuthenticated, async (req, res) => {
 
     const dailyForecasts = forecastData.filter((entry) => entry.dt_txt.includes("12:00:00"));
 
-    const currentDate = new Date();
-    const growthStages = [
-      { stage: "Sprout", days: 7 },
-      { stage: "Seedling", days: 14 },
-      { stage: "Vegetating", days: 30 },
-      { stage: "Budding", days: 45 },
-      { stage: "Flowering", days: 60 },
-      { stage: "Ripening", days: 75 },
-      { stage: "Harvesting", days: 90 }
-    ];
-
+    // Use the computed growth stage from the database
     const updatedPlants = plants.map(plant => {
-      const plantingDate = new Date(plant.plantingDate);
-      const daysSincePlanting = Math.floor((currentDate - plantingDate) / (1000 * 60 * 60 * 24));
-
-      let currentStage = "Not yet started";
-      for (const stage of growthStages) {
-        if (daysSincePlanting <= stage.days) {
-          currentStage = stage.stage;
-          break;
-        }
-      }
-
-      const lastWatered = new Date(plant.lastWatered || plantingDate);
+      // Watering logic: Check if the plant needs watering based on the schedule and last watered date
+      const currentDate = new Date();
+      const lastWatered = new Date(plant.lastWatered || plant.plantingDate);
       const dayDiff = Math.floor((currentDate - lastWatered) / (1000 * 60 * 60 * 24));
 
       const needsWatering = (plant.wateringSchedule === 'Daily' && dayDiff >= 1) || 
@@ -95,13 +76,14 @@ app.get('/dashboard', isAuthenticated, async (req, res) => {
 
       return { 
         ...plant.toObject(), 
-        growthStage: currentStage, 
-        needsWatering,
-        location: plant.location ? plant.location.name : 'Unknown Location'  // Extract location name
+        growthStage: plant.growthStage && plant.growthStage.trim() !== '' ? plant.growthStage : plant.computedGrowthStage,  // Use computed growth stage if planted
+        needsWatering,  // Watering status
+        location: plant.location ? plant.location.name : 'Unknown Location'  // Extract location name if available
       };
     });
 
-    const count = await Plant.countDocuments(query);
+    // Count total number of plants for pagination
+    const count = await Plant.countDocuments(query); // This is the line where await is used
     const totalPages = Math.ceil(count / limit);
 
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
@@ -149,7 +131,11 @@ app.post("/login", async (req, res) => {
         req.session.lastname = user.lastname;
         req.session.profilePicture = user.profilePicture;
 
-        return res.redirect('/dashboard'); // Redirect to dashboard after login
+        if(user.doneTutorial != true){
+          return res.redirect('/tutorial');
+        }
+
+        return res.redirect('/dashboard');
       } 
       else {
         const wrongInfo = "Wrong email or password";
@@ -164,6 +150,11 @@ app.post("/login", async (req, res) => {
     res.status(500).send("Error logging in user");
   }
 });
+
+app.get("/tutorial", (req, res)=>{
+
+  res.render('tutorial');
+})
  
 app.get("/logout", (req, res) => {
      req.session.destroy((err) => {
@@ -173,5 +164,6 @@ app.get("/logout", (req, res) => {
           res.redirect("/");
      });
 });
+
 
 module.exports = app;

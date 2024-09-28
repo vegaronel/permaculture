@@ -55,7 +55,25 @@ const sendWateringReminders = async () => {
         plant.lastWatered = today;
         await plant.save();
       }
-    });
+            // Define the email options for growth stage notification
+            const growthStageMailOptions = {
+              from: `"JELLYACE" <${process.env.EMAIL_USER}>`,
+              to: "ronelvega31@gmail.com", // Replace with actual recipient email or user-specific email
+              subject: 'Plant Growth Stage Update',
+              text: `Your plant "${plant._id + plant.name}" is currently at the "${plant.growthStage}" stage of growth.`
+          };
+
+          // Send the growth stage notification email
+          transporter.sendMail(growthStageMailOptions, (error, info) => {
+              if (error) {
+                  console.error('Error sending growth stage notification email:', error);
+              } else {
+                  console.log('Growth stage notification email sent:', info.response);
+              }
+          });
+      });
+    
+    
   } catch (error) {
     console.error('Error sending reminders:', error);
   }
