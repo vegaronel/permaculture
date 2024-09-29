@@ -63,6 +63,7 @@ app.use(dashboardPlants);
 app.use(commentsRoutes);
 app.use(postRoutes);
 
+
 app.get("/", (req, res) => {
   res.render("homepage.ejs");
 });
