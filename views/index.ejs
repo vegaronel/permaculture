@@ -134,8 +134,7 @@
             </div>
 
             <div class="col-lg-4 col-md-12 p-4 weather-card b-radius-50">
-                <p class="h2">Soil Status </p>
-                <p class="h3 bold"><%= soilMoistureValue %></p>
+                <p>Soil Status: <span id="soilMoistureStatus">Loading</span></p>
             </div>
         </div>    
     </section>
@@ -144,5 +143,11 @@
 <!-- /#page-content-wrapper -->
 </div>
 <!-- /#wrapper -->
-
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+  socket.on('soilMoistureUpdate', (value) => {
+    document.getElementById('soilMoistureStatus').innerText = value ? value : 'No data available';
+  });
+</script>
 <%- include("partials/UserFooter.ejs") %>
