@@ -2,29 +2,28 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const isAuthenticated = require('../middleware/athenticateUser');
 const User = require("../models/user");
-const axios = require('axios');
-const Plant = require("../models/Plant"); 
 
-const admin = require('firebase-admin');
+
+const Plant = require("../models/Plant"); 
+const axios = require('axios');
+
+const admin = require('../config/firebase'); // Import Firebase
+
+const soilMoistureRef = admin.database().ref('CurrentValue');
+
+require("dotenv").config(); // Load environment variables
 
 
 const app = express();
 
-require("dotenv").config();
-
-const serviceAccount = require('../config/soil-moisture-monitoring-1d52c-firebase-adminsdk-416o3-c3a5ead8f0.json');
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: 'https://soil-moisture-monitoring-1d52c-default-rtdb.firebaseio.com'
-});
-
-const db = admin.database();
-const ref = db.ref('CurrentValue');
+// Middleware for handling JSON data
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.post('/complete-tutorial', isAuthenticated, async (req, res) => {
   try {
     await User.findByIdAndUpdate(req.session.userId, { doneTutorial: true });
-    res.redirect('/dashboard');z
+    res.redirect('/dashboard');
   } catch (error) {
     console.error(error);
     res.status(500).send('Error completing the tutorial');
@@ -34,18 +33,12 @@ app.post('/complete-tutorial', isAuthenticated, async (req, res) => {
 app.get('/dashboard', isAuthenticated, async (req, res) => {
   try {
 
-    const snapshot = await ref.once('value');
-    const soilMoistureValue = snapshot.val();
-
-    console.log(soilMoistureValue);
-
     const user = await User.findById(req.session.userId);
-
     if (!user) {
       return res.status(404).send('User not found');
     }
 
-    if (user.doneToturial === "false") {
+    if (user.doneTutorial === "false") {
       return res.render('tutorial');
     }
 
@@ -65,25 +58,24 @@ app.get('/dashboard', isAuthenticated, async (req, res) => {
       query.type = filter;
     }
 
-    // Fetch weather data and plants data
-    const [currentWeatherResponse, forecastResponse, plants] = await Promise.all([
+    const [currentWeatherResponse, forecastResponse, plants,soilMoistureSnapshot] = await Promise.all([
       axios.get(currentWeatherUrl),
       axios.get(forecastUrl),
       Plant.find(query)
-        .populate('location')  // Populate the location field
+        .populate('location')
         .skip(skip)
         .limit(limit)
         .sort({ plantingDate: -1 }),
+        soilMoistureRef.once('value'), // Fetch soil moisture data
     ]);
 
     const weatherData = currentWeatherResponse.data;
     const forecastData = forecastResponse.data.list;
+    const soilMoistureValue = soilMoistureSnapshot.val();
 
     const dailyForecasts = forecastData.filter((entry) => entry.dt_txt.includes("12:00:00"));
 
-    // Use the computed growth stage from the database
     const updatedPlants = plants.map(plant => {
-      // Watering logic: Check if the plant needs watering based on the schedule and last watered date
       const currentDate = new Date();
       const lastWatered = new Date(plant.lastWatered || plant.plantingDate);
       const dayDiff = Math.floor((currentDate - lastWatered) / (1000 * 60 * 60 * 24));
@@ -94,23 +86,21 @@ app.get('/dashboard', isAuthenticated, async (req, res) => {
 
       return { 
         ...plant.toObject(), 
-        growthStage: plant.growthStage && plant.growthStage.trim() !== '' ? plant.growthStage : plant.computedGrowthStage,  // Use computed growth stage if planted
-        needsWatering,  // Watering status
-        location: plant.location ? plant.location.name : 'Unknown Location'  // Extract location name if available
+        growthStage: plant.growthStage && plant.growthStage.trim() !== '' ? plant.growthStage : plant.computedGrowthStage,
+        needsWatering,
+        location: plant.location ? plant.location.name : 'Unknown Location'
       };
     });
 
-    // Count total number of plants for pagination
-    const count = await Plant.countDocuments(query); // This is the line where await is used
+    const count = await Plant.countDocuments(query);
     const totalPages = Math.ceil(count / limit);
 
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     const formattedDate = new Date().toLocaleDateString('en-PH', options);
-
     const [weekday, month, dayWithComma] = formattedDate.split(', ');
 
     res.render('index', {
-      soilMoistureValue,
+      soilMoistureValue ,
       weather: weatherData,
       plants: updatedPlants,
       forecast: dailyForecasts,
@@ -127,10 +117,7 @@ app.get('/dashboard', isAuthenticated, async (req, res) => {
   }
 });
 
-
-
 app.post("/login", async (req, res) => {
-  
   const { email, password } = req.body;
 
   try {
@@ -150,15 +137,8 @@ app.post("/login", async (req, res) => {
         req.session.lastname = user.lastname;
         req.session.profilePicture = user.profilePicture;
 
-        if(user.doneTutorial != true){
-          return res.redirect('/tutorial');
-        }else{
-          return res.redirect('/dashboard');
-        }
-
-        
-      } 
-      else {
+        return user.doneTutorial ? res.redirect('/dashboard') : res.redirect('/tutorial');
+      } else {
         const wrongInfo = "Wrong email or password";
         return res.render("login.ejs", { wrongCridentials: wrongInfo });
       }
@@ -172,18 +152,17 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.get("/tutorial", (req, res)=>{
-
+app.get("/tutorial", (req, res) => {
   res.render('tutorial');
-})
- 
+});
+
 app.get("/logout", (req, res) => {
-     req.session.destroy((err) => {
-          if (err) {
-               return res.status(500).send("Error logging out");
-          }
-          res.redirect("/");
-     });
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).send("Error logging out");
+    }
+    res.redirect("/");
+  });
 });
 
 

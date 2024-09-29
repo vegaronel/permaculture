@@ -15,26 +15,57 @@ const plantIdentification = require("./routes/plantDetection");
 const dashboardPlants = require("./routes/dashboardPlants");
 const commentsRoutes = require("./routes/commentsRoutes");
 const postRoutes = require("./routes/postRoutes");
+const admin = require('./config/firebase');
+const SoilData = require('./models/SoilData');  // Import the SoilData model
+
+const http = require('http');
+const socketIo = require('socket.io');
+require('dotenv').config();
+
+const db = admin.database();
+const ref = db.ref('CurrentValue');
 
 const app = express();
 const port = process.env.PORT || 4000;
+const server = http.createServer(app);
+const io = socketIo(server);
 
-require('./routes/cronJobs'); // Just require the module
+// Listen for Firebase updates in real-time
+ref.on('value', async (snapshot) => {
+  const soilMoistureValue = snapshot.val();  // Get the value from Firebase
+
+  console.log('Real-time Soil Moisture Value:', soilMoistureValue);  // For debugging
+
+  // Check if the value is valid before saving
+  if (soilMoistureValue !== null && soilMoistureValue !== undefined) {
+    try {
+      // Create a new instance of SoilData with the fetched value
+      const newSoilData = new SoilData({
+        moistureValue: soilMoistureValue,  // Store the soil moisture value
+      });
+
+      // Save the new soil moisture data to MongoDB
+      await newSoilData.save();
+
+      console.log('Soil moisture data saved to MongoDB:', newSoilData);
+      io.emit('soilMoistureUpdate', soilMoistureValue);
+    } catch (error) {
+      console.error('Error saving soil moisture data to MongoDB:', error);
+    }
+  } else {
+    console.log('Invalid soil moisture value, not saving to database');
+  }
+});
+
 app.set('view engine', 'ejs');
-
-require('dotenv').config();
-
-
-  app.use(express.static("public"));
+app.use(express.static("public"));
 app.use('/uploads', express.static('uploads'));
 
 mongoose.connect(process.env.MONGODB_URI)
-  .then(() => 
-  {
+  .then(() => {
     console.log("Database Connected");
   })
-  .catch(() => 
-  {
+  .catch(() => {
     console.log("Connection Failed");
   });
 
@@ -47,9 +78,7 @@ app.use(session({
   secret: 'keyboard cat'
 }));
 app.use(bodyParser.urlencoded({ extended: true }));
-
 app.use(express.json());
-app.use(express.static("public"));
 
 app.use(middleWare);
 app.use(plantIdentification);
@@ -59,18 +88,18 @@ app.use(userLogin);
 app.use(userDashboard);
 app.use(registration);
 app.use(dashboardPlants);
-
 app.use(commentsRoutes);
 app.use(postRoutes);
-
 
 app.get("/", (req, res) => {
   res.render("homepage.ejs");
 });
 
 app.get("/dashboard", isAuthenticated, async (req, res) => {
-    res.render("index.ejs");
-  });
+  const snapshot = await ref.once('value');
+  const soilMoistureValue = snapshot.val();
+  res.render("index.ejs", { soilMoistureValue });
+});
 
 app.get("/register", (req, res) => {
   res.render("register.ejs");
@@ -82,13 +111,14 @@ app.get("/login", (req, res) => {
 
 app.get("/community", isAuthenticated, (req, res) => {
   const name = req.session.firstname + " " + req.session.lastname;
-  res.render("community.ejs", { username: name ,name: req.session.firstname + " " + req.session.lastname});
+  res.render("community.ejs", { username: name });
 });
 
 app.use((req, res, next) => {
   res.status(404).render("404.ejs");
 });
 
-app.listen(port, () => {
-  console.log(`Server running on port http://localhost:${port}`);
+// Start the server
+server.listen(port, () => {
+  console.log(`Server running on http://localhost:${port}`);
 });
