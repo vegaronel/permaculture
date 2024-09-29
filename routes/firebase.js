@@ -1,21 +1,35 @@
-// Import the functions you need from the SDKs you need
-const initializeApp = require('firebase/app')
-const getAnalytics = require('firebase/analytics')
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+const express = require('express');
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyCVQ_8JjaxmtCulAagbPV7AinjlCe4BCd4",
-  authDomain: "permaculture-jellyace.firebaseapp.com",
-  projectId: "permaculture-jellyace",
-  storageBucket: "permaculture-jellyace.appspot.com",
-  messagingSenderId: "473104477817",
-  appId: "1:473104477817:web:36a28af15dbab87c3eeea8",
-  measurementId: "G-T9PHDTFR8G"
-};
+const admin = require('firebase-admin');
+const axios = require('axios');
 
+const app = express();
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+const serviceAccount = require('../config/soil-moisture-monitoring-1d52c-firebase-adminsdk-416o3-c3a5ead8f0.json'); // Add your Firebase service account key file
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: 'https://soil-moisture-monitoring-1d52c-default-rtdb.firebaseio.com'
+});
+
+const db = admin.database();
+const ref = db.ref('CurrentValue'); // Reference to your CurrentValue
+
+ref.on('value', (snapshot) => {
+  const soilMoistureValue = snapshot.val();
+  console.log('Soil Moisture Value:', soilMoistureValue);
+});
+
+app.get('/soil-moisture',async(req,res)=>{
+
+  axios.get('https://soil-moisture-monitoring-1d52c-default-rtdb.firebaseio.com/CurrentValue.json')
+  .then(response => {
+    console.log('Soil Moisture Value:', response.data);
+  })
+  .catch(error => {
+    console.error('Error fetching data:', error);
+  });
+
+})
+
+module.exports = app;

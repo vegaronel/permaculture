@@ -4,15 +4,27 @@ const isAuthenticated = require('../middleware/athenticateUser');
 const User = require("../models/user");
 const axios = require('axios');
 const Plant = require("../models/Plant"); 
+
+const admin = require('firebase-admin');
+
+
 const app = express();
 
 require("dotenv").config();
 
+const serviceAccount = require('../config/soil-moisture-monitoring-1d52c-firebase-adminsdk-416o3-c3a5ead8f0.json');
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: 'https://soil-moisture-monitoring-1d52c-default-rtdb.firebaseio.com'
+});
+
+const db = admin.database();
+const ref = db.ref('CurrentValue');
 
 app.post('/complete-tutorial', isAuthenticated, async (req, res) => {
   try {
     await User.findByIdAndUpdate(req.session.userId, { doneTutorial: true });
-    res.redirect('/dashboard');
+    res.redirect('/dashboard');z
   } catch (error) {
     console.error(error);
     res.status(500).send('Error completing the tutorial');
@@ -21,6 +33,12 @@ app.post('/complete-tutorial', isAuthenticated, async (req, res) => {
 
 app.get('/dashboard', isAuthenticated, async (req, res) => {
   try {
+
+    const snapshot = await ref.once('value');
+    const soilMoistureValue = snapshot.val();
+
+    console.log(soilMoistureValue);
+
     const user = await User.findById(req.session.userId);
 
     if (!user) {
@@ -92,6 +110,7 @@ app.get('/dashboard', isAuthenticated, async (req, res) => {
     const [weekday, month, dayWithComma] = formattedDate.split(', ');
 
     res.render('index', {
+      soilMoistureValue,
       weather: weatherData,
       plants: updatedPlants,
       forecast: dailyForecasts,
