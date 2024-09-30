@@ -30,9 +30,9 @@ app.post('/complete-tutorial', isAuthenticated, async (req, res) => {
   }
 });
 
+
 app.get('/dashboard', isAuthenticated, async (req, res) => {
   try {
-
     const user = await User.findById(req.session.userId);
     if (!user) {
       return res.status(404).send('User not found');
@@ -58,7 +58,7 @@ app.get('/dashboard', isAuthenticated, async (req, res) => {
       query.type = filter;
     }
 
-    const [currentWeatherResponse, forecastResponse, plants,soilMoistureSnapshot] = await Promise.all([
+    const [currentWeatherResponse, forecastResponse, plants, soilMoistureSnapshot] = await Promise.all([
       axios.get(currentWeatherUrl),
       axios.get(forecastUrl),
       Plant.find(query)
@@ -66,12 +66,18 @@ app.get('/dashboard', isAuthenticated, async (req, res) => {
         .skip(skip)
         .limit(limit)
         .sort({ plantingDate: -1 }),
-        soilMoistureRef.once('value'), // Fetch soil moisture data
+      soilMoistureRef.once('value'), // Fetch soil moisture data
     ]);
 
     const weatherData = currentWeatherResponse.data;
     const forecastData = forecastResponse.data.list;
-    const soilMoistureValue = soilMoistureSnapshot.val();
+
+    // Parse the soil moisture data
+    const soilMoistureData = soilMoistureSnapshot.val() || {}; // Ensure there's data
+    const moistureLocations = Object.keys(soilMoistureData).map(key => ({
+      location: key,
+      moisture: soilMoistureData[key].moistureValue // Change this line
+    }));
 
     const dailyForecasts = forecastData.filter((entry) => entry.dt_txt.includes("12:00:00"));
 
@@ -100,7 +106,7 @@ app.get('/dashboard', isAuthenticated, async (req, res) => {
     const [weekday, month, dayWithComma] = formattedDate.split(', ');
 
     res.render('index', {
-      soilMoistureValue ,
+      moistureLocations, // Pass the moisture data to the view
       weather: weatherData,
       plants: updatedPlants,
       forecast: dailyForecasts,
@@ -116,6 +122,7 @@ app.get('/dashboard', isAuthenticated, async (req, res) => {
     res.status(500).send("Error retrieving dashboard data");
   }
 });
+
 
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;

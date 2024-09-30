@@ -5,6 +5,13 @@ const PlantCollection = require('../models/plantCollections');
 const isAuthenticated = require('../middleware/athenticateUser')
 const Counter = require('../models/Counter');
 const Location = require('../models/Location');
+const SoilData = require('../models/SoilData');
+
+const admin = require('../config/firebase');
+
+const db = admin.database();
+const ref = db.ref('CurrentValue');
+
 const app = express();
 
 async function getNextSequence(name) {
@@ -18,47 +25,60 @@ async function getNextSequence(name) {
 
 app.post('/add-custom-location', isAuthenticated, async (req, res) => {
   try {
-      const { name } = req.body;
-      const newLocation = new Location({
-          name,
-          userId: req.session.userId // Associate the location with the logged-in user
-      });
+    const { name } = req.body;
 
-      await newLocation.save();
+    // Create a new SoilData instance with the required locationName
+    const newSoilData = new SoilData({
+      moistureValue: 0, // Default moisture value for new locations
+      locationName: name // Add the locationName here
       
-      // Return the new location in the response
-      res.json({ success: true, location: newLocation });
+    });
+    await newSoilData.save();
+
+    // Create a new location and associate it with the current user and the new moisture sensor
+    const newLocation = new Location({
+      name,
+      userId: req.session.userId, // Associate the location with the logged-in user
+      moistureSensorId: newSoilData._id // Link the location to the moisture sensor
+    });
+
+    await newLocation.save();
+
+    // After saving the location, add a new sensor entry in Firebase
+    const sensorRef = db.ref(`Sensors/${newLocation._id}`); // Create a Firebase path for the new sensor
+    await sensorRef.set({
+      moistureValue: 0, // Default sensor value (can be modified)
+      locationName: name // Save the location name or any other relevant data
+    });
+
+    console.log(`New sensor added in Firebase for location: ${newLocation._id}`);
+
+    // Return the new location in the response
+    res.json({ success: true, location: newLocation });
   } catch (error) {
-      console.error('Error adding custom location:', error);
-      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    console.error('Error adding custom location:', error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 });
 
 
-app.get('/plant-details/:id', isAuthenticated, async (req, res) => {
+app.get('/plants/:plantId', async (req, res) => {
   try {
-    const plantId = req.params.id;
-
-    // Fetch plant details from PlantCollection
-    const plant = await PlantCollection.findById(plantId);
-
+    const plant = await Plant.findById(req.params.plantId).populate('location');
     if (!plant) {
-      return res.json({ success: false, message: 'Plant not found' });
+      return res.status(404).json({ message: 'Plant not found' });
     }
 
-    // Return plant details as JSON
-    res.json({
-      success: true,
-      plant: {
-        name: plant.name,
-        plantingInstructions: plant.plantingInstructions,
-        image:plant.image,
-        harvestTime: plant.harvestTime,
-      },
+    // Fetch soil data for the plant's location
+    const soilData = await SoilData.findById(plant.location.moistureSensorId);
+    
+    res.render('plantDetails', {
+      plant,
+      soilMoisture: soilData ? soilData.moistureValue : 'No data'
     });
   } catch (error) {
-    console.error('Error fetching plant details:', error);
-    res.status(500).json({ success: false, message: 'Internal Server Error' });
+    console.error(error);
+    res.status(500).json({ message: 'Failed to fetch plant data' });
   }
 });
 

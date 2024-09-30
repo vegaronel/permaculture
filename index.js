@@ -23,37 +23,47 @@ const socketIo = require('socket.io');
 require('dotenv').config();
 
 const db = admin.database();
-const ref = db.ref('CurrentValue');
+const ref = db.ref('Sensors');
 
 const app = express();
 const port = process.env.PORT || 4000;
 const server = http.createServer(app);
 const io = socketIo(server);
 
+
 // Listen for Firebase updates in real-time
 ref.on('value', async (snapshot) => {
-  const soilMoistureValue = snapshot.val();  // Get the value from Firebase
+  const soilMoistureData = snapshot.val();  // Get the value from Firebase
 
-  console.log('Real-time Soil Moisture Value:', soilMoistureValue);  // For debugging
-
-  // Check if the value is valid before saving
-  if (soilMoistureValue !== null && soilMoistureValue !== undefined) {
+  if (soilMoistureData !== null && soilMoistureData !== undefined) {
     try {
-      // Create a new instance of SoilData with the fetched value
-      const newSoilData = new SoilData({
-        moistureValue: soilMoistureValue,  // Store the soil moisture value
+      
+      // Iterate through each sensor entry
+      Object.keys(soilMoistureData).forEach(async (sensorId) => {
+        const sensorData = soilMoistureData[sensorId];
+        const locationName = sensorData.locationName;
+        const moistureValue = sensorData.moistureValue;
+
+        // Create a new instance of SoilData with the fetched values
+        const newSoilData = new SoilData({
+          locationName: locationName,  // Store the location name
+          moistureValue: moistureValue,  // Store the soil moisture value
+        });
+
+        // Save the new soil moisture data to MongoDB
+        await newSoilData.save();
+        console.log('Soil moisture data saved to MongoDB:', newSoilData);
       });
 
-      // Save the new soil moisture data to MongoDB
-      await newSoilData.save();
-
-      console.log('Soil moisture data saved to MongoDB:', newSoilData);
-      io.emit('soilMoistureUpdate', soilMoistureValue);
+      // Emit the last sensor's moisture value to the client
+      const lastSensorData = soilMoistureData[Object.keys(soilMoistureData)[0]];
+      io.emit('soilMoistureUpdate', soilMoistureData);
+      
     } catch (error) {
       console.error('Error saving soil moisture data to MongoDB:', error);
     }
   } else {
-    console.log('Invalid soil moisture value, not saving to database');
+    console.log('Invalid soil moisture data, not saving to database');
   }
 });
 
