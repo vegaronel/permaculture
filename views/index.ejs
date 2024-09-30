@@ -134,7 +134,49 @@
             </div>
 
             <div class="col-lg-4 col-md-12 p-4 weather-card b-radius-50">
-                <p>Soil Status: <span id="soilMoistureStatus">Loading</span></p>
+                <h5>Soil Moisture Data</h5>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Location</th>
+                            <th>Moisture Level</th>
+                            <th>Status</th> <!-- New Status Column -->
+                        </tr>
+                    </thead>
+                    <tbody id="soilMoistureTableBody">
+                        <% moistureLocations.forEach(location => { %>
+                            <tr data-location="<%= location.location %>">
+                                <td><%= location.location %></td>
+                                <td>
+                                    <% if (location.moisture !== undefined && location.moisture !== null) { %>
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar <%= location.moisture < 30 ? 'bg-danger' : location.moisture < 60 ? 'bg-warning' : 'bg-success' %>" 
+                                                 role="progressbar" 
+                                                 aria-valuenow="<%= location.moisture %>" 
+                                                 aria-valuemin="0" 
+                                                 aria-valuemax="100">
+                                                <%= location.moisture %>%
+                                            </div>
+                                        </div>
+                                        <p>
+                                            <% if (location.moisture < 30) { %>
+                                                Dry
+                                            <% } else if (location.moisture < 45) { %>
+                                                Moist
+                                            <% } else if (location.moisture < 60) { %>
+                                                Moderate
+                                            <% } else { %>
+                                                Wet
+                                            <% } %>
+                                        </p>
+                                    <% } else { %>
+                                        No data available
+                                    <% } %>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
             </div>
         </div>    
     </section>
@@ -146,8 +188,47 @@
 <script src="/socket.io/socket.io.js"></script>
 <script>
   const socket = io();
-  socket.on('soilMoistureUpdate', (value) => {
-    document.getElementById('soilMoistureStatus').innerText = value ? value : 'No data available';
-  });
+  socket.on('soilMoistureUpdate', (data) => {
+    const tableBody = document.getElementById('soilMoistureTableBody');
+    if (!tableBody) return;
+
+    Object.keys(data).forEach(location => {
+        const moistureValue = data[location].moistureValue;
+        const locDat = data[location].locationName;
+        let row = tableBody.querySelector(`tr[data-location="${location}"]`);
+
+        if (!row) {
+            row = document.createElement('tr');
+            row.setAttribute('data-location', location);
+            tableBody.appendChild(row);
+        }
+
+        const moistureDescription = moistureValue < 30 ? 'Dry' : moistureValue < 45 ? 'Moist' : moistureValue < 60 ? 'Moderate' : 'Wet';
+
+        row.innerHTML = `
+            <td>${locDat}</td>
+            <td>
+                ${moistureValue !== undefined && moistureValue !== null ? 
+                    `<div class="progress" style="height: 20px;">
+                        <div class="progress-bar ${moistureValue < 30 ? 'bg-danger' : moistureValue < 60 ? 'bg-warning' : 'bg-success'}" 
+                             role="progressbar" 
+                             style="width: ${moistureValue}%;" 
+                             aria-valuenow="${moistureValue}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100">
+                            ${moistureValue}%
+                        </div>
+                    </div>
+                    `
+                    : 'No data available'
+                }
+            </td>
+            <td>
+                <p>${moistureDescription}</p>
+            </td>
+        `;
+    });
+});
+
 </script>
 <%- include("partials/UserFooter.ejs") %>
