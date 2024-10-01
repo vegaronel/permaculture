@@ -2,7 +2,7 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const isAuthenticated = require('../middleware/athenticateUser');
 const User = require("../models/user");
-
+const SoilData = require("../models/SoilData");
 
 const Plant = require("../models/Plant"); 
 const axios = require('axios');
@@ -29,7 +29,6 @@ app.post('/complete-tutorial', isAuthenticated, async (req, res) => {
     res.status(500).send('Error completing the tutorial');
   }
 });
-
 
 app.get('/dashboard', isAuthenticated, async (req, res) => {
   try {
@@ -58,7 +57,7 @@ app.get('/dashboard', isAuthenticated, async (req, res) => {
       query.type = filter;
     }
 
-    const [currentWeatherResponse, forecastResponse, plants, soilMoistureSnapshot] = await Promise.all([
+    const [currentWeatherResponse, forecastResponse, plants, soilMoistureData] = await Promise.all([
       axios.get(currentWeatherUrl),
       axios.get(forecastUrl),
       Plant.find(query)
@@ -66,17 +65,16 @@ app.get('/dashboard', isAuthenticated, async (req, res) => {
         .skip(skip)
         .limit(limit)
         .sort({ plantingDate: -1 }),
-      soilMoistureRef.once('value'), // Fetch soil moisture data
+        SoilData.find({ userId: req.session.userId }).sort({ createdAt: -1 }).limit(10) // Fetch latest soil moisture data for the user
     ]);
 
     const weatherData = currentWeatherResponse.data;
     const forecastData = forecastResponse.data.list;
 
-    // Parse the soil moisture data
-    const soilMoistureData = soilMoistureSnapshot.val() || {}; // Ensure there's data
-    const moistureLocations = Object.keys(soilMoistureData).map(key => ({
-      location: key,
-      moisture: soilMoistureData[key].moistureValue // Change this line
+    const moistureLocations = soilMoistureData.map(data => ({
+      location: data.locationName,
+      moisture: data.moistureValue,
+      userId: data.userId
     }));
 
     const dailyForecasts = forecastData.filter((entry) => entry.dt_txt.includes("12:00:00"));
@@ -122,6 +120,7 @@ app.get('/dashboard', isAuthenticated, async (req, res) => {
     res.status(500).send("Error retrieving dashboard data");
   }
 });
+
 
 
 app.post("/login", async (req, res) => {

@@ -19,6 +19,9 @@ const SoilDataSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,  // Automatically set the timestamp to the current date
   },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  customId: String,  // Add this field to store the custom ID
+  
 });
 
 // Create the model from the schema
