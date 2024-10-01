@@ -151,76 +151,67 @@
 <%- include("partials/UserFooter.ejs") %>
 <script src="/socket.io/socket.io.js"></script>
 <script>
-    const socket = io(); // Ensure this line is present
+    const socket = io();
+    const userId = '<%= userId %>'; // Get the userId from the server-side render
+
     socket.on('soilMoistureUpdate', (data) => {
-      const tableBody = document.getElementById('soilMoistureTableBody');
-      if (!tableBody) return;
-  
-      Object.keys(data).forEach(sensorId => {
-          const moistureValue = data[sensorId].moistureValue;
-          const locDat = data[sensorId].locationName;
-          let row = tableBody.querySelector(`tr[data-location="${locDat}"]`);
-  
-          // Determine status based on moistureValue
-          let statusText;
-          let progressClass = ''; // Class for progress bar
-          let textClass = ''; // Class for text status
-  
-          if (moistureValue < 30) {
-              statusText = 'Dry';
-              progressClass = 'bg-danger';
-              textClass = 'text-danger';
-          } else if (moistureValue < 45) {
-              statusText = 'Moist';
-              progressClass = 'bg-warning';
-              textClass = 'text-warning';
-          } else if (moistureValue < 60) {
-              statusText = 'Moderate';
-              progressClass = 'bg-info'; // Using info color for moderate
-              textClass = 'text-info';
-          } else {
-              statusText = 'Wet';
-              progressClass = 'bg-success';
-              textClass = 'text-success';
-          }
-  
-          if (!row) {
-              // Create a new row if it doesn't exist
-              row = document.createElement('tr');
-              row.setAttribute('data-location', locDat);
-              row.innerHTML = `
-                  <td>${locDat}</td>
-                  <td>
-                      <div class="progress" style="height: 20px;">
-                          <div class="progress-bar ${progressClass}" 
-                               role="progressbar" 
-                               style="width: ${moistureValue}%;"
-                               aria-valuenow="${moistureValue}" 
-                               aria-valuemin="0" 
-                               aria-valuemax="100">
-                              ${moistureValue}%
-                          </div>
-                      </div>
-                  </td>
-                  <td>
-                      <p class="${textClass}">${statusText}</p>
-                  </td>
-              `;
-              tableBody.appendChild(row);
-          } else {
-              // Update existing row
-              const progressBar = row.querySelector('.progress-bar');
-              progressBar.style.width = `${moistureValue}%`;
-              progressBar.setAttribute('aria-valuenow', moistureValue);
-              progressBar.textContent = `${moistureValue}%`;
-              progressBar.className = `progress-bar ${progressClass}`; // Update class
-  
-              // Update the status text
-              const statusParagraph = row.querySelector('td p');
-              statusParagraph.textContent = statusText; // Update status text
-              statusParagraph.className = textClass; // Update text class
-          }
-      });
-  });
-  </script>
+        const tableBody = document.getElementById('soilMoistureTableBody');
+        if (!tableBody) return;
+
+        // Clear existing rows
+        tableBody.innerHTML = '';
+
+        Object.keys(data).forEach(sensorId => {
+            const sensorData = data[sensorId];
+            // Only process data for the current user
+            if (sensorData.userId === userId) {
+                const moistureValue = sensorData.moistureValue;
+                const locDat = sensorData.locationName;
+
+                let statusText;
+                let progressClass = '';
+                let textClass = '';
+
+                if (moistureValue < 30) {
+                    statusText = 'Dry';
+                    progressClass = 'bg-danger';
+                    textClass = 'text-danger';
+                } else if (moistureValue < 45) {
+                    statusText = 'Moist';
+                    progressClass = 'bg-warning';
+                    textClass = 'text-warning';
+                } else if (moistureValue < 60) {
+                    statusText = 'Moderate';
+                    progressClass = 'bg-info';
+                    textClass = 'text-info';
+                } else {
+                    statusText = 'Wet';
+                    progressClass = 'bg-success';
+                    textClass = 'text-success';
+                }
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${locDat}</td>
+                    <td>
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar ${progressClass}" 
+                                 role="progressbar" 
+                                 style="width: ${moistureValue}%;"
+                                 aria-valuenow="${moistureValue}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                                ${moistureValue}%
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <p class="${textClass}">${statusText}</p>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            }
+        });
+    });
+</script>
   

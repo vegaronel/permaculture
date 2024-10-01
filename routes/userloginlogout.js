@@ -113,7 +113,8 @@ app.get('/dashboard', isAuthenticated, async (req, res) => {
       filter,
       name: `${req.session.firstname} ${req.session.lastname}`,
       day: weekday,
-      dateToday: `${month}, ${dayWithComma}`
+      dateToday: `${month}, ${dayWithComma}`,
+      userId: req.session.userId // Pass the userId to the view
     });
   } catch (error) {
     console.error(error);
