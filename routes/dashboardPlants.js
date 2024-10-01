@@ -10,7 +10,6 @@ const SoilData = require('../models/SoilData');
 const admin = require('../config/firebase');
 
 const db = admin.database();
-const ref = db.ref('CurrentValue');
 
 const app = express();
 
@@ -26,37 +25,67 @@ async function getNextSequence(name) {
 app.post('/add-custom-location', isAuthenticated, async (req, res) => {
   try {
     const { name } = req.body;
-
+    // Get the next custom ID (formatted with leading zeros)
+    const customId = await getNextSequenceValue('sensorId');
     // Create a new SoilData instance with the required locationName
     const newSoilData = new SoilData({
-      moistureValue: 0, // Default moisture value for new locations
-      locationName: name // Add the locationName here
-      
+      moistureValue: 0,
+      locationName: name,
+      customId: customId,  // Save the custom ID (e.g., 00001)
+      userId: req.session.userId
     });
     await newSoilData.save();
 
     // Create a new location and associate it with the current user and the new moisture sensor
     const newLocation = new Location({
       name,
-      userId: req.session.userId, // Associate the location with the logged-in user
-      moistureSensorId: newSoilData._id // Link the location to the moisture sensor
+      userId: req.session.userId,
+      moistureSensorId: newSoilData._id
     });
 
     await newLocation.save();
 
     // After saving the location, add a new sensor entry in Firebase
-    const sensorRef = db.ref(`Sensors/${newLocation._id}`); // Create a Firebase path for the new sensor
+    const sensorRef = db.ref(`Sensors/${customId}`);
     await sensorRef.set({
-      moistureValue: 0, // Default sensor value (can be modified)
-      locationName: name // Save the location name or any other relevant data
+      moistureValue: 0,
+      locationName: name,
+      userId: req.session.userId,
     });
 
     console.log(`New sensor added in Firebase for location: ${newLocation._id}`);
 
-    // Return the new location in the response
     res.json({ success: true, location: newLocation });
   } catch (error) {
     console.error('Error adding custom location:', error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+});
+
+
+app.get('/plant-details/:id', isAuthenticated, async (req, res) => {
+  try {
+    const plantId = req.params.id;
+
+    // Fetch plant details from PlantCollection
+    const plant = await PlantCollection.findById(plantId);
+
+    if (!plant) {
+      return res.json({ success: false, message: 'Plant not found' });
+    }
+
+    // Return plant details as JSON
+    res.json({
+      success: true,
+      plant: {
+        name: plant.name,
+        plantingInstructions: plant.plantingInstructions,
+        image:plant.image,
+        harvestTime: plant.harvestTime,
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching plant details:', error);
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 });
@@ -216,6 +245,20 @@ app.get('/plant/:id', isAuthenticated, async (req, res) => {
     res.status(500).send('Error retrieving plant details');
   }
 });
+
+
+// Function to get the next sequence value and format it with leading zeros
+async function getNextSequenceValue(sequenceName) {
+  const counter = await Counter.findByIdAndUpdate(
+      { _id: sequenceName },       // Use the sequenceName to identify the counter (e.g., 'sensorId')
+      { $inc: { seq: 1 } },        // Increment the sequence value by 1
+      { new: true, upsert: true }  // Create a new counter if it doesn't exist
+  );
+
+  // Format the sequence number with leading zeros (e.g., 00001)
+  const formattedId = String(counter.seq).padStart(5, '0');
+  return formattedId;
+}
 
 
 // Function to calculate the growth stage based on the planting date and estimated harvest time

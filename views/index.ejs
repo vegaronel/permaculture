@@ -4,7 +4,6 @@
 <div class="container-fluid hidden-scroll"> 
 
     <section class="weather-section">
-
         <div class="row nexa-black gap-4 d-flex justify-content-center m-2">
             <div class="col-lg-7 d-flex gap-3 flex-column">
                 <div class="p-4 center-items weather-card b-radius-50">
@@ -26,7 +25,6 @@
                         <h3>5-Day Forecast</h3>
                     </div>
                     <div class="px-2 overflow-x-auto">                
-                        <!-- 5-Day Weather Forecast -->
                         <div class="forecast-container d-flex justify-content-around">
                             <% forecast.forEach(day => { %>
                                 <div class="forecast-day d-flex justify-content-center flex-column align-items-center">
@@ -58,9 +56,8 @@
         <div class="row gap-4 mt-3 d-flex justify-content-center mx-2">
             <div class="col-lg-7 col-md-12 d-flex gap-3 flex-column">
                 <div class="col p-4 weather-card b-radius-50 ">
-
                     <p class="h5">Plants That Need to Be Watered</p>
-                    <% if(locals.plant){ %>
+                    <% if(locals.plant) { %>
                         <div class="container-water d-flex gap-3">
                             <% plants.filter(plant => plant.needsWatering).forEach(plant => { %>
                                 <div class="not-watered-plants">
@@ -72,7 +69,7 @@
                                 </div>
                             <% }) %>
                         </div>
-                    <% }else{ %>
+                    <% } else { %>
                         <p>Nice, all plants are hydrated.</p>
                     <% } %>
 
@@ -101,9 +98,8 @@
                                             <td><%= plant.name %></td>
                                             <td><%= plant.location %></td>
                                             <td><%= new Date(plant.estimatedHarvestTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) %></td>
-                                            <td>   <%= plant.growthStage && plant.growthStage.trim() !== '' ? plant.growthStage : plant.computedGrowthStage %></td>
+                                            <td><%= plant.growthStage && plant.growthStage.trim() !== '' ? plant.growthStage : plant.computedGrowthStage %></td>
                                             <td>
-                                                <!-- User can verify or adjust the growth stage -->
                                                 <form action="/update-growth-stage/<%= plant._id %>" method="POST">
                                                     <label class="form-label" for="userGrowthStage">Is this stage accurate?</label>
                                                     <div class="d-flex">
@@ -118,7 +114,6 @@
                                                         </select>
                                                         <button type="submit" class="btn btn-primary btn-sm">Update</button>
                                                     </div>
-                                                  
                                                 </form>
                                             </td>
                                         </tr>
@@ -129,7 +124,6 @@
                             <p>No plants found. Start by adding a new plant!</p>
                         <% } %>
                     </div>
-
                 </div>
             </div>
 
@@ -144,37 +138,7 @@
                         </tr>
                     </thead>
                     <tbody id="soilMoistureTableBody">
-                        <% moistureLocations.forEach(location => { %>
-                            <tr data-location="<%= location.location %>">
-                                <td><%= location.location %></td>
-                                <td>
-                                    <% if (location.moisture !== undefined && location.moisture !== null) { %>
-                                        <div class="progress" style="height: 20px;">
-                                            <div class="progress-bar <%= location.moisture < 30 ? 'bg-danger' : location.moisture < 60 ? 'bg-warning' : 'bg-success' %>" 
-                                                 role="progressbar" 
-                                                 aria-valuenow="<%= location.moisture %>" 
-                                                 aria-valuemin="0" 
-                                                 aria-valuemax="100">
-                                                <%= location.moisture %>%
-                                            </div>
-                                        </div>
-                                        <p>
-                                            <% if (location.moisture < 30) { %>
-                                                Dry
-                                            <% } else if (location.moisture < 45) { %>
-                                                Moist
-                                            <% } else if (location.moisture < 60) { %>
-                                                Moderate
-                                            <% } else { %>
-                                                Wet
-                                            <% } %>
-                                        </p>
-                                    <% } else { %>
-                                        No data available
-                                    <% } %>
-                                </td>
-                            </tr>
-                        <% }) %>
+                       
                     </tbody>
                 </table>
             </div>
@@ -184,51 +148,79 @@
 </div>
 <!-- /#page-content-wrapper -->
 </div>
-<!-- /#wrapper -->
+<%- include("partials/UserFooter.ejs") %>
 <script src="/socket.io/socket.io.js"></script>
 <script>
-  const socket = io();
-  socket.on('soilMoistureUpdate', (data) => {
-    const tableBody = document.getElementById('soilMoistureTableBody');
-    if (!tableBody) return;
-
-    Object.keys(data).forEach(location => {
-        const moistureValue = data[location].moistureValue;
-        const locDat = data[location].locationName;
-        let row = tableBody.querySelector(`tr[data-location="${location}"]`);
-
-        if (!row) {
-            row = document.createElement('tr');
-            row.setAttribute('data-location', location);
-            tableBody.appendChild(row);
-        }
-
-        const moistureDescription = moistureValue < 30 ? 'Dry' : moistureValue < 45 ? 'Moist' : moistureValue < 60 ? 'Moderate' : 'Wet';
-
-        row.innerHTML = `
-            <td>${locDat}</td>
-            <td>
-                ${moistureValue !== undefined && moistureValue !== null ? 
-                    `<div class="progress" style="height: 20px;">
-                        <div class="progress-bar ${moistureValue < 30 ? 'bg-danger' : moistureValue < 60 ? 'bg-warning' : 'bg-success'}" 
-                             role="progressbar" 
-                             style="width: ${moistureValue}%;" 
-                             aria-valuenow="${moistureValue}" 
-                             aria-valuemin="0" 
-                             aria-valuemax="100">
-                            ${moistureValue}%
-                        </div>
-                    </div>
-                    `
-                    : 'No data available'
-                }
-            </td>
-            <td>
-                <p>${moistureDescription}</p>
-            </td>
-        `;
-    });
-});
-
-</script>
-<%- include("partials/UserFooter.ejs") %>
+    const socket = io(); // Ensure this line is present
+    socket.on('soilMoistureUpdate', (data) => {
+      const tableBody = document.getElementById('soilMoistureTableBody');
+      if (!tableBody) return;
+  
+      Object.keys(data).forEach(sensorId => {
+          const moistureValue = data[sensorId].moistureValue;
+          const locDat = data[sensorId].locationName;
+          let row = tableBody.querySelector(`tr[data-location="${locDat}"]`);
+  
+          // Determine status based on moistureValue
+          let statusText;
+          let progressClass = ''; // Class for progress bar
+          let textClass = ''; // Class for text status
+  
+          if (moistureValue < 30) {
+              statusText = 'Dry';
+              progressClass = 'bg-danger';
+              textClass = 'text-danger';
+          } else if (moistureValue < 45) {
+              statusText = 'Moist';
+              progressClass = 'bg-warning';
+              textClass = 'text-warning';
+          } else if (moistureValue < 60) {
+              statusText = 'Moderate';
+              progressClass = 'bg-info'; // Using info color for moderate
+              textClass = 'text-info';
+          } else {
+              statusText = 'Wet';
+              progressClass = 'bg-success';
+              textClass = 'text-success';
+          }
+  
+          if (!row) {
+              // Create a new row if it doesn't exist
+              row = document.createElement('tr');
+              row.setAttribute('data-location', locDat);
+              row.innerHTML = `
+                  <td>${locDat}</td>
+                  <td>
+                      <div class="progress" style="height: 20px;">
+                          <div class="progress-bar ${progressClass}" 
+                               role="progressbar" 
+                               style="width: ${moistureValue}%;"
+                               aria-valuenow="${moistureValue}" 
+                               aria-valuemin="0" 
+                               aria-valuemax="100">
+                              ${moistureValue}%
+                          </div>
+                      </div>
+                  </td>
+                  <td>
+                      <p class="${textClass}">${statusText}</p>
+                  </td>
+              `;
+              tableBody.appendChild(row);
+          } else {
+              // Update existing row
+              const progressBar = row.querySelector('.progress-bar');
+              progressBar.style.width = `${moistureValue}%`;
+              progressBar.setAttribute('aria-valuenow', moistureValue);
+              progressBar.textContent = `${moistureValue}%`;
+              progressBar.className = `progress-bar ${progressClass}`; // Update class
+  
+              // Update the status text
+              const statusParagraph = row.querySelector('td p');
+              statusParagraph.textContent = statusText; // Update status text
+              statusParagraph.className = textClass; // Update text class
+          }
+      });
+  });
+  </script>
+  

@@ -29,43 +29,55 @@ const app = express();
 const port = process.env.PORT || 4000;
 const server = http.createServer(app);
 const io = socketIo(server);
-
-
-// Listen for Firebase updates in real-time
-ref.on('value', async (snapshot) => {
-  const soilMoistureData = snapshot.val();  // Get the value from Firebase
-
-  if (soilMoistureData !== null && soilMoistureData !== undefined) {
+// This function will be called when new soil moisture data is received
+async function handleSoilMoistureUpdate(soilMoistureData) {
+  if (soilMoistureData) {
     try {
-      
-      // Iterate through each sensor entry
-      Object.keys(soilMoistureData).forEach(async (sensorId) => {
+      for (const sensorId of Object.keys(soilMoistureData)) {
         const sensorData = soilMoistureData[sensorId];
-        const locationName = sensorData.locationName;
-        const moistureValue = sensorData.moistureValue;
+        const { locationName, moistureValue, userId } = sensorData;
 
-        // Create a new instance of SoilData with the fetched values
-        const newSoilData = new SoilData({
-          locationName: locationName,  // Store the location name
-          moistureValue: moistureValue,  // Store the soil moisture value
-        });
+        console.log(`Sensor ID: ${sensorId}, Sensor Data:`, sensorData); 
 
-        // Save the new soil moisture data to MongoDB
-        await newSoilData.save();
-        console.log('Soil moisture data saved to MongoDB:', newSoilData);
-      });
+        if (userId) {
+          const updatedSoilData = await SoilData.findOneAndUpdate(
+            { userId, locationName },
+            { moistureValue },
+            { new: true, upsert: true }
+          );
 
-      // Emit the last sensor's moisture value to the client
-      const lastSensorData = soilMoistureData[Object.keys(soilMoistureData)[0]];
-      io.emit('soilMoistureUpdate', soilMoistureData);
-      
+          console.log('Soil moisture data updated in MongoDB:', updatedSoilData);
+
+          // Emit the updated data to all clients
+          io.emit('soilMoistureUpdate', {
+            [sensorId]: {
+              locationName,
+              moistureValue,
+              userId
+            }
+          });
+        } else {
+          console.log('No userId associated with this sensor data for sensor:', sensorId);
+        }
+      }
     } catch (error) {
-      console.error('Error saving soil moisture data to MongoDB:', error);
+      console.error('Error updating soil moisture data in MongoDB:', error);
     }
   } else {
     console.log('Invalid soil moisture data, not saving to database');
   }
+}
+
+
+
+// Set up the Firebase listener
+ref.on('value', (snapshot) => {
+  const soilMoistureData = snapshot.val();
+  console.log('Received soil moisture data:', soilMoistureData); // Log the data
+  handleSoilMoistureUpdate(soilMoistureData);
 });
+
+module.exports = { handleSoilMoistureUpdate };
 
 app.set('view engine', 'ejs');
 app.use(express.static("public"));
