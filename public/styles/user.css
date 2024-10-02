@@ -476,18 +476,42 @@ a{
 
 /* TUTORIAL PAGE */
 
-
-#tut1{
-    min-height: 100vh;
-    background-image: url(/images/tutorial1.svg);
+.section {
+    position: relative;
+    height: 100vh;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.section::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    height: 100%;
+    border-left: 2px solid rgb(255, 255, 255);
+    z-index: 4;
+}
+.content-text {
+    position: relative;
+    z-index: 2;
+}
+.top-buttons {
+    position: absolute;
+    top: 200px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+}
+.tut{
     background-repeat: no-repeat;
     background-size: cover;
     width: 100%;
     background-position: center; /* Keeps the image centered */
 }
-#tut1.container{
-    width: 100%;
-    height: 100%;
-}
+#tut1 { background-image: url(/images/tutorial1.svg); }
+#tut2 { background-image: url(/images/tut2.svg); }
+#tut3 { background-image: url(/images/tut3.svg); }
+#tut4 { background-image: url(/images/tut4.svg); }
+#tut5 { background-image: url(/images/tut5.svg); }
 
 /*  */
