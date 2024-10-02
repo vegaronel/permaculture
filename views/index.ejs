@@ -1,5 +1,28 @@
 <%- include("partials/UserHeader.ejs") %>
 
+<style>
+    .card {
+    border-radius: 20px;
+    border: none;
+    background: #e2f0fb;
+}
+
+.percentage {
+    font-size: 48px;
+    color: #fff;
+}
+
+.status-text {
+    font-size: 16px;
+    padding: 5px 10px;
+}
+
+.action-text {
+    font-size: 14px;
+    color: #a6b1be;
+}
+
+</style>
 <!-- Page Content -->
 <div class="container-fluid hidden-scroll"> 
 
@@ -129,18 +152,7 @@
 
             <div class="col-lg-4 col-md-12 p-4 weather-card b-radius-50">
                 <h5>Soil Moisture Data</h5>
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Location</th>
-                            <th>Moisture Level</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="soilMoistureTableBody">
-                       
-                    </tbody>
-                </table>
+                <div id="soilMoistureContainer" style="overflow: scroll; height: 370px;" class="d-flex flex-column"></div>
             </div>
         </div>    
     </section>
@@ -155,63 +167,76 @@
     const userId = '<%= userId %>'; // Get the userId from the server-side render
 
     socket.on('soilMoistureUpdate', (data) => {
-        const tableBody = document.getElementById('soilMoistureTableBody');
-        if (!tableBody) return;
+    const $container = $('#soilMoistureContainer');
+    if (!$container.length) return;
 
-        // Clear existing rows
-        tableBody.innerHTML = '';
+    $.each(data, (sensorId, sensorData) => {
+        if (sensorData.userId === userId) {
+            const moistureValue = sensorData.moistureValue;
+            const locDat = sensorData.locationName;
 
-        Object.keys(data).forEach(sensorId => {
-            const sensorData = data[sensorId];
-            // Only process data for the current user
-            if (sensorData.userId === userId) {
-                const moistureValue = sensorData.moistureValue;
-                const locDat = sensorData.locationName;
+            let statusText;
+            let statusClass = '';
 
-                let statusText;
-                let progressClass = '';
-                let textClass = '';
+            if (moistureValue < 30) {
+                statusText = 'Soil is Dry';
+                statusClass = 'text-white';
+            } else if (moistureValue < 45) {
+                statusText = 'Soil is Moist';
+                statusClass = 'text-white';
+            } else if (moistureValue < 60) {
+                statusText = 'Soil is Damp';
+                statusClass = 'text-white';
+            } else {
+                statusText = 'Soil is Wet';
+                statusClass = 'text-white';
+            }
 
-                if (moistureValue < 30) {
-                    statusText = 'Dry';
-                    progressClass = 'bg-danger';
-                    textClass = 'text-danger';
-                } else if (moistureValue < 45) {
-                    statusText = 'Moist';
-                    progressClass = 'bg-warning';
-                    textClass = 'text-warning';
-                } else if (moistureValue < 60) {
-                    statusText = 'Moderate';
-                    progressClass = 'bg-info';
-                    textClass = 'text-info';
-                } else {
-                    statusText = 'Wet';
-                    progressClass = 'bg-success';
-                    textClass = 'text-success';
-                }
+            let $card = $container.find(`.card[data-location="${locDat}"]`);
 
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${locDat}</td>
-                    <td>
-                        <div class="progress" style="height: 20px;">
-                            <div class="progress-bar ${progressClass}" 
-                                 role="progressbar" 
-                                 style="width: ${moistureValue}%;"
-                                 aria-valuenow="${moistureValue}" 
-                                 aria-valuemin="0" 
-                                 aria-valuemax="100">
-                                ${moistureValue}%
+            if ($card.length) {
+                $card.find('.percentage').text(`${moistureValue}%`);
+                $card.find('.status-text').text(statusText);
+            } else {
+                // Create a new card with a linear gradient background
+                $card = $(`
+                    <div class="card mb-3 p-4 shadow-none" data-location="${locDat}" style="border-radius: 20px; background: linear-gradient(${getGradient(moistureValue)});">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="location-name mb-2">${locDat}</h5>
+                                <p class="action-text text-muted">No Action Needed</p>
+                            </div>
+                            <div class="d-flex flex-column justify-content-center">
+                                <h1 class="percentage" style="font-weight: bold; color: #fff;">${moistureValue}%</h1>
+                                <span class="text-center bg-white-70" style="font-size: 16px;">${statusText}</span>
                             </div>
                         </div>
-                    </td>
-                    <td>
-                        <p class="${textClass}">${statusText}</p>
-                    </td>
-                `;
-                tableBody.appendChild(row);
+                    </div>
+                `);
+
+                $container.append($card);
             }
-        });
+
+            // Smooth update animation
+            $card.find('.percentage').css({
+                'transition': 'all 1s ease-in-out'
+            });
+        }
     });
+});
+
+
+
+function getGradient(moistureValue) {
+    if (moistureValue < 30) {
+        return 'to bottom right, rgba(220, 53, 69, 1) 35%, rgba(255, 255, 255, 0) 97%'; // Stronger red gradient for dry
+    } else if (moistureValue < 45) {
+        return 'to bottom right, rgba(255, 193, 7, 1) 35%, rgba(255, 255, 255, 0) 97%'; // Stronger yellow gradient for moist
+    } else if (moistureValue < 60) {
+        return 'to bottom right, rgba(67, 181, 229, 1) 35%, rgba(255, 255, 255, 0) 97%'; // Stronger blue gradient for moderate
+    } else {
+        return 'to bottom right, rgba(40, 167, 69, 1) 35%, rgba(255, 255, 255, 0) 97%'; // Stronger green gradient for wet
+    }
+}
+
 </script>
-  

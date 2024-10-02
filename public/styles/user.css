@@ -71,6 +71,54 @@ color: black;
     max-width: 150px;
     min-width: 130px;
 }
+
+.bg-white-70{
+    border-radius: 10px;
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.700);
+}
+
+/* scrollbar */
+/* For WebKit browsers (Chrome, Safari, and newer versions of Edge) */
+::-webkit-scrollbar {
+    width: 8px; /* Width of the scrollbar */
+}
+
+::-webkit-scrollbar-track {
+    background: transparent; /* Transparent or minimal background */
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2); /* Color of the scrollbar thumb */
+    border-radius: 10px; /* Rounded edges */
+    border: 2px solid transparent; /* Space around the thumb */
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0, 0, 0, 0.4); /* Darker on hover */
+}
+
+/* For Firefox */
+* {
+    scrollbar-width: thin; /* Thin scrollbar */
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent; /* Color of thumb and track */
+}
+
+/* Optional for making it even thinner on hover (for modern design) */
+* {
+    scrollbar-gutter: stable; /* Keeps a consistent gutter, preventing layout shifts */
+}
+
+/* For Internet Explorer and Edge (older versions) */
+.scrollable-content {
+    -ms-overflow-style: none; /* Disables default scrollbar */
+}
+
+.scrollable-content::-ms-scrollbar {
+    display: none; /* Hides scrollbar for IE */
+}
+
+/*  */
 p{
     font-size: 16px;
 }
