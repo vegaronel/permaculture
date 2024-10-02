@@ -165,7 +165,6 @@
 <script>
     const socket = io();
     const userId = '<%= userId %>'; // Get the userId from the server-side render
-
     socket.on('soilMoistureUpdate', (data) => {
     const $container = $('#soilMoistureContainer');
     if (!$container.length) return;
@@ -178,6 +177,7 @@
             let statusText;
             let statusClass = '';
 
+            // Define status and status class based on moisture value
             if (moistureValue < 30) {
                 statusText = 'Soil is Dry';
                 statusClass = 'text-white';
@@ -195,10 +195,13 @@
             let $card = $container.find(`.card[data-location="${locDat}"]`);
 
             if ($card.length) {
+                // Update the percentage, status text, and background gradient
                 $card.find('.percentage').text(`${moistureValue}%`);
                 $card.find('.status-text').text(statusText);
+                $card.find('.status-text').attr('class', `status-text ${statusClass}`); // Update the text class
+                $card.css('background', `linear-gradient(${getGradient(moistureValue)})`); // Update the background
             } else {
-                // Create a new card with a linear gradient background
+                // Create a new card with the proper gradient and text class
                 $card = $(`
                     <div class="card mb-3 p-4 shadow-none" data-location="${locDat}" style="border-radius: 20px; background: linear-gradient(${getGradient(moistureValue)});">
                         <div class="d-flex justify-content-between align-items-center">
@@ -208,7 +211,7 @@
                             </div>
                             <div class="d-flex flex-column justify-content-center">
                                 <h1 class="percentage" style="font-weight: bold; color: #fff;">${moistureValue}%</h1>
-                                <span class="text-center bg-white-70" style="font-size: 16px;">${statusText}</span>
+                                <span class="status-text ${statusClass}" style="font-size: 16px;">${statusText}</span>
                             </div>
                         </div>
                     </div>
@@ -227,15 +230,16 @@
 
 
 
+
 function getGradient(moistureValue) {
     if (moistureValue < 30) {
-        return 'to bottom right, rgba(220, 53, 69, 1) 35%, rgba(255, 255, 255, 0) 97%'; // Stronger red gradient for dry
+        return 'to bottom right, rgba(220, 53, 69, 1) 35%, rgba(255, 255, 255, 0) 100%';
     } else if (moistureValue < 45) {
-        return 'to bottom right, rgba(255, 193, 7, 1) 35%, rgba(255, 255, 255, 0) 97%'; // Stronger yellow gradient for moist
+        return 'to bottom right, rgba(255, 193, 7, 1) 35%, rgba(255, 255, 255, 0) 100%'; 
     } else if (moistureValue < 60) {
-        return 'to bottom right, rgba(67, 181, 229, 1) 35%, rgba(255, 255, 255, 0) 97%'; // Stronger blue gradient for moderate
+        return 'to bottom right, rgba(67, 181, 229, 1) 35%, rgba(255, 255, 255, 0) 100%'; 
     } else {
-        return 'to bottom right, rgba(40, 167, 69, 1) 35%, rgba(255, 255, 255, 0) 97%'; // Stronger green gradient for wet
+        return 'to bottom right, rgba(40, 167, 69, 1) 35%, rgba(255, 255, 255, 0) 100%'; 
     }
 }
 
