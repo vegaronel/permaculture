@@ -6,8 +6,8 @@ const SoilData = require("../models/SoilData");
 
 const Plant = require("../models/Plant"); 
 const axios = require('axios');
-
-const admin = require('../config/firebase'); // Import Firebase
+const handleSoilMoistureUpdate = require('../index')
+const admin = require('../config/firebase'); 
 
 const soilMoistureRef = admin.database().ref('CurrentValue');
 
@@ -103,6 +103,8 @@ app.get('/dashboard', isAuthenticated, async (req, res) => {
     const formattedDate = new Date().toLocaleDateString('en-PH', options);
     const [weekday, month, dayWithComma] = formattedDate.split(', ');
 
+    console.log(moistureLocations);
+    
     res.render('index', {
       moistureLocations, // Pass the moisture data to the view
       weather: weatherData,

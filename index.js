@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cron = require('node-cron');
+const nodemailer = require('nodemailer'); // Import Nodemailer
 const mongoose = require('mongoose');
 const session = require('express-session');
 const middleWare = require("./middleware/middleware");
@@ -16,6 +17,8 @@ const dashboardPlants = require("./routes/dashboardPlants");
 const commentsRoutes = require("./routes/commentsRoutes");
 const postRoutes = require("./routes/postRoutes");
 const admin = require('./config/firebase');
+const User = require('./models/user'); // Adjust the path based on your project structure
+
 const SoilData = require('./models/SoilData');  // Import the SoilData model
 
 const http = require('http');
@@ -29,7 +32,38 @@ const app = express();
 const port = process.env.PORT || 4000;
 const server = http.createServer(app);
 const io = socketIo(server);
-// This function will be called when new soil moisture data is received
+
+// Create a transport for sending emails
+const transporter = nodemailer.createTransport({
+  service: 'Gmail',
+  auth: {
+    user: process.env.EMAIL_USER, // Your email
+    pass: process.env.USER_PASS // Your email password
+  }
+});
+
+
+
+// Send email function
+function sendNotificationEmail(toEmail, locationName) {
+  const mailOptions = {
+    from: `"JELLYACE" <${process.env.EMAIL_USER}>`,
+    to: toEmail, // Receiver's email
+    subject: 'Soil Dry Alert',
+    text: `The soil at ${locationName} is dry. Please water your plants.`
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error('Error sending email:', error);
+    } else {
+      console.log('Email sent:', info.response);
+    }
+  });
+}
+
+const lastNotificationStatus = {}; // This can also be stored in the database
+
 async function handleSoilMoistureUpdate(soilMoistureData) {
   if (soilMoistureData) {
     try {
@@ -37,18 +71,15 @@ async function handleSoilMoistureUpdate(soilMoistureData) {
         const sensorData = soilMoistureData[sensorId];
         const { locationName, moistureValue, userId } = sensorData;
 
-        console.log(`Sensor ID: ${sensorId}, Sensor Data:`, sensorData); 
-
         if (userId) {
+          // Update soil data in the database
           const updatedSoilData = await SoilData.findOneAndUpdate(
             { userId, locationName },
             { moistureValue },
             { new: true, upsert: true }
           );
 
-          console.log('Soil moisture data updated in MongoDB:', updatedSoilData);
-
-          // Emit the updated data to all clients
+          // Emit the updated data to clients
           io.emit('soilMoistureUpdate', {
             [sensorId]: {
               locationName,
@@ -56,6 +87,22 @@ async function handleSoilMoistureUpdate(soilMoistureData) {
               userId
             }
           });
+
+          // Check if soil is dry and send notification only once
+          if (moistureValue < 30) {
+            const user = await User.findById(userId); // Assuming you have a User model
+            if (user && user.email) {
+              // Check if a notification has already been sent for this location
+              if (!lastNotificationStatus[locationName] || lastNotificationStatus[locationName] !== 'dry') {
+                sendNotificationEmail(user.email, locationName); // Send notification to the user's email
+                lastNotificationStatus[locationName] = 'dry'; // Mark as notified
+                console.log(`Notification sent to ${user.email} for dry soil at ${locationName}.`);
+              }
+            }
+          } else {
+            // Reset notification status when soil is not dry
+            lastNotificationStatus[locationName] = 'not-dry';
+          }
         } else {
           console.log('No userId associated with this sensor data for sensor:', sensorId);
         }
@@ -67,14 +114,11 @@ async function handleSoilMoistureUpdate(soilMoistureData) {
     console.log('Invalid soil moisture data, not saving to database');
   }
 }
-
-
-
 // Set up the Firebase listener
-ref.on('value', (snapshot) => {
-  const soilMoistureData = snapshot.val();
-  console.log('Received soil moisture data:', soilMoistureData); // Log the data
-  handleSoilMoistureUpdate(soilMoistureData);
+ref.on('child_changed', (snapshot) => {
+  const updatedData = snapshot.val();
+  console.log('Soil moisture sensor updated:', updatedData);
+  handleSoilMoistureUpdate({ [snapshot.key]: updatedData });
 });
 
 module.exports = { handleSoilMoistureUpdate };
