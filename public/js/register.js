@@ -177,7 +177,7 @@ $(document).ready(function () {
                 data: formData,
                 success: function (data) {
                     if (data.success) {
-                        window.location.href = "/login";
+                        window.location.href = "/register-success";
                     } else {
                         $("#otpFeedback").text(data.message).show(); // Show error message
                     }

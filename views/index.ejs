@@ -1,28 +1,5 @@
 <%- include("partials/UserHeader.ejs") %>
 
-<style>
-    .card {
-    border-radius: 20px;
-    border: none;
-    background: #e2f0fb;
-}
-
-.percentage {
-    font-size: 48px;
-    color: #fff;
-}
-
-.status-text {
-    font-size: 16px;
-    padding: 5px 10px;
-}
-
-.action-text {
-    font-size: 14px;
-    color: #a6b1be;
-}
-
-</style>
 <!-- Page Content -->
 <div class="container-fluid hidden-scroll"> 
 
@@ -36,7 +13,7 @@
                             <p class="h2 fs-30 m-0">Vinzons, Camarines Norte</p>
                         </div>
                         <p class="arial fs-14"><strong><%= day %>,</strong>  <%= dateToday %></p>
-                        <p class="fs-80"><%= weather.main.temp %>°</p>
+                        <p class="fs-80"><%= Math.floor(weather.main.temp)  %>°</p>
                     </div>
                     <div>
                         <img class="weather-icon-lg" src="images/weather-icons/<%= weather.weather[0].main %>.svg" alt="">
@@ -53,7 +30,7 @@
                                 <div class="forecast-day d-flex justify-content-center flex-column align-items-center">
                                     <p><%= new Date(day.dt_txt).toLocaleDateString('en-US', { weekday: 'long' }) %></p>
                                     <img src="https://openweathermap.org/img/wn/<%= day.weather[0].icon %>@2x.png" alt="Weather Icon">
-                                    <p><%= day.main.temp %> °C</p>
+                                    <p><%= Math.floor(day.main.temp) %> °C</p>
                                 </div>
                             <% }) %>
                         </div>
@@ -109,7 +86,7 @@
                                         <th>Location</th>
                                         <th>Estimated Harvest Time</th>
                                         <th>Current Stage</th>
-                                        <th>Verify Stage</th> <!-- New column for verification -->
+                                            <th>Verify Stage</th> <!-- New column for verification -->
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -149,7 +126,10 @@
             </div>
 
             <div class="col-lg-4 col-md-12 p-4 weather-card b-radius-50">
-                <h5>Soil Moisture Data</h5>
+                <div class="p-4">
+                    <h5>Soil Moisture Data</h5>
+                </div>
+              
                 <div id="soilMoistureContainer" style="overflow: scroll; height: 370px;" class="d-flex flex-column"></div>
             </div>
         </div>    
@@ -225,8 +205,6 @@
         }
     });
 });
-
-
 
 
 function getGradient(moistureValue) {

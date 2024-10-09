@@ -94,8 +94,11 @@ app.post("/admin/plants/update/:id", upload.single('plantImage'), async (req, re
 });
 // Route for adding a new plant collection
 app.post('/add-plant',upload.single('plantImage'), async (req, res) => {
-    const { name, plantingInstructions, harvestTime } = req.body;
+    const { name, plantingInstructions, harvestTime,plantingMonth  } = req.body;
   
+    // Handle plantingMonth to ensure it's an array
+    const plantingMonthsArray = Array.isArray(plantingMonth) ? plantingMonth : [plantingMonth].filter(Boolean);
+
     console.log(req.file);
 
       const imageUrl = req.file.path || req.file.url || req.file.secure_url; // Cloudinary URL
@@ -110,7 +113,8 @@ app.post('/add-plant',upload.single('plantImage'), async (req, res) => {
         name,
         plantingInstructions,
         harvestTime,
-        image: imageUrl
+        image: imageUrl,
+        plantingMonth: plantingMonthsArray,
       });
   
       await newPlant.save();
@@ -183,20 +187,31 @@ app.post('/send-mail',isAuthenticated, async(req, res)=>{
 
     try 
         {
+            res.locals.emailSent = "Email Sent";
+            const emailSent = req.session.emailSent;
+
             await Email({ reciepients, subject, message });
             
             // Save the email details to the database
             const newEmail = new Email({ name, email, subject, message, profilePicture });
             await newEmail.save();
+            
 
-            res.render("email.ejs", { emailSent: "Email Sent" });
+            req.flash('success', 'Email sent successfully!');
+            res.redirect('/email'); // Redirecting to the email page
         } 
     catch (err) 
         {
-            console.error(err);
-            res.status(500).send('Error sending email');
+            console.error('Error sending email:', error);
+            req.flash('error', 'Error sending email. Please try again.');
+            res.redirect('/email'); // Redirect to the same page with an error message
         }
         
 })
+
+app.post("/clear-email-session", (req, res) => {
+    delete req.session.emailSent;
+    res.json({ success: true });
+});
 
 module.exports = app;

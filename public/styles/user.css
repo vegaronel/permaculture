@@ -515,3 +515,68 @@ a{
 #tut5 { background-image: url(/images/tut5.svg); }
 
 /*  */
+
+/* SOIL DATA VIEW */
+
+.card {
+    border-radius: 20px;
+    border: none;
+    background: #e2f0fb;
+}
+
+.percentage {
+    font-size: 48px;
+    color: #fff;
+}
+
+.status-text {
+    font-size: 16px;
+    padding: 5px 10px;
+}
+
+.action-text {
+    font-size: 14px;
+    color: #a6b1be;
+}
+
+/*  */
+
+/* MONTHLY PLANTS */
+.monthly-plants-container{
+    border: 2px solid #555252;
+    max-width: 1300px;
+    min-height: 100px;
+    border-radius: 25px;
+}
+.available-plants-container{
+    max-width: 1300px;
+}
+.best-to-plant{
+    position: absolute;
+    left: 50%;
+    top: 48px;
+    transform: translateX(-50%);
+    background-color: #E3E6E5;
+    padding: 0 20px 0;
+}
+.rounded-image-container{
+    box-shadow: #555252 0 0 15px 1px;
+    width: 120px; 
+    height: 120px; 
+    background-color: #AFDBAB; 
+}
+.current-month-text{
+    color: #555252;
+    font-family: "Nexa-Black";
+    font-size: clamp( 16px ,2vw, 25px);
+}
+.gray-text{
+    color: #555252;
+}
+.available-plants-card{
+    width: 180px;
+    background-color: #F5F5F4;
+    height: 250px;
+    border-radius: 15px;
+}
+/*  */

@@ -115,6 +115,7 @@ app.post("/register", upload.single("profilePicture"), async (req, res) => {
         req.session.verificationCode = null;
         req.session.email = null;
         req.session.otpExpires = null;
+        req.session.registrationSuccess = true;
 
         res.json({ success: true, message: "Registration successful" });
     } catch (err) {
@@ -123,7 +124,17 @@ app.post("/register", upload.single("profilePicture"), async (req, res) => {
     }
 });
 
+app.get('/register-success', (req, res) => {
+    // Check if the user has just registered
+    if (!req.session.registrationSuccess) {
+        return res.redirect('/register'); // Redirect to register if not authorized
+    }
+    
+    // Clear the session flag after showing success
+    req.session.registrationSuccess = false; 
 
+    res.render('register-success'); // Render success page
+});
 
 
 
