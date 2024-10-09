@@ -2,8 +2,9 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cron = require('node-cron');
 const nodemailer = require('nodemailer'); // Import Nodemailer
-const mongoose = require('mongoose');
+const flash = require('connect-flash');
 const session = require('express-session');
+const mongoose = require('mongoose');
 const middleWare = require("./middleware/middleware");
 const MemoryStore = require('memorystore')(session);
 const email = require("./routes/emails");
@@ -115,10 +116,10 @@ async function handleSoilMoistureUpdate(soilMoistureData) {
   }
 }
 // Set up the Firebase listener
-ref.on('child_changed', (snapshot) => {
-  const updatedData = snapshot.val();
-  console.log('Soil moisture sensor updated:', updatedData);
-  handleSoilMoistureUpdate({ [snapshot.key]: updatedData });
+ref.on('value', (snapshot) => {
+  const soilMoistureData = snapshot.val();
+  console.log('Received soil moisture data:', soilMoistureData); // Log the data
+  handleSoilMoistureUpdate(soilMoistureData);
 });
 
 module.exports = { handleSoilMoistureUpdate };
@@ -126,6 +127,7 @@ module.exports = { handleSoilMoistureUpdate };
 app.set('view engine', 'ejs');
 app.use(express.static("public"));
 app.use('/uploads', express.static('uploads'));
+
 
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
@@ -135,14 +137,23 @@ mongoose.connect(process.env.MONGODB_URI)
     console.log("Connection Failed");
   });
 
-app.use(session({
-  cookie: { maxAge: 86400000 },
-  store: new MemoryStore({
-    checkPeriod: 86400000 // prune expired entries every 24h
-  }),
-  resave: false,
-  secret: 'keyboard cat'
-}));
+  app.use(session({
+    cookie: { maxAge: 86400000 },
+    store: new MemoryStore({
+      checkPeriod: 86400000 // prune expired entries every 24h
+    }),
+    resave: false,
+    saveUninitialized: true,
+    secret: 'keyboard cat'
+  }));
+  app.use(flash());
+
+  // Make flash messages available to all views
+app.use((req, res, next) => {
+  res.locals.messages = req.flash();
+  next();
+});
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 

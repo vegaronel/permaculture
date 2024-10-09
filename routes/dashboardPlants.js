@@ -6,6 +6,8 @@ const isAuthenticated = require('../middleware/athenticateUser')
 const Counter = require('../models/Counter');
 const Location = require('../models/Location');
 const SoilData = require('../models/SoilData');
+const fs = require('fs');
+const path = require('path');
 
 const admin = require('../config/firebase');
 
@@ -110,20 +112,27 @@ app.get('/plants/:plantId', async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch plant data' });
   }
 });
-
-
 app.get('/add-new-plant', isAuthenticated, async (req, res) => {
   try {
     const locations = await Location.find({ userId: req.session.userId });
-      const plantCollections = await PlantCollection.find(); // Fetch all plant collections from the database
-      const userId = req.session.userId; // Assuming you're storing userId in the session
+    const plantCollections = await PlantCollection.find();
+    const userId = req.session.userId;
 
-      res.render('addPlant.ejs', { name: req.session.username, plantCollections, userId, locations  }); // Pass userId to the view
+    // Get the current month
+    const currentMonth = new Date().toLocaleString('default', { month: 'long' });
+
+    // Find plants that are best to plant in the current month
+    const monthlyPlants = await PlantCollection.find({ plantingMonth: currentMonth });
+
+    // Render the view with additional data
+    res.render('addPlant.ejs', { name: req.session.username, plantCollections, userId, locations, monthlyPlants, currentMonth });
   } catch (error) {
-      console.error(error);
-      res.status(500).send("Error fetching plant collections");
+    console.error(error);
+    res.status(500).send("Error fetching plant collections");
   }
 });
+
+
   app.post('/add-new-plant', isAuthenticated, async (req, res) => {
     const { plantCollectionId, plantingDate, userId, location, customLocation } = req.body;
 

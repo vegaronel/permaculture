@@ -51,12 +51,16 @@ app.get('/dashboard', isAuthenticated, async (req, res) => {
     const limit = 10;
     const skip = (page - 1) * limit;
 
-    let query = { userId: req.session.userId };
+    const query = {
+      userId: req.session.userId,
+      growthStage: { $ne: 'harvesting' } // Exclude harvesting plants
+    };
 
     if (filter) {
       query.type = filter;
     }
 
+    
     const [currentWeatherResponse, forecastResponse, plants, soilMoistureData] = await Promise.all([
       axios.get(currentWeatherUrl),
       axios.get(forecastUrl),
@@ -104,7 +108,7 @@ app.get('/dashboard', isAuthenticated, async (req, res) => {
     const [weekday, month, dayWithComma] = formattedDate.split(', ');
 
     console.log(moistureLocations);
-    
+
     res.render('index', {
       moistureLocations, // Pass the moisture data to the view
       weather: weatherData,

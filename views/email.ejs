@@ -3,11 +3,25 @@
 
         <div class="container-fluid ">
             <!-- EMAIL SECTION -->
+            <% if (messages.success) { %>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                  <%= messages.success %>
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+              <% } %>
+              <% if (messages.error) { %>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                  <%= messages.error %>
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+              <% } %>
+              
                 <form class="form-container form-control p-4" action="/send-mail" method="post"> 
                 <% if(locals.emailSent){ %>
                     <p class="wrongCridentials bg-success hvr-wobble-horizontal"><%= emailSent %></p>
                 <% } %>
             <div class="row">
+                
                 <input hidden type="text" name="profilePicture"<% if (locals.profilePicture) { %>
                     value="<%= profilePicture %>"
                 <% } %>>
@@ -28,3 +42,21 @@
 
 
 <%- include("partials/UserFooter.ejs") %>
+
+<script>
+    setTimeout(() => {
+        fetch('/clear-email-session', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log("Session emailSent cleared");
+                // Optionally update the UI to reflect that the session data is cleared
+            }
+        });
+    }, 5000); // 5000 milliseconds = 5 seconds
+</script>

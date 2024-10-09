@@ -8,6 +8,9 @@
             <tr>
                 <th>Name</th>
                 <th>Actions</th>
+                <th>Picture</th>
+                <th>Planting Month/s</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody>
@@ -15,9 +18,8 @@
             <tr>
                 <td><%= plant.name %></td>
                 <td><%= plant.harvestTime %></td>
-                <td>
-                    <img src="<%= plant.image %>" alt="<%= plant.name %>" width="100">
-                </td>
+                <td><img src="<%= plant.image %>" alt="<%= plant.name %>" width="100"></td>
+                <td><%= plant.plantingMonth.join(', ') %></td> <!-- Display months as comma-separated list -->
                 <td>
                     <a class="btn btn-warning btn-sm" href="/admin/plants/edit/<%= plant._id %>">Edit</a>
                     <form action="/admin/plants/delete/<%= plant._id %>" method="POST" style="display:inline;">
@@ -27,9 +29,9 @@
             </tr>
             <% }) %>
         </tbody>
+        
         </table>
     </div>
-
     <h4>Add New Plant</h4>
     <form action="/add-plant" method="POST" enctype="multipart/form-data" class="mt-4">
         <div class="form-group">
@@ -45,11 +47,67 @@
             <input type="number" class="form-control" id="harvestTime" name="harvestTime" required>
         </div>
         <div class="form-group">
+            <label>Planting Months:</label>
+            <div class="checkbox-group d-flex gap-2 flex-wrap">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="plantingMonth" id="january" value="January">
+                    <label class="form-check-label" for="january">January</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="plantingMonth" id="february" value="February">
+                    <label class="form-check-label" for="february">February</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="plantingMonth" id="march" value="March">
+                    <label class="form-check-label" for="february">March</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="plantingMonth" id="april" value="April">
+                    <label class="form-check-label" for="february">April</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="plantingMonth" id="may" value="May">
+                    <label class="form-check-label" for="february">May</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="plantingMonth" id="june" value="June">
+                    <label class="form-check-label" for="february">June</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="plantingMonth" id="july" value="July">
+                    <label class="form-check-label" for="february">July</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="plantingMonth" id="august" value="August">
+                    <label class="form-check-label" for="february">August</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="plantingMonth" id="semptember" value="September">
+                    <label class="form-check-label" for="february">September</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="plantingMonth" id="october" value="October">
+                    <label class="form-check-label" for="february">October</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="plantingMonth" id="november" value="November">
+                    <label class="form-check-label" for="february">November</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="plantingMonth" id="december" value="December">
+                    <label class="form-check-label" for="december">December</label>
+                </div>
+            </div>
+        </div>
+        
+        
+        <div class="form-group">
             <label for="plantImage">Upload Plant Image:</label>
             <input type="file" class="form-control-file" id="plantImage" name="plantImage" accept="image/*" required>
         </div>
         <button type="submit" class="btn btn-primary">Add Plant</button>
     </form>
+    
     
   
 </div>

@@ -4,6 +4,13 @@
      --light-placeholder: #6e829f;
      --white-text: #ffffff;
 }
+@font-face {
+     font-family: "Nexa-Black";
+     src: url("../fonts/Nexa-Black.ttf") format("truetype"), url("../fonts/my-font.woff") format("woff");
+     font-weight: normal;
+     font-style: normal;
+     font-display: swap;
+ }
 .lighter-text {
      font-weight: 300px;
      color: #6e829f;
@@ -29,15 +36,7 @@ a {
      padding: 0;
      font-family: "Poppins", sans-serif;
 }
-body {
-     background-image: url(/images/reg-bg.svg);
-     background-repeat: no-repeat;
-     background-size: cover;
-     display: flex;
-     justify-content: center;
-     align-items: center;
-     min-height: 100vh;
-}
+
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
      -webkit-appearance: none;
@@ -103,11 +102,11 @@ input[type="number"] {
      height: 100%;
 }
 .my-button {
-     background-color: var(--accent-color);
+     background-color: #59A645;
      border: none;
      color: var(--white-text);
      padding: 10px 20px;
-     border-radius: 5px;
+     border-radius: 100px;
      cursor: pointer;
 }
 .otp-button {
@@ -134,11 +133,11 @@ input[type="number"] {
      max-width: 200px;
 }
 .my-button:hover {
-     background-color: var(--button-hover);
+     background-color: #59A645;
      border: none;
      color: var(--white-text);
      padding: 10px 20px;
-     border-radius: 5px;
+     border-radius: 100px;
      cursor: pointer;
 }
 .light-text {
