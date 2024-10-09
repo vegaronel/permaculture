@@ -65,6 +65,67 @@ app.post('/add-custom-location', isAuthenticated, async (req, res) => {
 });
 
 
+app.get('/plant/:customId', async (req, res) => {
+  try {
+      const plant = await Plant.findOne({ customId: req.params.customId }).populate('location').populate('userId').populate('plantCollectionId');
+      if (plant) {
+          res.json({ success: true, plant });
+      } else {
+          res.json({ success: false, message: 'Plant not found' });
+      }
+  } catch (err) {
+      res.status(500).json({ success: false, message: 'Server error', error: err.message });
+  }
+});
+
+// Route for harvesting a plant
+app.post('/plant/harvest/:customId', async (req, res) => {
+  try {
+      const { customId } = req.params;
+      const { harvestStatus } = req.body;
+
+      // Find and update the plant based on customId
+      const plant = await Plant.findOneAndUpdate(
+          { customId },
+          { harvestStatus, status: 'Harvested' },
+          { new: true }
+      );
+
+      if (plant) {
+          res.json({ success: true, plant });
+      } else {
+          res.json({ success: false, message: 'Plant not found' });
+      }
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// Route for marking a plant as dead
+app.post('/plant/died/:customId', async (req, res) => {
+  try {
+      const { customId } = req.params;
+      const { plantDied } = req.body;
+
+      // Find and update the plant based on customId
+      const plant = await Plant.findOneAndUpdate(
+          { customId },
+          { plantDied, status: 'Died' },
+          { new: true }
+      );
+
+      if (plant) {
+          res.json({ success: true, plant });
+      } else {
+          res.json({ success: false, message: 'Plant not found' });
+      }
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
 app.get('/plant-details/:id', isAuthenticated, async (req, res) => {
   try {
     const plantId = req.params.id;
@@ -155,7 +216,7 @@ app.get('/add-new-plant', isAuthenticated, async (req, res) => {
 
 
   app.post('/add-new-plant', isAuthenticated, async (req, res) => {
-    const { plantCollectionId, plantingDate, userId, location, customLocation } = req.body;
+    const { plantCollectionId, plantingDate, userId, location, customLocation,methodOfPlanting } = req.body;
 
     try {
         // Fetch the selected plant collection
@@ -200,6 +261,7 @@ app.get('/add-new-plant', isAuthenticated, async (req, res) => {
             userId,
             plantCollectionId,
             lastWatered: new Date(),
+            methodOfPlanting: methodOfPlanting,
             computedGrowthStage, // Set computed growth stage
             location: selectedLocation, // Save the selected location ID
             image: plantCollection.image // Save the image path from PlantCollection
