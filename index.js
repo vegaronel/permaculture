@@ -1,13 +1,13 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cron = require('node-cron');
-const nodemailer = require('nodemailer'); // Import Nodemailer
+const nodemailer = require('nodemailer');
 const flash = require('connect-flash');
 const session = require('express-session');
 const mongoose = require('mongoose');
 const middleWare = require("./middleware/middleware");
 const MemoryStore = require('memorystore')(session);
-const email = require("./routes/emails");
+const adminRoute = require("./routes/admin");
 const comments = require("./routes/commentsRoutes");
 const userLogin = require("./routes/userloginlogout");
 const isAuthenticated = require('./middleware/athenticateUser');
@@ -18,9 +18,8 @@ const dashboardPlants = require("./routes/dashboardPlants");
 const commentsRoutes = require("./routes/commentsRoutes");
 const postRoutes = require("./routes/postRoutes");
 const admin = require('./config/firebase');
-const User = require('./models/user'); // Adjust the path based on your project structure
-
-const SoilData = require('./models/SoilData');  // Import the SoilData model
+const User = require('./models/user');
+const SoilData = require('./models/SoilData');
 
 const http = require('http');
 const socketIo = require('socket.io');
@@ -38,14 +37,11 @@ const io = socketIo(server);
 const transporter = nodemailer.createTransport({
   service: 'Gmail',
   auth: {
-    user: process.env.EMAIL_USER, // Your email
-    pass: process.env.USER_PASS // Your email password
+    user: process.env.EMAIL_USER,
+    pass: process.env.USER_PASS
   }
 });
 
-
-
-// Send email function
 function sendNotificationEmail(toEmail, locationName) {
   const mailOptions = {
     from: `"JELLYACE" <${process.env.EMAIL_USER}>`,
@@ -95,7 +91,7 @@ async function handleSoilMoistureUpdate(soilMoistureData) {
             if (user && user.email) {
               // Check if a notification has already been sent for this location
               if (!lastNotificationStatus[locationName] || lastNotificationStatus[locationName] !== 'dry') {
-                sendNotificationEmail(user.email, locationName); // Send notification to the user's email
+                sendNotificationEmail(user.email, locationName);
                 lastNotificationStatus[locationName] = 'dry'; // Mark as notified
                 console.log(`Notification sent to ${user.email} for dry soil at ${locationName}.`);
               }
@@ -160,7 +156,7 @@ app.use(express.json());
 app.use(middleWare);
 app.use(plantIdentification);
 app.use(comments);
-app.use(email);
+app.use(adminRoute);
 app.use(userLogin);
 app.use(userDashboard);
 app.use(registration);

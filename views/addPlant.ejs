@@ -8,12 +8,12 @@
             </div>
             <div class="d-flex gap-4 justify-content-lg-center justify-content-sm-start py-5 px-2 mt-3" style="overflow-y: scroll;">
                 <% monthlyPlants.forEach(function(plant) { %>
-                    <div class="d-flex flex-column justify-content-center align-items-center">
+                    <div class="d-flex flex-column justify-content-center align-items-center" style="max-width: 190px;">
                         <div class="rounded-image-container rounded-circle p-2 d-flex align-items-center">
-                            <img src="<%= plant.image %>" alt="<%= plant.name %>" style="width: 100%;">
+                            <img class="p-1" src="<%= plant.image %>" alt="<%= plant.name %>" style="width: 100%;">
                         </div>
-                        <div class="d-flex justify-content-center align-items-center flex-column">
-                            <p class="m-0"><%= plant.name %></p>
+                        <div class="d-flex justify-content-center align-items-center flex-column" style="width: 100%;">
+                            <p class="m-0 text-center"><%= plant.name %></p>
                             <div style="width: 40px; background-color:#59A645; height: 5px; border-radius: 100px;"></div>
                         </div>
                     </div>
@@ -29,7 +29,7 @@
         
 
     <div class="available-plants-container mx-auto text-center" style="overflow-y: scroll;">
-        <p class="nexa-black h3 gray-text mt-2">Available Plants</p>
+        <p class="nexa-black h3 gray-text my-4">Available Plants</p>
         <div class="d-flex gap-3">
             <div class="d-flex gap-3" style="overflow-y: scroll;">
                 <% plantCollections.forEach(function(plant) { %>
@@ -37,81 +37,226 @@
                         <img class="p-2 mt-3" src="<%= plant.image %>" alt="<%= plant.name %>" style="width: 100px; height: 100px;">
                         <p class="gray-text h4"><%= plant.name %></p>
                         <p class="gray-text"><%= plant.harvestTime %> days to harvest</p>
+                        <button class="btn text-white px-3 view-plant-info green-button" data-id="<%= plant._id %>">View Info</button>
                     </div>
-                      
                 <% }); %>
             </div>
-            
         </div>   
     </div>
-  
-    
-    <h1>Add New Plant</h1>
-    <form action="/add-new-plant" method="POST">
-        <input type="hidden" name="userId" value="<%= userId %>"> <!-- Use passed userId here -->
 
-        <div class="form-group">
-            <label for="plantCollectionId">Select Plant</label>
-            <select class="form-control" name="plantCollectionId" id="plantCollectionId" required>
-                <option value="">Select a Plant</option>
-                <% plantCollections.forEach(function(plant) { %>
-                    <option value="<%= plant._id %>" data-harvest-time="<%= plant.harvestTime %>">
-                        <%= plant.name %>
-                    </option>
-                <% }); %>
-            </select>
-            <input type="text" name="plantingInstructions" hidden>
-            <input type="text" name="harvestTime" hidden>
+
+   <!-- Modal for displaying plant details -->
+<div class="modal fade" id="plantInfoModal" tabindex="-1" aria-labelledby="plantInfoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 800px; ">
+        <div class="modal-content view-plant-modal p-4">
+            <div class="modal-body d-flex flex-column-reverse flex-md-column-reverse flex-lg-row justify-content-md-center" style="min-height: 400px;">
+                <div class="col-lg-6 mt-3">
+                    <p class="nexa-black h2 gray-text" id="plantName"></p>
+                    <ul class="nav nav-pills my-4" id="pills-tab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active light-gray-text fw-bold" id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#pills-home" type="button" role="tab" aria-controls="pills-home" aria-selected="true">Overview</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link light-gray-text fw-bold" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Benefits</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link light-gray-text fw-bold" id="pills-contact-tab" data-bs-toggle="pill" data-bs-target="#pills-contact" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Used for</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content" style="max-height: 200px; min-height: 200px; padding-right: 10px; overflow-y: scroll;" id="pills-tabContent">
+                        <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab" tabindex="0">
+                            <p id="overview" class="text-word-wrap"></p>
+                        </div>
+                        <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab" tabindex="0">
+                            <p id="benefits" class="text-word-wrap"></p>
+                        </div>
+                        <div class="tab-pane fade" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab" tabindex="0">
+                            <p id="usedFor" class="text-word-wrap"></p>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <button type="button" class="btn back-button" data-bs-dismiss="modal">Back</button>
+                        <button type="button" class="btn green-button" id="showAddPlantModal">Add Plant</button>
+                    </div>
+                    
+                </div>
+                <div class="col-lg-6 col-md-12 d-flex justify-content-center align-items-center">
+                    <img id="plantImage" src="" alt="Plant Image" style="width: 100%; max-width: 400px; max-height: 400px; background-size: cover;" />
+                </div>
+            </div>
         </div>
+    </div>
+</div>
 
-        <div class="form-group">
-            <label for="plantingDate">Planting Date:</label>
-            <input type="date" name="plantingDate" class="form-control" required>
+ <!-- New Modal for adding a plant -->
+ <div class="modal fade" id="addPlantModal" tabindex="-1" aria-labelledby="addPlantModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 350px; ">
+        <div class="modal-content"  style="border-radius: 40px;">
+            <div class="modal-body p-0">
+                <div class="d-flex justify-content-center align-items-center" style="background-color: #59A645; border-radius: 40px;">
+                    <img id="plantImageForm" src="" alt="Plant Image" style="width: 100%; max-width: 300px; max-height: 300px; background-size: cover;" />
+                </div>
+
+                <form id="addPlantForm" class="p-5">
+                        <input type="hidden" name="userId" value="<%= userId %>"> <!-- Use passed userId here -->                     
+                        <div class="form-group">
+                            <label for="plantCollectionId">Select Plant</label>
+                            <select class="form-control" name="plantCollectionId" id="plantCollectionId" required>
+                                <option value="">Select a Plant</option>
+                                <% plantCollections.forEach(function(plant) { %>
+                                    <option id="plantNameInput" value="<%= plant._id %>" data-harvest-time="<%= plant.harvestTime %>">
+                                        <%= plant.name %>
+                                    </option>
+                                <% }); %>
+                            </select>
+                            <input type="text" name="plantingInstructions" hidden>
+                            <input type="text" name="harvestTime" hidden>
+                        </div>
+
+                        
+                
+                        <div class="form-group">
+                            <label for="plantingDate">Planting Date:</label>
+                            <input type="date" name="plantingDate" class="form-control" required>
+                        </div>
+                
+                        <div class="form-group">
+                            <label for="location">Select Location</label>
+                            <select class="form-control" name="location" id="location" required>
+                                <option value="">Select a Location</option>
+                                <% locations.forEach(function(loc) { %>
+                                    <option value="<%= loc._id %>"><%= loc.name %></option>
+                                <% }); %>
+                                <option value="custom">Add Custom Location</option>
+                            </select>
+                            <input type="text" id="customLocation" name="customLocation" class="form-control" placeholder="Enter custom location" style="display: none;">
+                            <button type="button" class="btn btn-warning" id="submitCustomLocation" style="display: none;">Submit Custom Location</button>
+                        </div>
+                
+                        <div class="form-group">
+                            <label for="initialGrowthStage">Initial Growth Stage</label>
+                            <select class="form-control" id="initialGrowthStage" name="initialGrowthStage" required>
+                              <option value="">Select Initial Growth Stage</option>
+                              <option value="Seedling">Seedling</option>
+                              <option value="Sprout">Sprout</option>
+                              <option value="Vegetating">Vegetating</option>
+                              <option value="Budding">Budding</option>
+                              <option value="Flowering">Flowering</option>
+                              <option value="Ripening">Ripening</option>
+                            </select>
+                          </div>
+
+                          <div class="mt-4">
+                            <button type="button" class="btn back-button" data-bs-dismiss="modal">Back</button>
+                            <button type="submit" class="btn green-button">Add Plant</button>
+                          </div>
+                        
+                </form>
+            </div>
         </div>
-
-        <div class="form-group">
-            <label for="location">Select Location</label>
-            <select class="form-control" name="location" id="location" required>
-                <option value="">Select a Location</option>
-                <% locations.forEach(function(loc) { %>
-                    <option value="<%= loc._id %>"><%= loc.name %></option>
-                <% }); %>
-                <option value="custom">Add Custom Location</option>
-            </select>
-            <input type="text" id="customLocation" name="customLocation" class="form-control" placeholder="Enter custom location" style="display: none;">
-            <button type="button" class="btn btn-warning" id="submitCustomLocation" style="display: none;">Submit Custom Location</button>
-        </div>
-
-        <div class="form-group">
-            <label for="initialGrowthStage">Initial Growth Stage</label>
-            <select class="form-control" id="initialGrowthStage" name="initialGrowthStage" required>
-              <option value="">Select Initial Growth Stage</option>
-              <option value="Seedling">Seedling</option>
-              <option value="Sprout">Sprout</option>
-              <option value="Vegetating">Vegetating</option>
-              <option value="Budding">Budding</option>
-              <option value="Flowering">Flowering</option>
-              <option value="Ripening">Ripening</option>
-            </select>
-          </div>
-
-
-        <!-- Display Plant Details -->
-        <div id="plantDetails" style="display: none;">
-            <h4>Plant Details</h4>
-            <p><strong>Name:</strong> <span id="plantName"></span></p>
-            <p><strong>Planting Instructions:</strong> <span id="plantingInstructions"></span></p>
-            <p><strong>Harvest Time:</strong> <span id="harvestTime"> days</span></p>
-            <img id="plantImage" alt="Plant Image">
-        </div>
-
-        <button type="submit" class="btn btn-success mt-3">Add Plant</button>
-    </form>
+    </div>
+</div>
+</div>
 </div>
 
 <%- include("partials/UserFooter.ejs") %>
 
 <script>
+$(document).ready(function() {
+    function clearForm() {
+            // Reset the form fields
+            $('#addPlantForm')[0].reset();
+
+            // Hide the custom location input and button if it was shown
+            $('#customLocation').hide().val('');
+            $('#submitCustomLocation').hide();
+        }
+
+    $('.view-plant-info').click(function() {
+        const plantId = $(this).data('id');
+
+        $.ajax({
+            url: `/plant-details/${plantId}`,
+            method: 'GET',
+            success: function(response) {
+                if (response.success) {
+                    $('#plantName').text(response.plant.name);
+                    $('#plantImage').attr('src', response.plant.image);
+                    $('#overview').text(response.plant.overview);
+                    $('#benefits').text(response.plant.benefits);
+                    $('#usedFor').text(response.plant.usedFor);
+                    $("#plantImageForm").attr('src', response.plant.image);
+                    $('#selectedPlantId').val(response.plant._id);
+                    $('#plantInfoModal').modal('show');
+                } else {
+                    alert('Plant not found.');
+                }
+            },
+            error: function() {
+                alert('Error fetching plant information.');
+            }
+        });
+    });
+
+    $('#showAddPlantModal').click(function() {
+        $('#plantInfoModal').css('z-index', "1050");
+        $('#addPlantModal').modal('show');
+    });
+
+    $('#addPlantModal').on('hidden.bs.modal', function (e) {
+        $('#plantInfoModal').css('z-index', "1050");
+    });
+
+    $('.back-button').on('click', function() {
+            clearForm(); // Clear the form when the "Back" button is clicked
+        });
+
+    $('#location').change(function() {
+        if ($(this).val() === 'custom') {
+            $('#customLocationGroup').show();
+        } else {
+            $('#customLocationGroup').hide();
+        }
+    });
+
+    $('#addPlantModal').on('hidden.bs.modal', function() {
+            clearForm();
+        });
+
+    $('#addPlantForm').on('submit', function(e) {
+            e.preventDefault(); // Prevent default form submission
+            
+            $.ajax({
+                type: 'POST',
+                url: '/add-new-plant', // Adjust this URL if necessary
+                data: $(this).serialize(), // Serialize form data
+                success: function(response) {
+                    // Handle success (you can update the UI or show a success message)
+                    alert('Plant added successfully!');
+                    clearForm(); // Clear the form on success
+                    // Optionally, you can close the modal and reset the form
+                    $('#addPlantModal').modal('hide');
+                    $('#addPlantForm')[0].reset();
+                },
+                error: function(xhr, status, error) {
+                    // Handle error (you can display an error message)
+                    alert('Error: ' + xhr.responseText);
+                }
+            });
+        });
+
+        // Show custom location input when 'Add Custom Location' is selected
+        $('#location').change(function() {
+            if ($(this).val() === 'custom') {
+                $('#customLocation').show();
+                $('#submitCustomLocation').show();
+            } else {
+                $('#customLocation').hide();
+                $('#submitCustomLocation').hide();
+            }
+        });
+});
+
 document.getElementById('location').addEventListener('change', function() {
     const selectedValue = this.value;
     const customLocationInput = document.getElementById('customLocation');

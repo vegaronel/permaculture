@@ -19,7 +19,7 @@
                 <td><%= plant.name %></td>
                 <td><%= plant.harvestTime %></td>
                 <td><img src="<%= plant.image %>" alt="<%= plant.name %>" width="100"></td>
-                <td><%= plant.plantingMonth.join(', ') %></td> <!-- Display months as comma-separated list -->
+                <td><%= plant.plantingMonth.join(', ') %></td>
                 <td>
                     <a class="btn btn-warning btn-sm" href="/admin/plants/edit/<%= plant._id %>">Edit</a>
                     <form action="/admin/plants/delete/<%= plant._id %>" method="POST" style="display:inline;">
@@ -42,10 +42,25 @@
             <label for="plantingInstructions">Planting Instructions:</label>
             <textarea class="form-control" id="plantingInstructions" name="plantingInstructions" rows="3" required></textarea>
         </div>
+
+        <div class="form-group">
+            <label for="overview">Overview:</label>
+            <textarea class="form-control" id="overview" name="overview" rows="3" required></textarea>
+        </div>
+        <div class="form-group">
+            <label for="benefits">Benefits:</label>
+            <textarea class="form-control" id="benefits" name="benefits" rows="3" required></textarea>
+        </div>
+        <div class="form-group">
+            <label for="usedFor">Used For:</label>
+            <textarea class="form-control" id="usedFor" name="usedFor" rows="3" required></textarea>
+        </div>
+
         <div class="form-group">
             <label for="harvestTime">Estimated Harvest Time:</label>
-            <input type="number" class="form-control" id="harvestTime" name="harvestTime" required>
+            <input type="number" class="form-control" id="harvestTime" name="harvestTime" aria-placeholder="Estimated Days" required>
         </div>
+
         <div class="form-group">
             <label>Planting Months:</label>
             <div class="checkbox-group d-flex gap-2 flex-wrap">
