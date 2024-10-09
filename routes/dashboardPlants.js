@@ -84,11 +84,32 @@ app.get('/plant-details/:id', isAuthenticated, async (req, res) => {
         plantingInstructions: plant.plantingInstructions,
         image:plant.image,
         harvestTime: plant.harvestTime,
+        overview: plant.overview,
+        benefits: plant.benefits,
+        usedFor:plant.usedFor
       },
     });
   } catch (error) {
     console.error('Error fetching plant details:', error);
     res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+});
+
+app.get('/get-plant-info/:id', async (req, res) => {
+  try {
+      const plant = await PlantCollection.findById(req.params.id);
+      if (!plant) {
+          return res.status(404).send("Plant not found");
+      }
+      res.json({
+          name: plant.name,
+          harvestTime: plant.harvestTime,
+          plantingInstructions: plant.plantingInstructions,
+          image: plant.image
+      });
+  } catch (error) {
+      console.error(error);
+      res.status(500).send("Error fetching plant information");
   }
 });
 

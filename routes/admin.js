@@ -68,10 +68,8 @@ app.get("/admin/plants/edit/:id", async (req, res) => {
         console.error(err);
         res.status(500).send('Error fetching plant');
     }
-});
-
-app.post("/admin/plants/update/:id", upload.single('plantImage'), async (req, res) => {
-    const { name, plantingInstructions, harvestTime } = req.body;
+});app.post("/admin/plants/update/:id", upload.single('plantImage'), async (req, res) => {
+    const { name, plantingInstructions, harvestTime, plantingMonth, overview, benefits, usedFor } = req.body;
     let imageUrl = req.body.existingImage; // Store existing image URL
 
     // If a new image is uploaded, use the new Cloudinary URL
@@ -80,11 +78,18 @@ app.post("/admin/plants/update/:id", upload.single('plantImage'), async (req, re
     }
 
     try {
+        // Ensure plantingMonth is an array, even if only one checkbox is checked
+        const updatedPlantingMonth = Array.isArray(plantingMonth) ? plantingMonth : [plantingMonth].filter(Boolean);
+
         await PlantCollection.findByIdAndUpdate(req.params.id, {
             name,
             plantingInstructions,
             harvestTime,
-            image: imageUrl // Use the updated or existing image URL
+            plantingMonth: updatedPlantingMonth,
+            image: imageUrl, // Use the updated or existing image URL
+            overview,
+            benefits,
+            usedFor,
         });
         res.redirect("/plant-collection");
     } catch (error) {
@@ -92,38 +97,42 @@ app.post("/admin/plants/update/:id", upload.single('plantImage'), async (req, re
         res.status(500).send("Error updating plant");
     }
 });
-// Route for adding a new plant collection
-app.post('/add-plant',upload.single('plantImage'), async (req, res) => {
-    const { name, plantingInstructions, harvestTime,plantingMonth  } = req.body;
+
+app.post('/add-plant', upload.single('plantImage'), async (req, res) => {
+    const { name, plantingInstructions, harvestTime, plantingMonth, overview, benefits, usedFor } = req.body;
   
-    // Handle plantingMonth to ensure it's an array
+    // Ensure plantingMonth is an array
     const plantingMonthsArray = Array.isArray(plantingMonth) ? plantingMonth : [plantingMonth].filter(Boolean);
 
     console.log(req.file);
 
-      const imageUrl = req.file.path || req.file.url || req.file.secure_url; // Cloudinary URL
+    const imageUrl = req.file.path || req.file.url || req.file.secure_url; // Cloudinary URL
 
-          // Check if the imageUrl is defined
-          if (!imageUrl) {
-            throw new Error('Image URL is missing');
-         }
+    // Check if the imageUrl is defined
+    if (!imageUrl) {
+        throw new Error('Image URL is missing');
+    }
 
     try {
-      const newPlant = new PlantCollection({
-        name,
-        plantingInstructions,
-        harvestTime,
-        image: imageUrl,
-        plantingMonth: plantingMonthsArray,
-      });
+        const newPlant = new PlantCollection({
+            name,
+            plantingInstructions,
+            harvestTime,
+            image: imageUrl,
+            plantingMonth: plantingMonthsArray,
+            overview,
+            benefits,
+            usedFor,
+        });
   
-      await newPlant.save();
-      res.redirect('/plant-collection'); // Redirect back to the admin page or wherever you want
+        await newPlant.save();
+        res.redirect('/plant-collection'); // Redirect back to the admin page or wherever you want
     } catch (error) {
-      console.error(error);
-      res.status(500).send("Error adding plant to collection");
+        console.error(error);
+        res.status(500).send("Error adding plant to collection");
     }
 });
+
 
 app.post("/admin/verify-user/:id", async (req, res) => {
     try {

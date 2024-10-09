@@ -574,9 +574,67 @@ a{
     color: #555252;
 }
 .available-plants-card{
-    width: 180px;
+    min-width: 180px;
+    max-width: 180px;
     background-color: #F5F5F4;
     height: 250px;
     border-radius: 15px;
 }
+.view-plant-modal{
+    background-image: url(/images/available-plant-bg.svg); 
+    background-size: cover;
+}
+.view-plant-modal-content{
+    background-color: rgba(255, 255, 255, 0); border: none;
+}
+     /* Custom styles for the active tab */
+     .nav-pills .nav-link.active {
+        background-color: #ffffff00; /* Change this to your desired color */
+        color: #747171; /* Change text color if needed */
+        font-weight: bolder;
+    }
+
+    /* Optional: Change background on hover */
+    .nav-pills .nav-link:hover {
+        background-color: #d9e6eb; /* Change this to your hover color */
+        color: #000; /* Change text color if needed */
+    }
+
+    .light-gray-text{
+        color: #c8c8c8;
+    }
+    .green-button{
+        min-width: 70px;
+        color: white;
+        background-color: #59A645; 
+        border-radius: 100px; 
+        font-size: 13px;
+    }
+    .back-button{
+        min-width: 70px;
+        color: #807D7D;
+        background-color: #ffffff00; 
+        border-radius: 100px; 
+        border: 1px solid #807D7D;
+        font-size: 13px;
+    }
+    #plantInfoModal {
+        z-index: 1050;
+    }
+    #addPlantModal {
+        z-index: 1060;
+    }
+    .modal-backdrop {
+        z-index: 1040;
+    }
+    .modal-backdrop + .modal-backdrop {
+        z-index: 1055;
+        opacity: 0.3; /* Adjust this value for desired background darkness */
+    }
+    .text-word-wrap {
+        white-space: normal; /* Allows the text to wrap within the container */
+        word-wrap: break-word; /* Breaks long words if they don't fit */
+        overflow-wrap: break-word; /* Ensures long words break and wrap properly */
+        max-width: 100%; /* Ensures the text doesn’t exceed the container’s width */
+    }
 /*  */
