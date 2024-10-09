@@ -90,7 +90,7 @@
 
  <!-- New Modal for adding a plant -->
  <div class="modal fade" id="addPlantModal" tabindex="-1" aria-labelledby="addPlantModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" style="max-width: 350px; ">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 350px; margin: auto;">
         <div class="modal-content"  style="border-radius: 40px;">
             <div class="modal-body p-0">
                 <div class="d-flex justify-content-center align-items-center" style="background-color: #59A645; border-radius: 40px;">
@@ -101,7 +101,7 @@
                         <input type="hidden" name="userId" value="<%= userId %>"> <!-- Use passed userId here -->                     
                         <div class="form-group">
                             <label for="plantCollectionId">Select Plant</label>
-                            <select class="form-control" name="plantCollectionId" id="plantCollectionId" required>
+                            <select class="form-control input-custom" name="plantCollectionId" id="plantCollectionId" required>
                                 <option value="">Select a Plant</option>
                                 <% plantCollections.forEach(function(plant) { %>
                                     <option id="plantNameInput" value="<%= plant._id %>" data-harvest-time="<%= plant.harvestTime %>">
@@ -117,13 +117,13 @@
                 
                         <div class="form-group">
                             <label for="plantingDate">Planting Date:</label>
-                            <input type="date" name="plantingDate" class="form-control" required>
+                            <input type="date" name="plantingDate" class="form-control input-custom" required>
                         </div>
                 
                         <div class="form-group">
                             <label for="location">Select Location</label>
-                            <select class="form-control" name="location" id="location" required>
-                                <option value="">Select a Location</option>
+                            <select class="form-control input-custom" name="location" id="location" required>
+                                <option value="">Select Location</option>
                                 <% locations.forEach(function(loc) { %>
                                     <option value="<%= loc._id %>"><%= loc.name %></option>
                                 <% }); %>
@@ -133,16 +133,12 @@
                             <button type="button" class="btn btn-warning" id="submitCustomLocation" style="display: none;">Submit Custom Location</button>
                         </div>
                 
-                        <div class="form-group">
-                            <label for="initialGrowthStage">Initial Growth Stage</label>
-                            <select class="form-control" id="initialGrowthStage" name="initialGrowthStage" required>
-                              <option value="">Select Initial Growth Stage</option>
-                              <option value="Seedling">Seedling</option>
-                              <option value="Sprout">Sprout</option>
-                              <option value="Vegetating">Vegetating</option>
-                              <option value="Budding">Budding</option>
-                              <option value="Flowering">Flowering</option>
-                              <option value="Ripening">Ripening</option>
+                          <div class="form-group">
+                            <label for="methodOfPlanting">Method of Planting</label>
+                            <select class="form-control input-custom" name="methodOfPlanting" id="" required>
+                                <option value="" selected >Select Method of Planting</option>
+                                <option value="Direct Sowing">Direct Sowing</option>
+                                <option value="Transplanting Seedlings">Transplanting Seedlings</option>
                             </select>
                           </div>
 

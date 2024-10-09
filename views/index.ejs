@@ -81,39 +81,24 @@
                             <table id="plantsTable" class="table table-striped">
                                 <thead>
                                     <tr>
-                                        <th>ID</th>
+                                        <th>Image</th>
                                         <th>Plant Name</th>
-                                        <th>Location</th>
-                                        <th>Estimated Harvest Time</th>
-                                        <th>Current Stage</th>
-                                            <th>Verify Stage</th> <!-- New column for verification -->
+                                        <th>Date Planted</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <% plants.forEach(plant => { %>
                                         <tr>
-                                            <td><%= plant.customId %></td>
+                                            <td><img src="<%= plant.image %>" alt="" width="70px"></td>
                                             <td><%= plant.name %></td>
-                                            <td><%= plant.location %></td>
-                                            <td><%= new Date(plant.estimatedHarvestTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) %></td>
-                                            <td><%= plant.growthStage && plant.growthStage.trim() !== '' ? plant.growthStage : plant.computedGrowthStage %></td>
+                                            <td><%= new Date(plant.plantingDate).toLocaleDateString('en-GB', {day: '2-digit', month: '2-digit', year: 'numeric'}) %></td>
+                                            <td><%= plant.status %></td>            
                                             <td>
-                                                <form action="/update-growth-stage/<%= plant._id %>" method="POST">
-                                                    <label class="form-label" for="userGrowthStage">Is this stage accurate?</label>
-                                                    <div class="d-flex">
-                                                        <select class="form-control" name="userGrowthStage" id="userGrowthStage">
-                                                            <option value="sprout">Sprout</option>
-                                                            <option value="seedling">Seedling</option>
-                                                            <option value="vegetating">Vegetating</option>
-                                                            <option value="budding">Budding</option>
-                                                            <option value="flowering">Flowering</option>
-                                                            <option value="ripening">Ripening</option>
-                                                            <option value="harvesting">Harvesting</option>
-                                                        </select>
-                                                        <button type="submit" class="btn btn-primary btn-sm">Update</button>
-                                                    </div>
-                                                </form>
-                                            </td>
+                                                <button class="btn btn-primary view-plant" data-custom-id="<%= plant.customId %>">View</button>
+
+                                            </td>                             
                                         </tr>
                                     <% }) %>
                                 </tbody>
@@ -134,6 +119,77 @@
             </div>
         </div>    
     </section>
+
+    <!-- Modal -->
+<div class="modal fade" id="plantDetailsModal" tabindex="-1" aria-labelledby="plantDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="plantDetailsModalLabel">Plant Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <div class="mt-3">
+                <label><strong>Growth Progress:</strong></label>
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-seedling me-2" style="font-size: 1.5rem;" aria-hidden="true"></i> <!-- Left Icon -->
+                    <div class="progress flex-grow-1">
+                        <div id="growthProgressBar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                    </div>
+                    <i class="fas fa-leaf ms-2" style="font-size: 1.5rem;" aria-hidden="true"></i> <!-- Right Icon -->
+                </div>
+            </div>
+            
+          <p><strong>Plant name:</strong> <span id="plantName"></span></p>
+          <p><strong>Estimated Harvest Time:</strong> <span id="plantHarvestTime"></span></p>
+          <p><strong>Method of Planting:</strong> <span id="methodOfPlanting"></span></p>
+          <p><strong>Location:</strong> <span id="plantLocation"></span></p>
+          <p><strong>Growth Stage:</strong> <span id="plantGrowthStage"></span></p>
+          <p><strong>Status:</strong> <span id="plantStatus"></span></p>
+          <p><strong>Date Planted:</strong> <span id="datePlanted"></span></p>
+          <img id="plantImage" src="" alt="Plant Image" class="img-fluid" />
+
+          <div class="form-group d-flex">
+            <div>
+                <label for="harvestStatus" class="form-label">In case you want to Harvest</label>
+                <select name="harvestStatus" class="form-control" id="harvestStatus">
+                    <option value="">Select Quality</option>
+                    <option value="Premium">Premium</option>
+                    <option value="Good">Good</option>
+                    <option value="Acceptable">Acceptable</option>
+                    <option value="Low">Low</option>
+                </select>
+            </div>
+            <div class="d-flex align-items-end">
+                <button class="btn border" id="harvestButton">Harvest</button>
+            </div>        
+        </div>
+
+        <div class="form-group d-flex">
+            <div>
+                <label for="plantDied" class="form-label">In case the plant died</label>
+                <select name="plantDied" class="form-control" id="plantDied">
+                    <option value="">Select Reason</option>
+                    <option value="Poor Soil Quality">Poor Soil Quality</option>
+                    <option value="Inadequate Watering">Inadequate Watering</option>
+                    <option value="Pests and Diseases">Pests and Diseases</option>
+                    <option value="Improper Sunlight and Temperature">Improper Sunlight and Temperature</option>
+                    <option value="Negligence">Negligence</option>
+                </select>
+            </div>
+            <div class="d-flex align-items-end">
+                <button class="btn btn-danger" id="plantDiedButton">Plant Died</button>
+            </div>        
+        </div>
+          <div class="mt-4">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Back</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+  
 
 </div>
 <!-- /#page-content-wrapper -->
@@ -203,6 +259,117 @@
                 'transition': 'all 1s ease-in-out'
             });
         }
+    });
+});
+
+
+$(document).ready(function() {
+
+
+    let customPlantID = ''; // Replace this with the actual custom ID of the plant
+
+    $('#harvestButton').click(function() {
+     
+        const harvestQuality = $('#harvestStatus').val();
+        
+        if (harvestQuality) {
+            $.ajax({
+                url: `/plant/harvest/${customPlantID}`,
+                method: 'POST',
+                data: { harvestStatus: harvestQuality },
+                success: function(response) {
+                    if (response.success) {
+                        alert('Plant harvested successfully!');
+                        // Optionally, update the UI or close the modal
+                    } else {
+                        alert('Failed to update plant status.');
+                    }
+                },
+                error: function() {
+                    alert('Error processing the request.');
+                }
+            });
+        } else {
+            alert('Please select a harvest quality.');
+        }
+    });
+
+    // Handle Plant Died button click
+    $('#plantDiedButton').click(function() {
+        const reasonForDying = $('#plantDied').val();
+        
+        if (reasonForDying) {
+            $.ajax({
+                url: `/plant/died/${customPlantID}`,
+                method: 'POST',
+                data: { plantDied: reasonForDying },
+                success: function(response) {
+                    if (response.success) {
+                        alert('Plant status updated as died!');
+                        // Optionally, update the UI or close the modal
+                    } else {
+                        alert('Failed to update plant status.');
+                    }
+                },
+                error: function() {
+                    alert('Error processing the request.');
+                }
+            });
+        } else {
+            alert('Please select a reason for plant death.');
+        }
+    });
+
+    $('.view-plant').on('click', function() {
+        const customId = $(this).data('custom-id');
+
+        $.ajax({
+    url: `/plant/${customId}`,
+    method: 'GET',
+    success: function(response) {
+        if (response.success) {
+            const plant = response.plant;
+            // Fill the modal with plant data
+            customPlantID = customId;
+            $('#plantName').text(plant.name);
+            $('#plantHarvestTime').text(new Date(plant.estimatedHarvestTime).toLocaleDateString());
+            $('#methodOfPlanting').text(plant.methodOfPlanting);
+            $('#plantLocation').text(plant.location ? plant.location.name : 'N/A');
+            $('#plantGrowthStage').text(plant.growthStage);
+            $('#plantStatus').text(plant.status);
+            $('#plantImage').attr('src', plant.image);
+            $("#datePlanted").text(new Date(plant.plantingDate).toLocaleDateString('en-GB', { month: 'long', day: '2-digit', year: 'numeric'}));
+
+            // Calculate progress percentage
+            const plantingDate = new Date(plant.plantingDate);
+            const harvestDate = new Date(plant.estimatedHarvestTime);
+            const today = new Date();
+
+            // Calculate the total duration and elapsed duration
+            const totalDuration = harvestDate - plantingDate;
+            const elapsedDuration = today - plantingDate;
+
+            // Calculate the percentage
+            let progressPercentage = (elapsedDuration / totalDuration) * 100;
+            // Clamp percentage to be between 0 and 100
+            progressPercentage = Math.max(0, Math.min(progressPercentage, 100));
+
+            // Update the progress bar
+            $('#growthProgressBar').css('width', progressPercentage + '%');
+            $('#growthProgressBar').attr('aria-valuenow', progressPercentage);
+            $('#growthProgressBar').text(Math.round(progressPercentage) + '%');
+
+            // Show the modal
+            $('#plantDetailsModal').modal('show');
+        } else {
+            alert('Plant not found!');
+        }
+    },
+    error: function() {
+        alert('Error fetching plant details.');
+    }
+});
+
     });
 });
 

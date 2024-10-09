@@ -53,8 +53,6 @@ function sendNotificationEmail(toEmail, locationName) {
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
       console.error('Error sending email:', error);
-    } else {
-      console.log('Email sent:', info.response);
     }
   });
 }
@@ -114,7 +112,7 @@ async function handleSoilMoistureUpdate(soilMoistureData) {
 // Set up the Firebase listener
 ref.on('value', (snapshot) => {
   const soilMoistureData = snapshot.val();
-  console.log('Received soil moisture data:', soilMoistureData); // Log the data
+  // console.log('Received soil moisture data:', soilMoistureData); // Log the data
   handleSoilMoistureUpdate(soilMoistureData);
 });
 

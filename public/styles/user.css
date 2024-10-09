@@ -637,4 +637,9 @@ a{
         overflow-wrap: break-word; /* Ensures long words break and wrap properly */
         max-width: 100%; /* Ensures the text doesn’t exceed the container’s width */
     }
+    .input-custom{
+        background-color: rgba(255, 255, 255, 0);
+        border: 1px solid #B3B3B3;
+        border-radius: 100px;
+    }
 /*  */
