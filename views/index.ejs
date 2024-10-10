@@ -16,7 +16,7 @@
                         <p class="fs-80"><%= Math.floor(weather.main.temp)  %>°</p>
                     </div>
                     <div>
-                        <img class="weather-icon-lg" src="images/weather-icons/<%= weather.weather[0].main %>.svg" alt="">
+                        <img src="images/weather-icons/<%= weatherIcon %>.svg" alt="Weather Icon" style="width: 100%; min-width: 170px;">
                     </div>
                 </div>
 
@@ -29,7 +29,7 @@
                             <% forecast.forEach(day => { %>
                                 <div class="forecast-day d-flex justify-content-center flex-column align-items-center">
                                     <p><%= new Date(day.dt_txt).toLocaleDateString('en-US', { weekday: 'long' }) %></p>
-                                    <img src="https://openweathermap.org/img/wn/<%= day.weather[0].icon %>@2x.png" alt="Weather Icon">
+                                    <img style="width: 100px; height: 100px; background-size: cover;" src="images/weather-icons/<%= day.weather[0].icon %>.svg" alt="Weather Icon">
                                     <p><%= Math.floor(day.main.temp) %> °C</p>
                                 </div>
                             <% }) %>
@@ -43,9 +43,26 @@
                     <img src="/images/todo-icon.svg" alt="">
                     <p class="m-0 gray-text todo-text">To do list</p>
                 </div>
-                <div class="px-4">
-                    <!-- needs to do -->
+                <div class="px-4" style="height: 370px;overflow-y: scroll;">
+                    <% if (tasks && tasks.length > 0) { %>
+                        <ul class="list-group">
+                            <% tasks.forEach(task => { %>
+                                <li class="list-group-item d-flex flex-lg-row justify-content-between align-items-center flex-sm-column">
+                                    <div>
+                                        <strong><%= task.title %></strong><br>
+                                        <small><%= task.description %></small>
+                                    </div>
+                                    <span class="badge badge-pill text-black">
+                                        Due: <%= new Date(task.dueDate).toLocaleDateString('en-PH') %>
+                                    </span>
+                                </li>
+                            <% }) %>
+                        </ul>
+                    <% } else { %>
+                        <p class="text-muted">No tasks to complete.</p>
+                    <% } %>
                 </div>
+                
             </div>
         </div>    
     </section>
@@ -67,9 +84,8 @@
                                 </div>
                             <% }) %>
                         </div>
-                    <% } else { %>
-                        <p>Nice, all plants are hydrated.</p>
                     <% } %>
+                  
 
                     <div class="d-flex align-items-center mt-2">
                         <img src="/images/my-plants.svg" alt="">
@@ -184,7 +200,6 @@
           <div class="mt-4">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Back</button>
           </div>
-
         </div>
       </div>
     </div>
@@ -265,112 +280,157 @@
 
 $(document).ready(function() {
 
+let customPlantID = '';
 
-    let customPlantID = ''; // Replace this with the actual custom ID of the plant
+    // Initialize DataTable
+    const plantsTable = $('#plantsTable').DataTable({
+        "paging": true,   
+        "searching": true,   
+        "lengthChange": false,
+        "pageLength": 5
+    });
 
     $('#harvestButton').click(function() {
-     
-        const harvestQuality = $('#harvestStatus').val();
-        
-        if (harvestQuality) {
-            $.ajax({
-                url: `/plant/harvest/${customPlantID}`,
-                method: 'POST',
-                data: { harvestStatus: harvestQuality },
-                success: function(response) {
-                    if (response.success) {
-                        alert('Plant harvested successfully!');
-                        // Optionally, update the UI or close the modal
-                    } else {
-                        alert('Failed to update plant status.');
-                    }
-                },
-                error: function() {
-                    alert('Error processing the request.');
-                }
-            });
-        } else {
-            alert('Please select a harvest quality.');
-        }
-    });
-
-    // Handle Plant Died button click
-    $('#plantDiedButton').click(function() {
-        const reasonForDying = $('#plantDied').val();
-        
-        if (reasonForDying) {
-            $.ajax({
-                url: `/plant/died/${customPlantID}`,
-                method: 'POST',
-                data: { plantDied: reasonForDying },
-                success: function(response) {
-                    if (response.success) {
-                        alert('Plant status updated as died!');
-                        // Optionally, update the UI or close the modal
-                    } else {
-                        alert('Failed to update plant status.');
-                    }
-                },
-                error: function() {
-                    alert('Error processing the request.');
-                }
-            });
-        } else {
-            alert('Please select a reason for plant death.');
-        }
-    });
-
-    $('.view-plant').on('click', function() {
-        const customId = $(this).data('custom-id');
-
+    const harvestQuality = $('#harvestStatus').val();
+    
+    if (harvestQuality) {
         $.ajax({
-    url: `/plant/${customId}`,
-    method: 'GET',
-    success: function(response) {
-        if (response.success) {
-            const plant = response.plant;
-            // Fill the modal with plant data
-            customPlantID = customId;
-            $('#plantName').text(plant.name);
-            $('#plantHarvestTime').text(new Date(plant.estimatedHarvestTime).toLocaleDateString());
-            $('#methodOfPlanting').text(plant.methodOfPlanting);
-            $('#plantLocation').text(plant.location ? plant.location.name : 'N/A');
-            $('#plantGrowthStage').text(plant.growthStage);
-            $('#plantStatus').text(plant.status);
-            $('#plantImage').attr('src', plant.image);
-            $("#datePlanted").text(new Date(plant.plantingDate).toLocaleDateString('en-GB', { month: 'long', day: '2-digit', year: 'numeric'}));
-
-            // Calculate progress percentage
-            const plantingDate = new Date(plant.plantingDate);
-            const harvestDate = new Date(plant.estimatedHarvestTime);
-            const today = new Date();
-
-            // Calculate the total duration and elapsed duration
-            const totalDuration = harvestDate - plantingDate;
-            const elapsedDuration = today - plantingDate;
-
-            // Calculate the percentage
-            let progressPercentage = (elapsedDuration / totalDuration) * 100;
-            // Clamp percentage to be between 0 and 100
-            progressPercentage = Math.max(0, Math.min(progressPercentage, 100));
-
-            // Update the progress bar
-            $('#growthProgressBar').css('width', progressPercentage + '%');
-            $('#growthProgressBar').attr('aria-valuenow', progressPercentage);
-            $('#growthProgressBar').text(Math.round(progressPercentage) + '%');
-
-            // Show the modal
-            $('#plantDetailsModal').modal('show');
-        } else {
-            alert('Plant not found!');
-        }
-    },
-    error: function() {
-        alert('Error fetching plant details.');
+            url: `/plant/harvest/${customPlantID}`,
+            method: 'POST',
+            data: { harvestStatus: harvestQuality },
+            success: function(response) {
+                if (response.success) {
+                    alert('Plant harvested successfully!');
+                    updatePlantsTable(); // Update the table after successful harvest
+                } else {
+                    alert('Failed to update plant status.');
+                }
+            },
+            error: function() {
+                alert('Error processing the request.');
+            }
+        });
+    } else {
+        alert('Please select a harvest quality.');
     }
 });
 
+$('#plantDiedButton').click(function() {
+    const reasonForDying = $('#plantDied').val();
+    
+    if (reasonForDying) {
+        $.ajax({
+            url: `/plant/died/${customPlantID}`,
+            method: 'POST',
+            data: { plantDied: reasonForDying },
+            success: function(response) {
+                if (response.success) {
+                    alert('Plant status updated as died!');
+                    updatePlantsTable(); // Update the table after plant status is updated
+                } else {
+                    alert('Failed to update plant status.');
+                }
+            },
+            error: function() {
+                alert('Error processing the request.');
+            }
+        });
+    } else {
+        alert('Please select a reason for plant death.');
+    }
+});
+
+  // Use event delegation for the "View" button click event
+  $('#plantsTable').on('click', '.view-plant', function() {
+        const customId = $(this).data('custom-id');
+        fetchPlantDetails(customId);
     });
+
+    function fetchPlantDetails(customId) {
+        $.ajax({
+            url: `/plant/${customId}`,
+            method: 'GET',
+            success: function(response) {
+                if (response.success) {
+                    const plant = response.plant;
+                    // Fill the modal with plant data
+                    customPlantID = customId;
+                    $('#plantName').text(plant.name);
+                    $('#plantHarvestTime').text(new Date(plant.estimatedHarvestTime).toLocaleDateString());
+                    $('#methodOfPlanting').text(plant.methodOfPlanting);
+                    $('#plantLocation').text(plant.location ? plant.location.name : 'N/A');
+                    $('#plantGrowthStage').text(plant.growthStage);
+                    $('#plantStatus').text(plant.status);
+                    $('#plantImage').attr('src', plant.image);
+                    $("#datePlanted").text(new Date(plant.plantingDate).toLocaleDateString('en-GB', { month: 'long', day: '2-digit', year: 'numeric'}));
+
+                    // Calculate and update progress bar
+                    updateProgressBar(plant.plantingDate, plant.estimatedHarvestTime);
+
+                    // Show the modal
+                    $('#plantDetailsModal').modal('show');
+                } else {
+                    alert('Plant not found!');
+                }
+            },
+            error: function() {
+                alert('Error fetching plant details.');
+            }
+        });
+    }
+
+    function updateProgressBar(plantingDate, harvestDate) {
+        const plantingDateObj = new Date(plantingDate);
+        const harvestDateObj = new Date(harvestDate);
+        const today = new Date();
+
+        const totalDuration = harvestDateObj - plantingDateObj;
+        const elapsedDuration = today - plantingDateObj;
+
+        let progressPercentage = (elapsedDuration / totalDuration) * 100;
+        progressPercentage = Math.max(0, Math.min(progressPercentage, 100));
+
+        $('#growthProgressBar').css('width', progressPercentage + '%');
+        $('#growthProgressBar').attr('aria-valuenow', progressPercentage);
+        $('#growthProgressBar').text(Math.round(progressPercentage) + '%');
+    }
+
+    function updatePlantsTable() {
+    $.ajax({
+        url: '/plants', // The endpoint we created to fetch plant data
+        method: 'GET',
+        success: function(response) {
+            if (response.success) {
+                const plants = response.plants;
+                const tableBody = $('#plantsTable tbody');
+                tableBody.empty(); // Clear existing rows
+
+                plants.forEach(plant => {
+                    const row = `
+                        <tr>
+                            <td><img src="${plant.image}" alt="" width="70px"></td>
+                            <td>${plant.name}</td>
+                            <td>${new Date(plant.plantingDate).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
+                            <td>${plant.status}</td>
+                            <td>
+                                <button class="btn btn-primary view-plant" data-custom-id="${plant.customId}">View</button>
+                            </td>
+                        </tr>
+                    `;
+                    tableBody.append(row);
+                });
+            } else {
+                alert('Failed to fetch updated plant data.');
+            }
+        },
+        error: function() {
+            alert('Error updating the plant table.');
+        }
+    });
+}
+
+
+    
 });
 
 

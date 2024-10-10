@@ -8,7 +8,8 @@
         usedFor:{type: String, required: true},
         harvestTime: { type: Number, required: true },
         image: { type: String },
-        plantingMonth: { type: [String], required: true }
+        plantingMonth: { type: [String], required: true },
+        transplantSeedling: {type:String, required: true}
     });
 
     const PlantCollection = mongoose.model('PlantCollection', plantCollectionSchema);
