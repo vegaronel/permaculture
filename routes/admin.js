@@ -69,10 +69,9 @@ app.get("/admin/plants/edit/:id", async (req, res) => {
         res.status(500).send('Error fetching plant');
     }
 });app.post("/admin/plants/update/:id", upload.single('plantImage'), async (req, res) => {
-    const { name, plantingInstructions, harvestTime, plantingMonth, overview, benefits, usedFor } = req.body;
+    const { name, plantingInstructions, harvestTime, plantingMonth, overview, benefits, usedFor, transplantSeedling } = req.body;
     let imageUrl = req.body.existingImage; // Store existing image URL
 
-    // If a new image is uploaded, use the new Cloudinary URL
     if (req.file) {
         imageUrl = req.file.path || req.file.url || req.file.secure_url;
     }
@@ -90,6 +89,7 @@ app.get("/admin/plants/edit/:id", async (req, res) => {
             overview,
             benefits,
             usedFor,
+            transplantSeedling
         });
         res.redirect("/plant-collection");
     } catch (error) {
@@ -99,7 +99,7 @@ app.get("/admin/plants/edit/:id", async (req, res) => {
 });
 
 app.post('/add-plant', upload.single('plantImage'), async (req, res) => {
-    const { name, plantingInstructions, harvestTime, plantingMonth, overview, benefits, usedFor } = req.body;
+    const { name, plantingInstructions, harvestTime, plantingMonth, overview, benefits, usedFor,transplantSeedling } = req.body;
   
     // Ensure plantingMonth is an array
     const plantingMonthsArray = Array.isArray(plantingMonth) ? plantingMonth : [plantingMonth].filter(Boolean);
@@ -123,6 +123,7 @@ app.post('/add-plant', upload.single('plantImage'), async (req, res) => {
             overview,
             benefits,
             usedFor,
+            transplantSeedling
         });
   
         await newPlant.save();

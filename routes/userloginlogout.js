@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs");
 const isAuthenticated = require('../middleware/athenticateUser');
 const User = require("../models/user");
 const SoilData = require("../models/SoilData");
-
+const Task = require('../models/Todo');
 const Plant = require("../models/Plant"); 
 const axios = require('axios');
 const handleSoilMoistureUpdate = require('../index')
@@ -29,7 +29,6 @@ app.post('/complete-tutorial', isAuthenticated, async (req, res) => {
     res.status(500).send('Error completing the tutorial');
   }
 });
-
 app.get('/dashboard', isAuthenticated, async (req, res) => {
   try {
     const user = await User.findById(req.session.userId);
@@ -51,28 +50,35 @@ app.get('/dashboard', isAuthenticated, async (req, res) => {
     const limit = 10;
     const skip = (page - 1) * limit;
 
-    const query = {
+    const plantQuery = {
       userId: req.session.userId,
-      growthStage: { $ne: 'harvesting' } // Exclude harvesting plants
+      completed: { $nin: ['a'] } // Exclude harvested plants
     };
 
     if (filter) {
-      query.type = filter;
+      plantQuery.type = filter;
     }
 
-    
-    const [currentWeatherResponse, forecastResponse, plants, soilMoistureData] = await Promise.all([
+    // Fetch tasks where status is 'pending'
+    const tasksQuery = {
+      userId: req.session.userId,
+      completed: 'false'
+    };
+
+    const [currentWeatherResponse, forecastResponse, plants, soilMoistureData, tasks] = await Promise.all([
       axios.get(currentWeatherUrl),
       axios.get(forecastUrl),
-      Plant.find(query)
+      Plant.find(plantQuery)
         .populate('location')
         .skip(skip)
         .limit(limit)
         .sort({ plantingDate: -1 }),
-        SoilData.find({ userId: req.session.userId }).sort({ createdAt: -1 }).limit(10) // Fetch latest soil moisture data for the user
+      SoilData.find({ userId: req.session.userId }).sort({ createdAt: -1 }).limit(10), // Fetch latest soil moisture data for the user
+      Task.find(tasksQuery).sort({ dueDate: 1 }) // Fetch pending tasks for the user sorted by due date
     ]);
 
     const weatherData = currentWeatherResponse.data;
+    
     const forecastData = forecastResponse.data.list;
 
     const moistureLocations = soilMoistureData.map(data => ({
@@ -100,20 +106,21 @@ app.get('/dashboard', isAuthenticated, async (req, res) => {
       };
     });
 
-    const count = await Plant.countDocuments(query);
+    const count = await Plant.countDocuments(plantQuery);
     const totalPages = Math.ceil(count / limit);
 
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     const formattedDate = new Date().toLocaleDateString('en-PH', options);
     const [weekday, month, dayWithComma] = formattedDate.split(', ');
-
-    console.log(moistureLocations);
+    const weatherIcon = weatherData.weather[0].icon; // Get the icon code
 
     res.render('index', {
       moistureLocations, // Pass the moisture data to the view
       weather: weatherData,
+      weatherIcon,
       plants: updatedPlants,
       forecast: dailyForecasts,
+      tasks, // Pass the tasks to the view
       page,
       totalPages,
       filter,
@@ -128,6 +135,19 @@ app.get('/dashboard', isAuthenticated, async (req, res) => {
   }
 });
 
+
+app.get('/plants', isAuthenticated, async (req, res) => {
+  try {
+      const plants = await Plant.find({ userId: req.session.userId })
+          .populate('location')
+          .sort({ plantingDate: -1 });
+      
+      res.json({ success: true, plants });
+  } catch (error) {
+      console.error(error);
+      res.json({ success: false, message: 'Error fetching plants' });
+  }
+});
 
 
 app.post("/login", async (req, res) => {
@@ -168,6 +188,7 @@ app.post("/login", async (req, res) => {
 app.get("/tutorial", (req, res) => {
   res.render('tutorial');
 });
+
 
 app.get("/logout", (req, res) => {
   req.session.destroy((err) => {

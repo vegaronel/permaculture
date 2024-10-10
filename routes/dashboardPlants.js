@@ -6,6 +6,7 @@ const isAuthenticated = require('../middleware/athenticateUser')
 const Counter = require('../models/Counter');
 const Location = require('../models/Location');
 const SoilData = require('../models/SoilData');
+const Task = require('../models/Todo');
 const fs = require('fs');
 const path = require('path');
 
@@ -213,67 +214,92 @@ app.get('/add-new-plant', isAuthenticated, async (req, res) => {
     res.status(500).send("Error fetching plant collections");
   }
 });
+app.post('/add-new-plant', isAuthenticated, async (req, res) => {
+  const { plantCollectionId, plantingDate, userId, location, customLocation, methodOfPlanting } = req.body;
 
+  try {
+      // Fetch the selected plant collection
+      const plantCollection = await PlantCollection.findById(plantCollectionId);
 
-  app.post('/add-new-plant', isAuthenticated, async (req, res) => {
-    const { plantCollectionId, plantingDate, userId, location, customLocation,methodOfPlanting } = req.body;
+      if (!plantCollection) {
+          return res.status(400).send('Invalid plant selected.');
+      }
 
-    try {
-        // Fetch the selected plant collection
-        const plantCollection = await PlantCollection.findById(plantCollectionId);
+      // Check if the user added a custom location
+      let selectedLocation;
+      if (location === 'custom') {
+          const newLocation = new Location({
+              name: customLocation,
+              userId: userId,
+          });
+          await newLocation.save();
+          selectedLocation = newLocation._id;
+      } else {
+          selectedLocation = location;
+      }
 
-        if (!plantCollection) {
-            return res.status(400).send('Invalid plant selected.');
-        }
+      // Convert the plantingDate string to a Date object
+      const plantingDateObj = new Date(plantingDate);
 
-        // Check if the user added a custom location
-        let selectedLocation;
-        if (location === 'custom') {
-            // Create and save the custom location
-            const newLocation = new Location({
-                name: customLocation,
-                userId: userId, // Associate the location with the user
-            });
-            await newLocation.save();
-            selectedLocation = newLocation._id; // Use the ID of the new location
-        } else {
-            selectedLocation = location; // Use the existing location ID
-        }
+      // Calculate estimated harvest time
+      const harvestTimeInDays = plantCollection.harvestTime;
+      const estimatedHarvestTime = new Date(plantingDateObj);
+      estimatedHarvestTime.setDate(plantingDateObj.getDate() + harvestTimeInDays);
 
-        // Convert the plantingDate string to a Date object
-        const plantingDateObj = new Date(plantingDate);
+      // Calculate the computed growth stage based on planting date
+      const computedGrowthStage = calculateGrowthStage(plantingDateObj, estimatedHarvestTime);
 
-        // Calculate estimated harvest time
-        const harvestTimeInDays = plantCollection.harvestTime;
-        const estimatedHarvestTime = new Date(plantingDateObj);
-        estimatedHarvestTime.setDate(plantingDateObj.getDate() + harvestTimeInDays);
+      // Create a new plant instance
+      const newPlant = new Plant({
+          name: plantCollection.name,
+          customId: await getNextSequence('plant'),
+          plantingInstructions: plantCollection.plantingInstructions,
+          plantingDate: plantingDateObj,
+          estimatedHarvestTime,
+          userId,
+          plantCollectionId,
+          lastWatered: new Date(),
+          methodOfPlanting,
+          computedGrowthStage,
+          location: selectedLocation,
+          image: plantCollection.image,
+      });
 
-        // Calculate the computed growth stage based on planting date
-        const computedGrowthStage = calculateGrowthStage(plantingDateObj, estimatedHarvestTime); // Create this function
+      await newPlant.save();
 
-        // Create a new plant instance
-        const newPlant = new Plant({
-            name: plantCollection.name,
-            customId: await getNextSequence('plant'),
-            plantingInstructions: plantCollection.plantingInstructions,
-            plantingDate: plantingDateObj,
-            estimatedHarvestTime,
-            userId,
-            plantCollectionId,
-            lastWatered: new Date(),
-            methodOfPlanting: methodOfPlanting,
-            computedGrowthStage, // Set computed growth stage
-            location: selectedLocation, // Save the selected location ID
-            image: plantCollection.image // Save the image path from PlantCollection
-        });
+      // If the method of planting is transplanting and transplantSeedling has a value, add a task
+      if (methodOfPlanting === 'Transplanting Seedlings' && plantCollection.transplantSeedling) {
 
-        await newPlant.save();
-        res.redirect('/dashboard'); // Redirect after adding
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Internal Server Error');
-    }
-  });
+        const transplantDays = Number(plantCollection.transplantSeedling); // Get transplant days
+
+        // Calculate the transplant due date
+        const transplantDueDate = new Date(plantingDateObj);
+
+        transplantDueDate.setDate(transplantDueDate.getDate() + transplantDays); // Add transplantDays to the planting date
+  
+
+          // Create a new task for transplanting seedlings
+          const newTask = new Task({
+              userId: req.session.userId,
+              plantId: newPlant._id,
+              title: `Transplant ${newPlant.name}`,
+              description: `Transplant the seedlings of ${newPlant.name} after ${plantCollection.transplantSeedling} days.`,
+              dueDate: transplantDueDate,
+              status: 'pending',
+              taskType: 'transplanting',
+              priority: 'high',
+          });
+
+          await newTask.save();
+      }
+
+      res.redirect('/dashboard'); // Redirect after adding the plant and task
+  } catch (error) {
+      console.error(error);
+      res.status(500).send('Internal Server Error');
+  }
+});
+
 
 
 app.post('/update-growth-stage/:id', async (req, res) => {
