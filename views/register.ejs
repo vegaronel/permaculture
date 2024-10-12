@@ -1,146 +1,210 @@
 <%- include("partials/LoginPageHeader.ejs") %>
 
 <body>
-     <section id="registration-section">
-      
-          <div class="registration-container ">
-               <div class="text-center">
-                    <p class="h5 fw-bold mt-3">Sign Up</p>
-                    <p class="light-text mt-2">Welcome! Begin by creating your account.</p>
-               </div>
-               <form id="registrationForm" class="needs-validation d-grid gap-3" action="/register" method="post" enctype="multipart/form-data" novalidate>
-                    <div class="d-flex gap-3">
-                         <div class="form-group">
-                              <label for="firstName">First Name</label>
-                              <input type="text" class="form-control" name="firstname" placeholder="First Name" />
-                              <div class="invalid-feedback">Please provide a first name.</div>
-                         </div>
-                         <div class="form-group">
-                              <label for="lastName">Last Name</label>
-                              <input type="text" class="form-control" name="lastname" placeholder="Last Name" />
-                              <div class="invalid-feedback">Please provide a last name.</div>
-                         </div>
-                    </div>
+    <style>
+        @media (max-width: 1000px) {
+            .register-container {
+                display: none !important;
+            }
+        }
 
-                    <div class="d-flex gap-3 email-card">
-                         <div class="form-group">
-                              <label for="email">Email</label>
-                              <input type="email" class="form-control" name="email" id="email" placeholder="Email" />
-                              <div class="invalid-feedback m-0" id="emailFeedback">Please provide a valid email.</div>
-                              <div class="valid-feedback m-0" id="emailValid">Email is available!</div>
-                         </div>
-                         <div class="form-group m-0">
-                              <label for="form-label" form="verificationCode">Send OTP</label>
-                              <div class="d-flex">
-                                   <div style="width: 100%">
-                                        <input type="number" class="form-control" name="verificationCode" id="verificationCode" placeholder="6 Digits OTP" min="0" />
-                                   </div>
-                                   <div>
-                                        <button type="button" id="sendCodeBtn" class="btn otp-button">Send OTP</button>
-                                   </div>
-                              </div>
-                              <p class="invalid-feedback m-0" id="otpFeedback">Invalid or expired verification code.</p>
-                              <div class="invalid-feedback m-0" id="emailRequired">Please enter your email address before sending OTP.</div>
-                         </div>
-                    </div>
+        .gray-text {
+            color: #6B6B6B;
+        }
 
-                    <div class="form-group gap-3">
-                         <label for="password">Password</label>
-                         <input type="password" class="form-control" name="password" id="password" placeholder="Password" />
-                         <div class="invalid-feedback">Please provide a password.</div>
-                         <small class="form-text text-muted">Must be at least 8 characters long, contain letters, numbers, and special characters.</small>
-                    </div>
-                    <div class="form-group gap-3">
-                         <label for="confirmPassword">Confirm Password</label>
-                         <input type="password" class="form-control" name="confirmPassword" id="confirmPassword" placeholder="Confirm Password" />
-                         <div class="invalid-feedback" id="passwordMismatchFeedback">Passwords do not match.</div>
-                     </div>
-                     <div class="form-check">
-                         <input type="checkbox" class="form-check-input" id="agreeTerms" />
-                         <label class="form-check-label" for="agreeTerms">
-                             <p class="terms">By creating an account you agree to our <span id="showTerms" style="cursor: pointer; color: blue;">Terms & Conditions.</span>
-                             </p>
-                         </label>
-                         <div class="invalid-feedback">You must agree to the terms and conditions.</div>
-                     </div>
+        .reg-container {
+            border-top-right-radius: 80px;
+            border-bottom-right-radius: 80px;
+        }
+    </style>
 
-                    <div class="text-card" id="termBox">
-                         <div class="row">
-                              <div class="col-12">
-                                   <h2 class="mt-3">Terms and Conditions</h2>
-                              </div>
-                              <div class="col-12">
-                                   <p>Welcome to [Your Website Name]! These terms and conditions outline the rules and regulations for the use of [Your Website URL] (hereafter referred to as "the Website").</p>
-                                   <p>By accessing this Website, we assume you accept these terms and conditions in full. Do not continue to use [Your Website Name] if you do not accept all of the terms and conditions stated on this page.</p>
-                                   <p>
-                                        The following terminology applies to these Terms and Conditions, Privacy Statement and Disclaimer Notice and any or all Agreements: "Client", "You" and "Your" refers to you, the person accessing this website and accepting the Company’s terms and conditions.
-                                        "The Company", "Ourselves", "We", "Our" and "Us", refers to our Company. "Party", "Parties", or "Us", refers to both the Client and ourselves, or either the Client or ourselves. All terms refer to the offer, acceptance and consideration of payment necessary to
-                                        undertake the process of our assistance to the Client in the most appropriate manner, whether by formal meetings of a fixed duration, or any other means, for the express purpose of meeting the Client’s needs in respect of provision of the Company’s stated
-                                        services/products, in accordance with and subject to, prevailing law of. Any use of the above terminology or other words in the singular, plural, capitalisation and/or he/she or they, are taken as interchangeable and therefore as referring to same.
-                                   </p>
-                                   <p>Cookies</p>
-                                   <p>We employ the use of cookies. By using [Your Website Name], you consent to the use of cookies in accordance with [Your Company Name]’s privacy policy.</p>
-                                   <p>Most of the modern-day interactive web sites use cookies to enable us to retrieve user details for each visit. Cookies are used in some areas of our site to enable the functionality of this area and ease of use for those people visiting.</p>
-                                   <p>Some of our affiliate/advertising partners may also use cookies.</p>
-                                   <b>License</b>
-                              </div>
-                         </div>
+    <section id="registration-section">
+        <div class="container-fluid">
+            <div class="row d-flex justify-content-center" style="min-height: 100vh;">
+                <div class="col-6 p-0 m-0 d-flex flex-column justify-content-around register-container">
+                    <div class="px-4">
+                        <img class="mt-4" src="/images/project-seed-icon.svg" alt="">
+                        <p class="h1 nexa-black text-white mt-3">Earth Care,<br> People Care,<br> and Fair Share.</p>
+                    </div>
+                    <div style="max-width: 800px; max-height: 500px;">
+                        <img src="/images/register-icon.svg" alt="" style="width: 100%; background-size: contain;">
+                    </div>
+                </div>
+                <div class="col-lg-6 col-sm-12 p-5 reg-container d-flex justify-content-center align-items-center"
+                    style="background-color:#E2F0DF; border-top-left-radius: 80px; border-bottom-left-radius: 80px; ">
+                    <div class="d-flex justify-content-center align-items-center flex-column" style="max-width:500px">
+                        <div class="align-self-start">
+                            <p class="nexa-black h2 gray-text">Create Account</p>
+                            <p class="gray-text" style="max-width: 400px;">Logging in is the process of verifying your identity to access a website or app.</p>
+                        </div>
 
-                         <div class="d-flex justify-content-evenly">
-                              <div class="">
-                                   <button type="button" class="btn btn-danger" id="decline">Decline</button>
-                              </div>
-                              <div class="">
-                                   <button type="button" class="btn btn-primary" id="accept1">Accept</button>
-                              </div>
-                         </div>
+                        <form id="registrationForm" class="needs-validation d-grid gap-3" action="/register" method="post"
+                            enctype="multipart/form-data" novalidate>
+                            <div class="row">
+                                <div class="form-group col-6">
+                                    <label for="firstName">First Name</label>
+                                    <input type="text" class="form-control input-custom" name="firstname" placeholder="First Name" />
+                                    <div class="invalid-feedback">Please provide a first name.</div>
+                                </div>
+                                <div class="form-group col-6">
+                                    <label for="lastName">Last Name</label>
+                                    <input type="text" class="form-control input-custom" name="lastname" placeholder="Last Name" />
+                                    <div class="invalid-feedback">Please provide a last name.</div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group col-lg-6">
+                                    <label for="email">Email</label>
+                                    <input type="email" class="form-control input-custom" name="email" id="email" placeholder="Email" />
+                                    <div class="invalid-feedback m-0" id="emailFeedback">Please provide a valid email.</div>
+                                    <div class="valid-feedback m-0" id="emailValid">Email is available!</div>
+                                </div>
+                                <div class="form-group m-0 col-lg-6 col-md-12">
+                                    <label for="form-label" form="verificationCode">Send OTP</label>
+                                    <div class="d-flex gap-2">
+                                        <div style="width: 100%">
+                                            <input type="number" class="form-control input-custom" name="verificationCode" id="verificationCode" placeholder="6 Digits OTP" min="0" />
+                                        </div>
+                                        <div>
+                                            <button type="button" id="sendCodeBtn" class="btn otp-button">Send OTP</button>
+                                        </div>
+                                    </div>
+                                    <p class="invalid-feedback m-0" id="otpFeedback">Invalid or expired verification code.</p>
+                                    <div class="invalid-feedback m-0" id="emailRequired">Please enter your email address before sending OTP.</div>
+                                </div>
+                            </div>
+
+                            <div class="form-group gap-3">
+                                <label for="password">Password</label>
+                                <input type="password" class="form-control input-custom" name="password" id="password" placeholder="Password" />
+                                <div class="invalid-feedback">Please provide a password.</div>
+                                <small class="form-text text-muted">Must be at least 8 characters long, contain letters, numbers, and special characters.</small>
+                            </div>
+                            <div class="form-group gap-3">
+                                <label for="confirmPassword">Confirm Password</label>
+                                <input type="password" class="form-control input-custom" name="confirmPassword" id="confirmPassword" placeholder="Confirm Password" />
+                                <div class="invalid-feedback" id="passwordMismatchFeedback">Passwords do not match.</div>
+                            </div>
+                            <div class="form-check">
+                              <input type="checkbox" class="form-check-input input-custom" id="agreeTerms" />
+                              <label class="form-check-label" for="agreeTerms">
+                                  <p class="terms">
+                                      By creating an account you agree to our
+                                      <span id="showTerms" style="cursor: pointer; color: blue;">Terms & Conditions.</span>
+                                  </p>
+                              </label>
+                              <div class="invalid-feedback">You must agree to the terms and conditions.</div>
+                          </div>
+
+                            <div class="row">
+                                <div class="form-group">
+                                    <button type="submit" id="registerBtn" class="btn my-button mt-3" style="width: 100%">Create Account</button>
+                                </div>
+                                <div class="mt-3">
+                                    <p class="text-center lighter-text">Already have an account? <a href="/login">Sign in</a></p>
+                                </div>
+                            </div>
+                        </form>
                     </div>
-                    <div class="row">
-                         <div class="form-group">
-                              <button type="submit" id="registerBtn" class="btn my-button mt-3" style="width: 100%">Create Account</button>
-                         </div>
-                         <div class="mt-3">
-                              <p class="text-center lighter-text">Already have an account? <a href="/login">Sign in</a></p>
-                         </div>
-                    </div>
-               </form>
-          </div>
-     </section>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+     <div class="modal-dialog modal-dialog-centered modal-lg">
+         <div class="modal-content">
+             <div class="modal-header">
+                 <h5 class="modal-title" id="termsModalLabel">Terms and Conditions</h5>
+                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+             </div>
+             <div class="modal-body">
+                    <p>
+                         Terms and Conditions
+Welcome to [Permaculture Web App Name]!
+
+These terms and conditions outline the rules and regulations for the use of [Permaculture Web App Name]’s website and services.
+
+By accessing this website, we assume you accept these terms and conditions in full. Do not continue to use [Permaculture Web App Name] if you do not accept all of the terms and conditions stated on this page.
+
+1. Usage of the Platform
+You must be at least [Minimum Age, e.g., 18] years old to use this platform.
+You agree to use the platform solely for lawful purposes and in a manner that does not infringe upon the rights of others, including intellectual property rights.
+2. Registration and User Accounts
+To access certain features of our app, you may be required to register an account. You agree to provide accurate and complete information during the registration process.
+You are responsible for maintaining the confidentiality of your login credentials and for any activities or actions under your account.
+3. Permaculture Information and Guidance
+[Permaculture Web App Name] offers planting guidance, crop care instructions, and permaculture tips to help users grow crops. While we strive to provide accurate and up-to-date information, we do not guarantee that the information is free of errors or that it will be suitable for your specific needs or conditions.
+Users are advised to consult with a professional or conduct additional research when implementing any information provided by the platform.
+4. User-Generated Content
+Users may upload content such as images, comments, and tips. By uploading content, you grant [Permaculture Web App Name] a non-exclusive, royalty-free, worldwide license to use, display, and distribute the content for the purposes of the platform.
+You are solely responsible for the content you upload, and you agree not to upload any content that is illegal, offensive, or infringes on the rights of others.
+5. Privacy Policy
+We are committed to protecting your privacy. Please refer to our [Privacy Policy] for information about how we collect, use, and protect your data.
+6. Limitation of Liability
+[Permaculture Web App Name] and its developers will not be held liable for any damages, including but not limited to loss of crops, loss of profits, or any other indirect, consequential, or incidental damages arising from the use or inability to use the platform.
+The platform is provided on an “as-is” basis. We do not guarantee that the platform will be error-free, secure, or available at all times.
+7. Modifications to the Service
+We reserve the right to modify, suspend, or discontinue the platform or any part of it without notice. We are not liable to you or any third party for any modification, suspension, or discontinuance of the service.
+8. Changes to Terms and Conditions
+We may update these terms from time to time. Continued use of the platform after any changes will constitute acceptance of such changes. Users are encouraged to review the terms periodically.
+9. Governing Law
+These terms and conditions are governed by and construed in accordance with the laws of [Country/State]. Any disputes arising from these terms shall be subject to the exclusive jurisdiction of the courts of [Country/State].
+10. Contact Information
+If you have any questions about these terms, please contact us at [Contact Email].
+                    </p>
+             </div>
+             <div class="modal-footer">
+                 <button type="button" class="btn btn-danger" id="declineTerms">Decline</button>
+                 <button type="button" class="btn btn-primary" id="acceptTerms">Accept</button>
+             </div>
+         </div>
+     </div>
+ </div>
+
+ 
 </body>
 
 <%- include("partials/LoginFooter.ejs") %>
 
+
 <script>
-       $(document).ready(function(){
-    $("#termBox").hide();
-  
-    $("#agreeTerms").change(function(){
-   
-   if(this.checked){
-    document.getElementById('registerBtn').disabled = false;
-     $("#termBox").show();
-   }else{
-    document.getElementById('registerBtn').disabled = true;
-     $("#termBox").hide();
-   }
-  })
-  
-  })
-  
-  
-  $("#decline").click(function(event){
-    
-    event.preventDefault();
-    $("#termBox").hide();
-    document.getElementById('registerBtn').disabled = true;
-    document.getElementById('agreeTerms').checked = false;
-  
-   
-  })
-  $("#accept1").click(function(event){
-    $("#termBox").hide();
-    document.getElementById('registerBtn').disabled = false;
-    event.preventDefault();
-  })
-  
+
+$(document).ready(function() {
+        const agreeTermsCheckbox = $("#agreeTerms");
+        const registerBtn = $("#registerBtn");
+        const termsModal = new bootstrap.Modal(document.getElementById("termsModal"));
+
+        // Initially disable the register button
+        registerBtn.prop('disabled', true);
+
+        // Show modal when checkbox is checked
+        agreeTermsCheckbox.change(function() {
+            if (this.checked) {
+                termsModal.show();
+            } else {
+                registerBtn.prop('disabled', true);
+            }
+        });
+
+        // Handle "Show Terms" click
+        $("#showTerms").click(function() {
+            termsModal.show();
+        });
+
+        // Handle "Decline" button in modal
+        $("#declineTerms").click(function() {
+            agreeTermsCheckbox.prop('checked', false);
+            registerBtn.prop('disabled', true);
+            termsModal.hide();
+        });
+
+        // Handle "Accept" button in modal
+        $("#acceptTerms").click(function() {
+            agreeTermsCheckbox.prop('checked', true);
+            registerBtn.prop('disabled', false);
+            termsModal.hide();
+        });
+    });
 </script>

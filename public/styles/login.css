@@ -22,11 +22,23 @@
      font-style: normal;
      font-display: swap;
 }
+@font-face {
+     font-family: "Nexa-Black";
+     src: url("../fonts/Nexa-Black.ttf") format("truetype"), url("../fonts/my-font.woff") format("woff");
+     font-weight: normal;
+     font-style: normal;
+     font-display: swap;
+ }
+ .nexa-black{
+     font-family: "Nexa-Black";
+ }
 html {
      scroll-behavior: smooth;
      overflow-y: scroll;
 }
-
+body{
+     background-image: linear-gradient(to right, #59A645 50%, #FFFFFF 105%);
+}
 a {
      text-decoration: none;
 }
@@ -36,7 +48,11 @@ a {
      padding: 0;
      font-family: "Poppins", sans-serif;
 }
-
+.input-custom{
+     background-color: rgba(255, 255, 255, 0);
+     border: 1px solid #B3B3B3;
+     border-radius: 100px;
+ }
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
      -webkit-appearance: none;
@@ -59,7 +75,6 @@ input[type="number"] {
 
 .login-container {
      padding: 50px;
-     background-color: white;
      border-radius: 15px;
      max-width: 455px;
      width: 100%;
@@ -67,7 +82,7 @@ input[type="number"] {
 }
 @media screen and (max-width: 700px) {
      * {
-          font-size: 20px;
+          font-size: 15px;
      }
      .email-card {
           flex-direction: column;
@@ -142,29 +157,4 @@ input[type="number"] {
 }
 .light-text {
      color: var(--light-placeholder);
-}
-#registrationForm .form-group {
-     width: 100%;
-}
-.profilePhoto {
-     background-repeat: no-repeat;
-     object-fit: cover;
-     width: 100px;
-     height: 100px;
-     border-radius: 50%;
-}
-.text-card {
-     background-color: #ffffff;
-     height: auto;
-     padding: 20px 15px 20px;
-     height: 100%;
-     max-height: 500px;
-     position: absolute;
-     top: 50%;
-     left: 50%;
-     transform: translate(-50%, -50%);
-     border-radius: 20px;
-     box-shadow: black 2px 1px 5px;
-     overflow-y: scroll;
-     box-sizing: content-box;
 }
