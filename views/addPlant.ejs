@@ -78,7 +78,6 @@
                         <button type="button" class="btn back-button" data-bs-dismiss="modal">Back</button>
                         <button type="button" class="btn green-button" id="showAddPlantModal">Add Plant</button>
                     </div>
-                    
                 </div>
                 <div class="col-lg-6 col-md-12 d-flex justify-content-center align-items-center">
                     <img id="plantImage" src="" alt="Plant Image" style="width: 100%; max-width: 400px; max-height: 400px; background-size: cover;" />
@@ -97,61 +96,65 @@
                     <img id="plantImageForm" src="" alt="Plant Image" style="width: 100%; max-width: 300px; max-height: 300px; background-size: cover;" />
                 </div>
 
-                <form id="addPlantForm" class="p-5">
-                        <input type="hidden" name="userId" value="<%= userId %>"> <!-- Use passed userId here -->                     
-                        <div class="form-group">
-                            <label for="plantCollectionId">Select Plant</label>
-                            <select class="form-control input-custom" name="plantCollectionId" id="plantCollectionId" required>
-                                <option value="">Select a Plant</option>
-                                <% plantCollections.forEach(function(plant) { %>
-                                    <option id="plantNameInput" value="<%= plant._id %>" data-harvest-time="<%= plant.harvestTime %>">
-                                        <%= plant.name %>
-                                    </option>
-                                <% }); %>
-                            </select>
-                            <input type="text" name="plantingInstructions" hidden>
-                            <input type="text" name="harvestTime" hidden>
-                        </div>
+                <form id="addPlantForm" class="p-5 ajax-form" >
+                    <input type="hidden" name="userId" value="<%= userId %>"> <!-- Use passed userId here -->                     
+                    <div class="form-group">
+                        <label for="plantCollectionId">Select Plant</label>
+                        <select class="form-control input-custom" name="plantCollectionId" id="plantCollectionId" required>
+                            <option value="">Select a Plant</option>
+                            <% plantCollections.forEach(function(plant) { %>
+                                <option id="plantNameInput" value="<%= plant._id %>" data-harvest-time="<%= plant.harvestTime %>">
+                                    <%= plant.name %>
+                                </option>
+                            <% }); %>
+                        </select>
+                        <input type="text" name="plantingInstructions" hidden>
+                        <input type="text" name="harvestTime" hidden>
+                    </div>
+            
+                    <div class="form-group">
+                        <label for="plantingDate">Planting Date:</label>
+                        <input type="date" name="plantingDate" class="form-control input-custom" required>
+                    </div>
+            
+                    <div class="form-group">
+                        <label for="location">Select Location</label>
+                        <select class="form-control input-custom" name="location" id="location" required>
+                            <option value="">Select Location</option>
+                            <% locations.forEach(function(loc) { %>
+                                <option value="<%= loc._id %>"><%= loc.name %></option>
+                            <% }); %>
+                            <option value="custom">Add Custom Location</option>
+                        </select>
+                        <input type="text" id="customLocation" name="customLocation" class="form-control" placeholder="Enter custom location" style="display: none;">
+                        <button type="button" class="btn btn-warning" id="submitCustomLocation" style="display: none;">Submit Custom Location</button>
+                    </div>
+            
+                    <div class="form-group">
+                    <label for="methodOfPlanting">Method of Planting</label>
+                    <select class="form-control input-custom" name="methodOfPlanting" id="" required>
+                        <option value="" selected >Select Method of Planting</option>
+                        <option value="Direct Sowing">Direct Sowing</option>
+                        <option value="Transplanting Seedlings">Transplanting Seedlings</option>
+                    </select>
+                    </div>
 
-                        
-                
-                        <div class="form-group">
-                            <label for="plantingDate">Planting Date:</label>
-                            <input type="date" name="plantingDate" class="form-control input-custom" required>
-                        </div>
-                
-                        <div class="form-group">
-                            <label for="location">Select Location</label>
-                            <select class="form-control input-custom" name="location" id="location" required>
-                                <option value="">Select Location</option>
-                                <% locations.forEach(function(loc) { %>
-                                    <option value="<%= loc._id %>"><%= loc.name %></option>
-                                <% }); %>
-                                <option value="custom">Add Custom Location</option>
-                            </select>
-                            <input type="text" id="customLocation" name="customLocation" class="form-control" placeholder="Enter custom location" style="display: none;">
-                            <button type="button" class="btn btn-warning" id="submitCustomLocation" style="display: none;">Submit Custom Location</button>
-                        </div>
-                
-                          <div class="form-group">
-                            <label for="methodOfPlanting">Method of Planting</label>
-                            <select class="form-control input-custom" name="methodOfPlanting" id="" required>
-                                <option value="" selected >Select Method of Planting</option>
-                                <option value="Direct Sowing">Direct Sowing</option>
-                                <option value="Transplanting Seedlings">Transplanting Seedlings</option>
-                            </select>
-                          </div>
-
-                          <div class="mt-4">
-                            <button type="button" class="btn back-button" data-bs-dismiss="modal">Back</button>
-                            <button type="submit" class="btn green-button">Add Plant</button>
-                          </div>
-                        
+                    <div class="mt-4">
+                        <button type="button" class="btn back-button" data-bs-dismiss="modal">Back</button>
+                        <button type="submit" class="btn green-button submit-button">Add Plant</button>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
+<!-- Notification div for success message -->
+<div id="successNotification" class="alert alert-success d-none position-fixed" style="top: 20px; right: 20px; z-index: 1051; display: flex; align-items: center; border-radius: 40px;">
+    <i class="fas fa-check-circle" style="font-size: 24px; margin-right: 10px;"></i>
+    <span>Plant has been added successfully!</span>
+</div>
+
+
 </div>
 </div>
 
@@ -204,7 +207,7 @@ $(document).ready(function() {
     });
 
     $('.back-button').on('click', function() {
-            clearForm(); // Clear the form when the "Back" button is clicked
+            clearForm();
         });
 
     $('#location').change(function() {
@@ -215,31 +218,52 @@ $(document).ready(function() {
         }
     });
 
+
+  
+
     $('#addPlantModal').on('hidden.bs.modal', function() {
             clearForm();
         });
+        $('#addPlantForm').on('submit', function(e) {
+    e.preventDefault(); // Prevent default form submission
 
-    $('#addPlantForm').on('submit', function(e) {
-            e.preventDefault(); // Prevent default form submission
-            
-            $.ajax({
-                type: 'POST',
-                url: '/add-new-plant', // Adjust this URL if necessary
-                data: $(this).serialize(), // Serialize form data
-                success: function(response) {
-                    // Handle success (you can update the UI or show a success message)
-                    alert('Plant added successfully!');
-                    clearForm(); // Clear the form on success
-                    // Optionally, you can close the modal and reset the form
-                    $('#addPlantModal').modal('hide');
-                    $('#addPlantForm')[0].reset();
-                },
-                error: function(xhr, status, error) {
-                    // Handle error (you can display an error message)
-                    alert('Error: ' + xhr.responseText);
-                }
-            });
-        });
+    // Disable the submit button to prevent multiple submissions and change the text
+    const submitButton = $('#addPlantForm button[type="submit"]');
+    submitButton.prop('disabled', true).text('Processing...');
+
+    $.ajax({
+        type: 'POST',
+        url: '/add-new-plant', // Adjust this URL if necessary
+        data: $(this).serialize(), // Serialize form data
+        success: function(response) {
+            // Show the success notification
+            const notification = $('#successNotification');
+            notification.removeClass('d-none').fadeIn(300);
+
+            // Hide the notification after 3 seconds
+            setTimeout(function() {
+                notification.fadeOut(300, function() {
+                    notification.addClass('d-none');
+                });
+            }, 3000);
+
+            // Clear the form and close the modal
+            $('#addPlantForm')[0].reset();
+            $('#addPlantModal').modal('hide');
+
+            // Reset the submit button to its original state
+            submitButton.prop('disabled', false).text('Add Plant');
+        },
+        error: function(xhr, status, error) {
+            // Log the error or display an error message
+            console.error('Error: ' + xhr.responseText);
+
+            // Reset the submit button to its original state in case of an error
+            submitButton.prop('disabled', false).text('Add Plant');
+        }
+    });
+});
+
 
         // Show custom location input when 'Add Custom Location' is selected
         $('#location').change(function() {

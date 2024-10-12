@@ -3,7 +3,7 @@
 
 
 
-  <div class="container-fluid d-flex row hidden-scroll">
+  <div class="container-fluid hidden-scroll">
     <div class="upload-container col-lg-8 col-md-12 hidden-scroll">
 
       <% if (error) { %>
@@ -97,32 +97,33 @@
 
     </div>
 
-<!-- CHATBOT -->
-    <div class="chat-bot-container col-md-12 col-lg-4" style="min-width: 400px;">
-
-          <div class="chat-container" id="chat-container">
-            <div class="chat-messages d-flex flex-column" id="chat-messages">
-              <div id="predefined-options" class="d-flex flex-wrap gap-2">
-                <button class="option-button" data-option="Can you suggest a care tips for this plant <%= plantName %>">Care tips</button>
-                <button class="option-button" data-option="What are common diseases for this plant <%= plantName %>?">Common Plant Diseases</button>
-                <button class="option-button" data-option="How much water does this plant <%= plantName %> need?">Watering Requirements</button>
-              </div>
-            </div>
-            <div class="chat-input d-flex align-items-center gap-2">
-              <input class="m-0" type="text" id="chat-input" placeholder="Type a message...">
-              <button id="send-button" class="btn">Send</button>
-            </div>
-          </div>
-
-    </div>
   </div>
 
+  <style>
 
-
-
-
-      
-
+    
+</style>
+<div id="chatbot" class="chatbot">
+  <div class="chat-header">
+      <span class="chat-title">Chatbot</span>
+      <div class="chat-controls">
+          <button id="minimize-button">-</button>
+          <button id="close-button">×</button>
+      </div>
+  </div>
+  <div class="chat-messages" id="chat-messages">
+      <div id="predefined-options">
+          <button class="option-button" data-option="Can you suggest care tips for this plant <%= plantName %>">Care tips</button>
+          <button class="option-button" data-option="What are common diseases for this plant <%= plantName %>?">Common Plant Diseases</button>
+          <button class="option-button" data-option="How much water does this plant <%= plantName %> need?">Watering Requirements</button>
+      </div>
+  </div>
+  <div class="chat-input">
+      <input type="text" id="chat-input" placeholder="Type a message...">
+      <button id="send-button">Send</button>
+  </div>
+</div>
+<button id="open-chatbot-button">Chat</button>
     </main>
 </div>
 
@@ -130,7 +131,26 @@
 <%- include("partials/UserFooter.ejs") %>
 
   
-      
+      <script>
+        $(document).ready(function () {
+    const $chatBotContainer = $('#chat-bot-container');
+    const $openChatbotButton = $('#open-chatbot-button');
+    const $closeButton = $('#close-button');
+
+    // Open chatbot when the button is clicked
+    $openChatbotButton.on('click', function () {
+        $chatBotContainer.show();
+        $openChatbotButton.hide();
+    });
+
+    // Close chatbot when the close button is clicked
+    $closeButton.on('click', function () {
+        $chatBotContainer.hide();
+        $openChatbotButton.show();
+    });
+});
+
+      </script>
 
 <script>
   $(document).ready(function () {
@@ -230,96 +250,94 @@
   const $messagesContainer = $('#chat-messages');
 const $predefinedOptions = $('#predefined-options');
 
-    // Handle predefined option clicks
-    $predefinedOptions.on('click', '.option-button', async function () {
-        const $button = $(this);
-        const option = $button.data('option');
-        const message = $button.text();
+$(document).ready(function() {
+            const $chatbot = $('#chatbot');
+            const $openChatbotButton = $('#open-chatbot-button');
+            const $minimizeButton = $('#minimize-button');
+            const $closeButton = $('#close-button');
+            const $messagesContainer = $('#chat-messages');
+            const $predefinedOptions = $('#predefined-options');
+            const $chatInput = $('#chat-input');
+            const $sendButton = $('#send-button');
 
-        // Display user's message
-        const userMessage = $('<div>').addClass('message sent').html(`<p class="fsize-13">${message}</p><span class="timestamp">${new Date().toLocaleTimeString()}</span>`);
-        $messagesContainer.append(userMessage);
-        $predefinedOptions.hide();
-
-        // Send the selected option to the server
-        try {
-            const response = await fetch('/chat', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ content: option })
+            $minimizeButton.on('click', function() {
+                $chatbot.toggleClass('minimized');
+                $(this).text($chatbot.hasClass('minimized') ? '+' : '-');
             });
 
-            const data = await response.json();
+            $closeButton.on('click', function() {
+                $chatbot.hide();
+                $openChatbotButton.show();
+            });
 
-            // Display bot's message
-            const botMessage = $('<div>')
-              .addClass('message received p-0 mt-2')
-              .html(`<p class="fsize-13 received-response m-0">${data.response.replace(/\n/g, '<br>')}</p><span class="timestamp">${new Date().toLocaleTimeString()}</span>`);
-            $messagesContainer.append(botMessage);
-        } catch (error) {
-            console.error('Error:', error);
-        }
-    });
+            $openChatbotButton.on('click', function() {
+                $chatbot.show();
+                $chatbot.removeClass('minimized');
+                $minimizeButton.text('-');
+                $(this).hide();
+            });
 
-    const updateOptionsVisibility = () => {
-        if ($messagesContainer.children().length === 0) {
-            $predefinedOptions.show();
-        } else {
-            $predefinedOptions.hide();
-        }
-    };
+            function updateOptionsVisibility() {
+                if ($messagesContainer.children().length === 1) {
+                    $predefinedOptions.show();
+                } else {
+                    $predefinedOptions.hide();
+                }
+            }
 
-    updateOptionsVisibility();
+            $predefinedOptions.on('click', '.option-button', async function() {
+                const option = $(this).data('option');
+                const message = $(this).text();
+                await sendMessage(message, option);
+            });
 
- // Send button handler
-$('#send-button').on('click', async function () {
-    const $input = $('#chat-input');
-    const message = $input.val().trim();
-    if (!message) return;
+            $sendButton.on('click', async function() {
+                const message = $chatInput.val().trim();
+                if (message) {
+                    await sendMessage(message, message);
+                }
+            });
 
-    // Display user's message
-    const userMessage = $('<div>').addClass('message sent').html(`<p class="fsize-13">${message}</p><span class="timestamp">${new Date().toLocaleTimeString()}</span>`);
-    $messagesContainer.append(userMessage);
-    $input.val('');
-    $messagesContainer.scrollTop($messagesContainer[0].scrollHeight);
-    $predefinedOptions.hide();
+            $chatInput.on('keypress', async function(e) {
+                if (e.which === 13) {
+                    const message = $(this).val().trim();
+                    if (message) {
+                        await sendMessage(message, message);
+                    }
+                }
+            });
 
-    // Send the message to the server
-    try {
-        const response = await fetch('/chat', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ content: message })
+            async function sendMessage(displayMessage, serverMessage) {
+                appendMessage(displayMessage, 'sent');
+                $chatInput.val('');
+                updateOptionsVisibility();
+
+                try {
+                    const response = await fetch('/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ content: serverMessage })
+                    });
+
+                    const data = await response.json();
+                    appendMessage(data.response, 'received');
+                } catch (error) {
+                    console.error('Error:', error);
+                    appendMessage('Sorry, there was an error processing your request.', 'received');
+                }
+            }
+
+            function appendMessage(content, type) {
+                const $message = $('<div>')
+                    .addClass(`message ${type}`)
+                    .html(`<p>${content.replace(/\n/g, '<br>')}</p>`)
+                    .appendTo($messagesContainer);
+
+                $messagesContainer.scrollTop($messagesContainer[0].scrollHeight);
+            }
+
+            updateOptionsVisibility();
         });
-
-        const data = await response.json();
-
-        // Display bot's message with line breaks
-        const botMessage = $('<div>')
-            .addClass('message received')
-            .html(`<p class="fsize-13">${data.response.replace(/\n/g, '<br>')}</p><span class="timestamp">${new Date().toLocaleTimeString()}</span>`);
-        $messagesContainer.append(botMessage);
-        $messagesContainer.scrollTop($messagesContainer[0].scrollHeight);
-
-        updateOptionsVisibility();
-    } catch (error) {
-        console.error('Error:', error);
-    }
-});
-
-    // Minimize button handler
-    $('#minimize-button').on('click', function () {
-        $('#chat-container').toggleClass('minimized');
-    });
-
-    // Close button handler
-    $('#close-button').on('click', function () {
-        $('#chat-container').hide();
-    });
 });
 
     </script>

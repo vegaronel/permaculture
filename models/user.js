@@ -14,6 +14,8 @@ const userSchema = new mongoose.Schema({
     },
     doneTutorial: { type: Boolean, default: false },
     fcmToken: String, // Add this field to store FCM token
+    resetToken: String,
+    resetTokenExpiry: Date
 });
 
 const User = mongoose.model('User', userSchema);

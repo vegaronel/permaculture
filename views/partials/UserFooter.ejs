@@ -25,7 +25,16 @@
    <script>
 $(document).ready(function() {
 
+    // Select all forms with the class 'ajax-form'
+    $('.ajax-form').on('submit', function(event) {
+        // Find the submit button within the current form
+        const submitButton = $(this).find('.submit-button');
 
+        // Disable the button and change the text to indicate processing
+        submitButton.prop('disabled', true).text('Processing...');
+
+        // Allow form submission to proceed
+    });
 
     // Get the current path
     var currentPath = window.location.pathname;
