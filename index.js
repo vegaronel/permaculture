@@ -20,6 +20,7 @@ const postRoutes = require("./routes/postRoutes");
 const admin = require('./config/firebase');
 const User = require('./models/user');
 const SoilData = require('./models/SoilData');
+const forgotPassword = require('./routes/requestForgotPassword');
 
 const http = require('http');
 const socketIo = require('socket.io');
@@ -161,6 +162,7 @@ app.use(registration);
 app.use(dashboardPlants);
 app.use(commentsRoutes);
 app.use(postRoutes);
+app.use(forgotPassword);
 
 app.get("/", (req, res) => {
   res.render("homepage.ejs");
