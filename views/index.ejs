@@ -1,8 +1,22 @@
 <%- include("partials/UserHeader.ejs") %>
 
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-messaging.js"></script>
+
 <!-- Page Content -->
 <div class="container-fluid hidden-scroll"> 
-
+    <style>
+        #token-display {
+            word-break: break-all;
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+        }
+    </style>
+      <div id="notification-status"></div>
+      <div id="token-display"></div>
+    
     <section class="weather-section">
         <div class="row nexa-black gap-4 d-flex justify-content-center m-2">
             <div class="col-lg-7 d-flex gap-3 flex-column">
@@ -310,6 +324,86 @@
 <!-- /#page-content-wrapper -->
 </div>
 <%- include("partials/UserFooter.ejs") %>
+
+
+<script>
+    // Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyCxmfWGdh_1oIuIZ-OFJ3hQI4jn5FiE_JM",
+        authDomain: "soil-moisture-monitoring-1d52c.firebaseapp.com",
+        databaseURL: "https://soil-moisture-monitoring-1d52c-default-rtdb.firebaseio.com",
+        projectId: "soil-moisture-monitoring-1d52c",
+        storageBucket: "soil-moisture-monitoring-1d52c.appspot.com",
+        messagingSenderId: "425533189140",
+        appId: "1:425533189140:web:09ad7931def112b1740b01",
+        measurementId: "G-86ZGP33GW0"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+
+    const messaging = firebase.messaging();
+
+    // Request permission and get FCM token
+    async function initializeFirebaseMessaging() {
+            try {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    console.log('Notification permission granted.');
+                    const token = await messaging.getToken();
+                    console.log('FCM Token:', token);
+                    document.getElementById('token-display').textContent = `FCM Token: ${token}`;
+                    await sendTokenToServer(token);
+                    document.getElementById('notification-status').textContent = 'Notifications enabled';
+                } else {
+                    console.log('Unable to get permission to notify.');
+                    document.getElementById('notification-status').textContent = 'Notifications disabled';
+                    document.getElementById('token-display').textContent = 'No token available - permission denied';
+                }
+            } catch (error) {
+                console.error('Error initializing Firebase messaging:', error);
+                document.getElementById('notification-status').textContent = 'Error initializing notifications';
+                document.getElementById('token-display').textContent = `Error: ${error.message}`;
+            }
+        }
+
+    // Function to send token to server
+    async function sendTokenToServer(token) {
+            try {
+                const response = await fetch('/api/save-fcm-token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ token })
+                });
+                if (!response.ok) {
+                    throw new Error('Failed to save token');
+                }
+                console.log('Token successfully sent to server');
+                document.getElementById('notification-status').textContent += ' - Token sent to server';
+            } catch (error) {
+                console.error('Error sending token to server:', error);
+                document.getElementById('notification-status').textContent += ' - Failed to send token to server';
+            }
+        }
+
+
+        // Handle incoming messages
+        messaging.onMessage((payload) => {
+            console.log('Message received. ', payload);
+            // Display the notification
+            const notificationTitle = payload.notification.title;
+            const notificationOptions = {
+                body: payload.notification.body,
+                icon: '/path/to/icon.png' // Update with your icon path
+            };
+            new Notification(notificationTitle, notificationOptions);
+        });
+    // Initialize messaging when the page loads
+    document.addEventListener('DOMContentLoaded', initializeFirebaseMessaging);
+</script>
+
 <script src="/socket.io/socket.io.js"></script>
 <script>
     const socket = io();
