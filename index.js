@@ -36,29 +36,7 @@ const port = process.env.PORT || 4000;
 const server = http.createServer(app);
 const io = socketIo(server);
 
-// Create a transport for sending emails
-const transporter = nodemailer.createTransport({
-  service: 'Gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.USER_PASS
-  }
-});
 
-function sendNotificationEmail(toEmail, locationName) {
-  const mailOptions = {
-    from: `"JELLYACE" <${process.env.EMAIL_USER}>`,
-    to: toEmail, // Receiver's email
-    subject: 'Soil Dry Alert',
-    text: `The soil at ${locationName} is dry. Please water your plants.`
-  };
-
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.error('Error sending email:', error);
-    }
-  });
-}
 
 const lastNotificationStatus = {}; // This can also be stored in the database
 
@@ -117,9 +95,6 @@ async function handleSoilMoistureUpdate(soilMoistureData) {
             await newTask.save();
             console.log(`Task added to the To-Do list for user ${user.email}.`);
           }
-
-          // Send email notification
-          sendNotificationEmail(user.email, locationName);
 
           if (user.fcmTokens && user.fcmTokens.length > 0) {
             const message = {
