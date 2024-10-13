@@ -6,7 +6,6 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 const db = admin.database();
-const ref = db.ref('Sensors');
 
 // Middleware
 app.use(bodyParser.json());

@@ -325,7 +325,6 @@
 </div>
 <%- include("partials/UserFooter.ejs") %>
 
-
 <script>
     // Firebase configuration
     const firebaseConfig = {
@@ -341,68 +340,84 @@
 
     // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
-
     const messaging = firebase.messaging();
 
-    // Request permission and get FCM token
+    // Register the service worker
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/firebase-messaging-sw.js')
+            .then((registration) => {
+                console.log('Service Worker registered with scope:', registration.scope);
+                // Now you can initialize messaging
+                initializeFirebaseMessaging();
+            })
+            .catch((error) => {
+                console.error('Service Worker registration failed:', error);
+            });
+    } else {
+        console.error('Service workers are not supported in this browser.');
+    }
+
     async function initializeFirebaseMessaging() {
-            try {
-                const permission = await Notification.requestPermission();
-                if (permission === 'granted') {
-                    console.log('Notification permission granted.');
-                    const token = await messaging.getToken();
-                    console.log('FCM Token:', token);
-                    document.getElementById('token-display').textContent = `FCM Token: ${token}`;
-                    await sendTokenToServer(token);
-                    document.getElementById('notification-status').textContent = 'Notifications enabled';
-                } else {
-                    console.log('Unable to get permission to notify.');
-                    document.getElementById('notification-status').textContent = 'Notifications disabled';
-                    document.getElementById('token-display').textContent = 'No token available - permission denied';
-                }
-            } catch (error) {
-                console.error('Error initializing Firebase messaging:', error);
-                document.getElementById('notification-status').textContent = 'Error initializing notifications';
-                document.getElementById('token-display').textContent = `Error: ${error.message}`;
+        try {
+            const permission = await Notification.requestPermission();
+            if (permission === 'granted') {
+                console.log('Notification permission granted.');
+                const token = await messaging.getToken();
+                console.log('FCM Token:', token);
+                document.getElementById('token-display').textContent = `FCM Token: ${token}`;
+                await sendTokenToServer(token);
+                document.getElementById('notification-status').textContent = 'Notifications enabled';
+            } else {
+                console.log('Unable to get permission to notify.');
+                document.getElementById('notification-status').textContent = 'Notifications disabled';
+                document.getElementById('token-display').textContent = 'No token available - permission denied';
             }
+        } catch (error) {
+            console.error('Error initializing Firebase messaging:', error);
+            document.getElementById('notification-status').textContent = 'Error initializing notifications';
+            document.getElementById('token-display').textContent = `Error: ${error.message}`;
         }
+    }
 
     // Function to send token to server
     async function sendTokenToServer(token) {
-            try {
-                const response = await fetch('/api/save-fcm-token', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ token })
-                });
-                if (!response.ok) {
-                    throw new Error('Failed to save token');
-                }
-                console.log('Token successfully sent to server');
-                document.getElementById('notification-status').textContent += ' - Token sent to server';
-            } catch (error) {
-                console.error('Error sending token to server:', error);
-                document.getElementById('notification-status').textContent += ' - Failed to send token to server';
+        try {
+            const response = await fetch('/api/save-fcm-token', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ token })
+            });
+            if (!response.ok) {
+                throw new Error('Failed to save token');
             }
+            console.log('Token successfully sent to server');
+            document.getElementById('notification-status').textContent += ' - Token sent to server';
+        } catch (error) {
+            console.error('Error sending token to server:', error);
+            document.getElementById('notification-status').textContent += ' - Failed to send token to server';
         }
+    }
 
+    // Handle incoming messages
+    messaging.onMessage((payload) => {
+        console.log('Message received. ', payload);
+        // Display the notification
+        const notificationTitle = payload.notification.title;
+        const notificationOptions = {
+            body: payload.notification.body,
+            icon: '/path/to/icon.png' // Update with your icon path
+        };
+        new Notification(notificationTitle, notificationOptions);
+    });
 
-        // Handle incoming messages
-        messaging.onMessage((payload) => {
-            console.log('Message received. ', payload);
-            // Display the notification
-            const notificationTitle = payload.notification.title;
-            const notificationOptions = {
-                body: payload.notification.body,
-                icon: '/path/to/icon.png' // Update with your icon path
-            };
-            new Notification(notificationTitle, notificationOptions);
-        });
     // Initialize messaging when the page loads
-    document.addEventListener('DOMContentLoaded', initializeFirebaseMessaging);
+    document.addEventListener('DOMContentLoaded', () => {
+        // Only initialize messaging after service worker registration
+    });
 </script>
+
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
