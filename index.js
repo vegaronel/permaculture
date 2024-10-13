@@ -20,6 +20,7 @@ const postRoutes = require("./routes/postRoutes");
 const admin = require('./config/firebase');
 const User = require('./models/user');
 const SoilData = require('./models/SoilData');
+const Todo = require('./models/Todo');
 const forgotPassword = require('./routes/requestForgotPassword');
 
 const http = require('http');
@@ -59,57 +60,107 @@ function sendNotificationEmail(toEmail, locationName) {
 }
 
 const lastNotificationStatus = {}; // This can also be stored in the database
-
 async function handleSoilMoistureUpdate(soilMoistureData) {
-  if (soilMoistureData) {
-    try {
-      for (const sensorId of Object.keys(soilMoistureData)) {
-        const sensorData = soilMoistureData[sensorId];
-        const { locationName, moistureValue, userId } = sensorData;
+  if (!soilMoistureData) {
+      console.log('Invalid soil moisture data, not saving to database');
+      return;
+  }
 
-        if (userId) {
+  try {
+      for (const sensorId of Object.keys(soilMoistureData)) {
+          const sensorData = soilMoistureData[sensorId];
+          const { locationName, moistureValue, userId, plantId } = sensorData;
+
+          if (!userId) {
+              console.log('No userId associated with this sensor data for sensor:', sensorId);
+              continue;
+          }
+
           // Update soil data in the database
-          const updatedSoilData = await SoilData.findOneAndUpdate(
-            { userId, locationName },
-            { moistureValue },
-            { new: true, upsert: true }
+          await SoilData.findOneAndUpdate(
+              { userId, locationName },
+              { moistureValue },
+              { new: true, upsert: true }
           );
 
           // Emit the updated data to clients
           io.emit('soilMoistureUpdate', {
-            [sensorId]: {
-              locationName,
-              moistureValue,
-              userId
-            }
+              [sensorId]: {
+                  locationName,
+                  moistureValue,
+                  userId
+              }
           });
 
-          // Check if soil is dry and send notification only once
+          // Check if soil is dry
           if (moistureValue < 30) {
-            const user = await User.findById(userId); // Assuming you have a User model
-            if (user && user.email) {
-              // Check if a notification has already been sent for this location
-              if (!lastNotificationStatus[locationName] || lastNotificationStatus[locationName] !== 'dry') {
-                sendNotificationEmail(user.email, locationName);
-                lastNotificationStatus[locationName] = 'dry'; // Mark as notified
-                console.log(`Notification sent to ${user.email} for dry soil at ${locationName}.`);
+              const user = await User.findById(userId);
+              if (user && user.email) {
+                  // Notification logic
+                  const existingTask = await Todo.findOne({
+                      userId: user._id,
+                      plantId: plantId || null,
+                      title: `Water your plant at ${locationName}`,
+                      taskType: 'watering',
+                      completed: false
+                  });
+
+                  if (!existingTask) {
+                      // Create a new task
+                      const newTask = new Todo({
+                          userId: user._id,
+                          plantId: plantId || null,
+                          title: `Water your plant at ${locationName}`,
+                          description: `The soil at ${locationName} is dry. Please water your plant.`,
+                          dueDate: new Date(),
+                          taskType: 'watering',
+                          priority: 'high'
+                      });
+
+                      await newTask.save();
+                      console.log(`Task added to the To-Do list for user ${user.email}.`);
+                  }
+
+                  // Send the email notification
+                  sendNotificationEmail(user.email, locationName);
+
+                  // Send push notification if the token exists
+                  if (user.fcmToken) {
+                      console.log('Sending push notification to:', user.fcmToken);
+                      const pushMessage = {
+                          notification: {
+                              title: 'Soil Moisture Alert',
+                              body: `The soil at ${locationName} is dry. Please water your plant.`,
+                              icon: '/images/plant-icon.png',
+                          },
+                          token: user.fcmToken
+                      };
+
+                      admin.messaging().send(pushMessage)
+                          .then(response => {
+                              console.log('Push notification sent successfully:', response);
+                          })
+                          .catch(error => {
+                              console.error('Error sending push notification:', error);
+                          });
+                  } else {
+                      console.log('No FCM token found for user:', user.email);
+                  }
+
+                  lastNotificationStatus[locationName] = 'dry';
+                  console.log(`Notification sent to ${user.email} for dry soil at ${locationName}.`);
               }
-            }
           } else {
-            // Reset notification status when soil is not dry
-            lastNotificationStatus[locationName] = 'not-dry';
+              // Reset notification status when soil is not dry
+              lastNotificationStatus[locationName] = 'not-dry';
           }
-        } else {
-          console.log('No userId associated with this sensor data for sensor:', sensorId);
-        }
       }
-    } catch (error) {
+  } catch (error) {
       console.error('Error updating soil moisture data in MongoDB:', error);
-    }
-  } else {
-    console.log('Invalid soil moisture data, not saving to database');
   }
 }
+
+
 // Set up the Firebase listener
 ref.on('value', (snapshot) => {
   const soilMoistureData = snapshot.val();
