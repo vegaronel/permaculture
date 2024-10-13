@@ -17,7 +17,7 @@ app.set('view engine', 'ejs');
 
 
 app.post('/api/save-fcm-token',isAuthenticated, async(req, res) => {
-    const { token, userId } = req.body;
+    const { token } = req.body;
     const userID = req.session.userId;
     try {
       const user = await User.findById(userID);
@@ -28,7 +28,7 @@ app.post('/api/save-fcm-token',isAuthenticated, async(req, res) => {
         user.fcmTokens.push(token);
         await user.save();
       }
-      console.log('FCM token saved for user:', userId);
+      console.log('FCM token saved for user:', userID);
       res.json({ success: true });
     } catch (error) {
       console.error('Error saving FCM token:', error);
