@@ -61,103 +61,100 @@ function sendNotificationEmail(toEmail, locationName) {
 }
 
 const lastNotificationStatus = {}; // This can also be stored in the database
+
 async function handleSoilMoistureUpdate(soilMoistureData) {
   if (!soilMoistureData) {
-      console.log('Invalid soil moisture data, not saving to database');
-      return;
+    console.log('Invalid soil moisture data, not saving to database');
+    return;
   }
 
   try {
-      for (const sensorId of Object.keys(soilMoistureData)) {
-          const sensorData = soilMoistureData[sensorId];
-          const { locationName, moistureValue, userId, plantId } = sensorData;
+    for (const sensorId of Object.keys(soilMoistureData)) {
+      const sensorData = soilMoistureData[sensorId];
+      const { locationName, moistureValue, userId, plantId } = sensorData;
 
-          if (!userId) {
-              console.log('No userId associated with this sensor data for sensor:', sensorId);
-              continue;
-          }
+      if (!userId) {
+        console.log('No userId associated with this sensor data for sensor:', sensorId);
+        continue;
+      }
 
-          // Update soil data in the database
-          await SoilData.findOneAndUpdate(
-              { userId, locationName },
-              { moistureValue },
-              { new: true, upsert: true }
-          );
+      // Update soil data in the database
+      await SoilData.findOneAndUpdate(
+        { userId, locationName },
+        { moistureValue },
+        { new: true, upsert: true }
+      );
 
-          // Emit the updated data to clients
-          io.emit('soilMoistureUpdate', {
-              [sensorId]: {
-                  locationName,
-                  moistureValue,
-                  userId
-              }
+      // Emit the updated data to clients
+      io.emit('soilMoistureUpdate', {
+        [sensorId]: { locationName, moistureValue, userId }
+      });
+
+      // Check if soil is dry
+      if (moistureValue < 30) {
+        const user = await User.findById(userId);
+        if (user && user.email) {
+          // Create a new task if it doesn't exist
+          const existingTask = await Todo.findOne({
+            userId: user._id,
+            plantId: plantId || null,
+            title: `Water your plant at ${locationName}`,
+            taskType: 'watering',
+            completed: false
           });
 
-          // Check if soil is dry
-          if (moistureValue < 30) {
-              const user = await User.findById(userId);
-              if (user && user.email) {
-                  // Notification logic
-                  const existingTask = await Todo.findOne({
-                      userId: user._id,
-                      plantId: plantId || null,
-                      title: `Water your plant at ${locationName}`,
-                      taskType: 'watering',
-                      completed: false
-                  });
+          if (!existingTask) {
+            const newTask = new Todo({
+              userId: user._id,
+              plantId: plantId || null,
+              title: `Water your plant at ${locationName}`,
+              description: `The soil at ${locationName} is dry. Please water your plant.`,
+              dueDate: new Date(),
+              taskType: 'watering',
+              priority: 'high'
+            });
 
-                  if (!existingTask) {
-                      // Create a new task
-                      const newTask = new Todo({
-                          userId: user._id,
-                          plantId: plantId || null,
-                          title: `Water your plant at ${locationName}`,
-                          description: `The soil at ${locationName} is dry. Please water your plant.`,
-                          dueDate: new Date(),
-                          taskType: 'watering',
-                          priority: 'high'
-                      });
-
-                      await newTask.save();
-                      console.log(`Task added to the To-Do list for user ${user.email}.`);
-                  }
-
-                  // Send the email notification
-                  sendNotificationEmail(user.email, locationName);
-
-                  // Send push notification if the token exists
-                  if (user.fcmToken) {
-                      console.log('Sending push notification to:', user.fcmToken);
-                      const pushMessage = {
-                          notification: {
-                              title: 'Soil Moisture Alert',
-                              body: `The soil at ${locationName} is dry. Please water your plant.`,
-                              icon: '/images/plant-icon.png',
-                          },
-                          token: user.fcmToken
-                      };
-
-                      admin.messaging().send(pushMessage)
-                          .then(response => {
-                              console.log('Push notification sent successfully:', response);
-                          })
-                          .catch(error => {
-                              console.error('Error sending push notification:', error);
-                          });
-                  } else {
-                      console.log('No FCM token found for user:', user.email);
-                  }
-
-                  lastNotificationStatus[locationName] = 'dry';
-                  console.log(`Notification sent to ${user.email} for dry soil at ${locationName}.`);
-              }
-          } else {
-              // Reset notification status when soil is not dry
-              lastNotificationStatus[locationName] = 'not-dry';
+            await newTask.save();
+            console.log(`Task added to the To-Do list for user ${user.email}.`);
           }
+
+          // Send email notification
+          sendNotificationEmail(user.email, locationName);
+
+          if (user.fcmTokens && user.fcmTokens.length > 0) {
+            const message = {
+              notification: {
+                title: 'Soil Moisture Alert',
+                body: `The soil at ${locationName} is dry. Please water your plant.`,
+              },
+              android: {
+                notification: {
+                  icon: 'stock_ticker_update',
+                  color: '#7e55c3'
+                }
+              },
+              tokens: user.fcmTokens
+            };
+
+            try {
+              const response = await admin.messaging().sendEachForMulticast(message);
+              console.log('Successfully sent message:', response);
+            } catch (error) {
+              console.log('Error sending message:', error);
+            }
+          } else {
+            console.log('No FCM tokens found for user:', user.email);
+          }
+
+          lastNotificationStatus[locationName] = 'dry';
+          console.log(`Notification sent to ${user.email} for dry soil at ${locationName}.`);
+        }
+      } else {
+        lastNotificationStatus[locationName] = 'not-dry';
       }
+    }
   } catch (error) {
-      console.error('Error updating soil moisture data in MongoDB:', error);
+    console.error('Error updating soil moisture data in MongoDB:', error);
   }
 }
 

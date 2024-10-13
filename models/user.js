@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema({
         default: 'https://res.cloudinary.com/db1vjlfkm/image/upload/v1234567890/ushtpui941lhkzluvtrk.jpg' // Replace with your Cloudinary URL
     },
     doneTutorial: { type: Boolean, default: false },
-    fcmToken: String, // Add this field to store FCM token
+    fcmTokens: [String],
     resetToken: String,
     resetTokenExpiry: Date
 });
