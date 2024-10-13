@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const Groq = require('groq-sdk');
 const isAuthenticated = require('../middleware/athenticateUser');
 const natural = require('natural');
+const Task = require('../models/Todo')
 
 const app = express();
 
@@ -47,5 +48,20 @@ app.post("/chat", isAuthenticated, async (req, res) => {
     res.status(500).json({ error: 'An error occurred while processing your request.' });
   }
 });
+app.post('/tasks/complete', async (req, res) => {
+  const { taskId } = req.body;
+
+  try {
+      // Find the task by ID and update it as complete
+      await Task.findByIdAndUpdate(taskId, { completed: true });
+
+      // Respond with a success message
+      res.json({ success: true });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'An error occurred while updating the task.' });
+  }
+});
+
 
 module.exports = app;

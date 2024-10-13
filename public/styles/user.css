@@ -104,11 +104,6 @@ color: black;
     scrollbar-color: rgba(0, 0, 0, 0.2) transparent; /* Color of thumb and track */
 }
 
-/* Optional for making it even thinner on hover (for modern design) */
-* {
-    scrollbar-gutter: stable; /* Keeps a consistent gutter, preventing layout shifts */
-}
-
 /* For Internet Explorer and Edge (older versions) */
 .scrollable-content {
     -ms-overflow-style: none; /* Disables default scrollbar */
@@ -140,7 +135,6 @@ a{
     overflow-y: scroll;
     flex: 1;
     padding: 10px;
-    border-radius: 8px;
 }
 .chat-container{
     border: 1px solid rgb(219, 218, 218);

@@ -55,6 +55,7 @@
                                     <span class="badge badge-pill text-black">
                                         Due: <%= new Date(task.dueDate).toLocaleDateString('en-PH') %>
                                     </span>
+                                    <button class="btn border complete-task-btn" data-id="<%= task._id %>">Done</button>
                                 </li>
                             <% }) %>
                         </ul>
@@ -62,31 +63,18 @@
                         <p class="text-muted">No tasks to complete.</p>
                     <% } %>
                 </div>
-                
             </div>
         </div>    
     </section>
 
+    <div id="successTaskNotification" class="alert alert-success d-none" role="alert" style="position: fixed; bottom: 20px; right: 20px; z-index: 1050;">
+        Task Completed Successfully!
+    </div>
+
     <section id="my-plants">
         <div class="row gap-4 mt-3 d-flex justify-content-center mx-2">
             <div class="col-lg-7 col-md-12 d-flex gap-3 flex-column">
-                <div class="col p-4 weather-card b-radius-50 ">
-                    <p class="h5">Plants That Need to Be Watered</p>
-                    <% if(locals.plant) { %>
-                        <div class="container-water d-flex gap-3">
-                            <% plants.filter(plant => plant.needsWatering).forEach(plant => { %>
-                                <div class="not-watered-plants">
-                                    <%= plant.name %>
-                                    <form action="/water-plant/<%= plant._id %>" method="POST" style="display: inline">
-                                        <button type="submit" class="btn btn-success btn-sm ml-2">Water</button>
-                                    </form>
-                                    <p style="width: 300px;">Last Watered: <%= plant.lastWatered ? new Date(plant.lastWatered).toLocaleDateString() : 'Not yet watered' %></p>
-                                </div>
-                            <% }) %>
-                        </div>
-                    <% } %>
-                  
-
+                <div class="col p-4 weather-card b-radius-50 ">              
                     <div class="d-flex align-items-center mt-2">
                         <img src="/images/my-plants.svg" alt="">
                         <p class="h5 m-0">My Plants</p>
@@ -264,6 +252,58 @@
         </div>
     </div>
 </div>
+
+
+<style>
+    /* Gray overlay background */
+    #overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent gray */
+        z-index: 1040; /* Below the notification */
+        display: none; /* Initially hidden */
+    }
+
+    /* Notification styles */
+    #successHarvestNotification.show {
+        opacity: 1;
+    }
+
+    #successHarvestNotification {
+        opacity: 0;
+        transition: opacity 0.5s;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1050;
+        text-align: center;
+        width: 300px;
+    }
+</style>
+
+<!-- Gray overlay -->
+<div id="overlay"></div>
+
+<!-- Notification -->
+<div id="successHarvestNotification" class="alert alert-success d-none shadow-lg rounded" role="alert">
+    <img src="/images/Party.gif" alt="Plant Icon" style="width: 100px; height: 100px; margin-bottom: 10px;">
+    <h5>Congratulations!</h5>
+    <p>Your plant has been successfully harvested!</p>
+</div>
+
+  
+<div id="successHarvestNotification" class="alert alert-success d-none shadow-lg rounded" role="alert" 
+     style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1050; transition: all 0.5s; text-align: center; width: 300px;">
+    <img src="/images/Party.gif" alt="Plant Icon">
+    <h5>Congratulations!</h5>
+    <p>Your plant has been successfully harvested!</p>
+</div>
+
+
     
 
 </div>
@@ -379,6 +419,35 @@ const plantsTable = $('#plantsTable').DataTable({
             }
         ]
     });
+
+    $('.complete-task-btn').on('click', function() {
+            const taskId = $(this).data('id');
+            const $taskItem = $(this).closest('li');
+
+            $.ajax({
+                url: '/tasks/complete',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ taskId: taskId }),
+                success: function(response) {
+                    // Show the success notification
+                    $('#successTaskNotification').removeClass('d-none');
+
+                    // Remove the task item or mark it as completed in some way
+                    $taskItem.remove();
+
+                    // Hide the notification after 3 seconds
+                    setTimeout(() => {
+                        $('#successTaskNotification').addClass('d-none');
+                    }, 3000);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                }
+            });
+        });
+
+    
     $('#harvestButton').click(function(e) {
         e.preventDefault();
 
@@ -406,15 +475,17 @@ const plantsTable = $('#plantsTable').DataTable({
                 $('#harvestConfirmationModal').modal('hide');
                 $('#plantDetailsModal').modal('hide');
                 if (response.success) {
-                    // Show a success notification
-                    const notification = $('#successNotification');
-                    notification.text('Plant harvested successfully!').removeClass('d-none').fadeIn(300);
-                    setTimeout(function() {
-                        notification.fadeOut(300, function() {
-                            notification.addClass('d-none');
-                        });
-                    }, 3000);
+                     // Show the overlay and the success notification
+                     $('#overlay').fadeIn();
+                    const $notification = $('#successHarvestNotification');
+                    $notification.removeClass('d-none').addClass('show');
 
+                    // Hide the notification and overlay after 3 seconds
+                    setTimeout(() => {
+                        $notification.removeClass('show').addClass('d-none');
+                        $('#overlay').fadeOut();
+                    }, 1500);
+                    
                     // Reset the harvest form
                     $('#harvestStatus').val('');
                     $('#harvestButton').prop('disabled', false).text('Harvest');
