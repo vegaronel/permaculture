@@ -19,6 +19,7 @@ const commentsRoutes = require("./routes/commentsRoutes");
 const postRoutes = require("./routes/postRoutes");
 const admin = require('./config/firebase');
 const User = require('./models/user');
+const saveToken = require('./routes/saveToken');
 const SoilData = require('./models/SoilData');
 const Todo = require('./models/Todo');
 const forgotPassword = require('./routes/requestForgotPassword');
@@ -212,6 +213,7 @@ app.use(userDashboard);
 app.use(registration);
 app.use(dashboardPlants);
 app.use(commentsRoutes);
+app.use(saveToken);
 app.use(postRoutes);
 app.use(forgotPassword);
 
