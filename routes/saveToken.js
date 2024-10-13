@@ -13,10 +13,6 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 
-// Routes
-app.get('/', (req, res) => {
-  res.render('dashboard');
-});
 
 app.post('/api/save-fcm-token', (req, res) => {
   const { token } = req.body;
