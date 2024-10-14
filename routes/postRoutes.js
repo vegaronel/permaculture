@@ -31,24 +31,28 @@ app.use('/uploads', express.static('uploads'));
 
 // Route to create a new post with an image
 app.post('/create', upload.single('image'), async (req, res) => {
-  const {content } = req.body;
+  const { content, category } = req.body;
 
   try {
-    // Find the user based on the session userId
-    const user = await User.findById(req.session.userId);
-
+    const user = await User.findById(req.session.userId).select('profilePicture');
+    
+    console.log("User found:", user); // Check user data
     if (!user) {
       return res.status(404).send('User not found');
     }
 
-    // Create a new post with the image URL from Cloudinary and user profile information
+    // Log the profile picture
+    console.log("User's profile picture:", user.profilePicture);
+
     const newPost = new Post({
       userId: user._id,
-      category: req.body.category,
+      category,
       content,
-      image: req.file ? req.file.path : null, // Use null if no image is uploaded
-      profile: user.profilePicture // Save the user's profile picture in the post
+      image: req.file ? req.file.path : null,
+      profile: user.profilePicture || null // Save the user's profile picture
     });
+
+    console.log("New post data:", newPost); // Log the post data
 
     await newPost.save();
 
@@ -58,6 +62,7 @@ app.post('/create', upload.single('image'), async (req, res) => {
     res.status(500).send('Error creating post');
   }
 });
+
 
 app.post('/like/:id', auth, async (req, res) => {
   const { id } = req.params;

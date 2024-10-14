@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema({
     status: {type: String, default: 'pending'},
     profilePicture: { 
         type: String, 
-        default: 'https://res.cloudinary.com/db1vjlfkm/image/upload/v1234567890/ushtpui941lhkzluvtrk.jpg' // Replace with your Cloudinary URL
+        default: 'https://res.cloudinary.com/db1vjlfkm/image/upload/v1728924414/ganxd9tduj3ihdvaxydf.jpg' // Replace with your Cloudinary URL
     },
     doneTutorial: { type: Boolean, default: false },
     fcmTokens: [String],
