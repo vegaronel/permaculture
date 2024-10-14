@@ -781,3 +781,48 @@ a{
 }
 
 /*  */
+
+/* POSTS */
+
+.card {
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .like-btn {
+    transition: background-color 0.2s, color 0.2s;
+  }
+  
+  .like-btn:hover {
+    background-color: #f8d7da;
+    color: #dc3545;
+  }
+  .like-animation {
+    animation: likeEffect 0.5s forwards;
+}
+
+@keyframes likeEffect {
+    0% {
+        transform: scale(1);
+        color: #ff0000; /* Change to your desired color */
+    }
+    50% {
+        transform: scale(1.2);
+        color: #ff4d4d; /* A lighter red for effect */
+    }
+    100% {
+        transform: scale(1);
+        color: #ff0000; /* Final color after the animation */
+    }
+}
+.post-form-container{
+    background-color: white;
+    border-radius: 20px;
+  }
+  
+
+/*  */

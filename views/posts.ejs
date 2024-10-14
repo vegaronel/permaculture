@@ -1,35 +1,198 @@
 <%- include("partials/UserHeader.ejs") %>
 
-<div class="container-fluid">
+  <div class="container-fluid">
 
+    <div class="d-flex row">
+      <div class="col-lg-8 col-md-12">
+        <form action="/create" class="post-form-container mt-3" method="POST" enctype="multipart/form-data">
+          <div class="d-flex flex-column">
+              <div class="d-flex p-3">
+                  <img src="<%= profile %>" class="p-3" alt="" style="width: 80px; height: 80px; object-fit: cover; border-radius: 50%;">
+                  <textarea class="form-control p-2 border border-light" name="content" placeholder="What's on your plant?" required></textarea>
+              </div>
+              <div class="d-flex">
+                  <img src="<%= profile %>" alt="" style="width: 80px; height: 20px; opacity: 0;">
+                  <label for="image" style="background: linear-gradient(to right, #f0e68c, #f0a1a8); padding: 7px; cursor: pointer; color: #fff; border-radius: 100px;">
+                      <i class="fas fa-image"></i> Choose Image
+                  </label>
+                  <input type="file" id="image" class="form-control" name="image" accept="image/*" style="display: none;">
+                  <select name="category" class="border border-light p-2 gray-text" style="background-color:#CDE1FF; padding: 7px; cursor: pointer; border-radius: 100px;">
+                      <option value="">Categories</option>
+                      <option value="Health">Health</option>
+                      <option value="Plants">Plants</option>
+                      <option value="Recipes">Recipes</option>
+                  </select>
+              </div>
+          </div>
+      
+          <div class="d-flex mt-4 py-4">
+              <img src="<%= profile %>" alt="" style="width: 80px; height: 20px; opacity: 0;">
+              <button type="submit" class="btn btn-primary">Post</button>
+          </div>
+      </form>
+      
+        <br>
 
-<h1>Posts</h1>
+        <% posts.forEach(post => { %> 
+          <div class="card mb-4 shadow-sm bg-white rounded-lg border-0">
+            <div class="card-body d-flex align-items-start">
+              <!-- Profile Image -->
+              <div class="me-3">
+                <img src="<%= post.profile %>" alt="Profile Picture" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
+              </div>
+              
+              <!-- Post Content -->
+              <div class="flex-grow-1">
+                <!-- User Information -->
+                <div class="d-flex align-items-center">
+                  <div>
+                    <div class="d-flex gap-3">
+                      <h6 class="mb-0 fw-bold"><%= post.userId.firstname %> <%= post.userId.lastname %></h6>
+                      <div class="px-2 post" data-category="<%= post.category %>" style="border-radius: 100px;">
+                        <small><%= post.category %></small>
+                      </div>
+                    </div>
+                    
+                    <small class="text-muted"><%= post.timeAgo %></small>
+                  </div>
+                </div>
+                
+                <!-- Post Title -->
+                <div class="mt-2">
+                  <a href="/post/<%= post._id %>" class="text-decoration-none text-dark">
+                    <p class="mb-0"><%= post.content %></p>
+                  </a>
+                </div>
+                
+                <!-- Like Button and Comment Count -->
+                <div class="mt-3 d-flex align-items-center">
+                  <button class="btn btn-outline-danger btn-sm like-btn" 
+                          data-id="<%= post._id %>" 
+                          data-liked="<%= post.isLiked %>">
+                    <i class="<%= post.isLiked ? 'fas' : 'far' %> fa-heart"></i> 
+                    <span class="like-count"><%= post.likes || 0 %></span>
+                  </button>
+                  <span class="ms-2 text-muted"><%= post.commentsCount || 0 %> comments</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    
+      <div class="col p-lg-3 p-md-0">
+        <div class="bg-white p-4" style="border-radius: 15px;">
+          <p class="nexa-black gray-text">Topics</p>
 
-<% posts.forEach(post => { %>
-  <div>
-    <p><strong><%= post.userId.firstname %> <%= post.userId.lastname %>:</strong> <%= post.title %></p>
-    <p><a href="/post/<%= post._id %>">View Post</a></p>
+          <div class="d-flex gap-2 p-3">
+            <div style="width: 40px; height: 40px; background-color: #E4A951; border-radius: 50%;"></div>
+            <div>
+              <p class="m-0">Health</p> <!-- Display Health count -->
+              <p><%= healthCount === 1 ? '1 post' : healthCount + ' posts' %></p>
+            </div>
+          </div>
+
+          <div class="d-flex gap-2 p-3">
+            <div style="width: 40px; height: 40px; background-color: #86D72F; border-radius: 50%;"></div>
+            <div>
+              <p class="m-0">Plants</p> <!-- Display Plants count -->
+              <p><%= plantsCount === 1 ? '1 post' : plantsCount + ' posts' %></p>
+            </div>
+          </div>
+          
+          <div class="d-flex gap-2 p-3">
+            <div style="width: 40px; height: 40px; background-color: #43B5E5; border-radius: 50%;"></div>
+            <div>
+              <p class="m-0">Recipes</p> <!-- Display Recipes count -->
+              <p><%= recipesCount === 1 ? '1 post' : recipesCount + ' posts' %></p>
+            </div>
+          </div>
+          
+          <div>
+              <p class="m-0">Total Posts</p> <!-- Display total posts -->
+              <p><%= totalPosts %></p>
+          </div>
+        </div>
+    </div>
+
+    <!-- Pagination Controls -->
+        <nav aria-label="Page navigation">
+          <ul class="pagination">
+            <% if (currentPage > 1) { %>
+              <li class="page-item">
+                <a class="page-link" href="/posts?page=<%= currentPage - 1 %>">Previous</a>
+              </li>
+            <% } %>
+            <% for (let i = 1; i <= totalPages; i++) { %>
+              <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                <a class="page-link" href="/posts?page=<%= i %>"><%= i %></a>
+              </li>
+            <% } %>
+            <% if (currentPage < totalPages) { %>
+              <li class="page-item">
+                <a class="page-link" href="/posts?page=<%= currentPage + 1 %>">Next</a>
+              </li>
+            <% } %>
+          </ul>
+        </nav>
+      </div>
   </div>
-  <hr>
-<% }) %>
-
-<h2>Create a New Post</h2>
-<form action="/create" method="POST" enctype="multipart/form-data">
-  <div>
-    <label for="title">Post Title</label>
-    <input type="text" name="title" placeholder="Enter title" required>
-  </div>
-  <div>
-    <label for="content">Post Description</label>
-    <br>
-    <textarea  class="form-control" name="content" placeholder="Write something..." required></textarea>
-  </div>
-  <div>
-    <label for="image">Upload an Image</label>
-    <input type="file" class="form-control" name="image" accept="image/*">
-  </div>
-  <button type="submit" class="btn btn-primary">Post</button>
-</form>
-
 </div>
+
 <%- include("partials/UserFooter.ejs") %>
+
+<script>
+  $(document).ready(function() {
+    $('.post').each(function() {
+      var title = $(this).data('category').toLowerCase();
+      var backgroundColor;
+  
+      if (title === 'health') {
+        backgroundColor = '#E4A951';
+      } else if (title === 'plants') {
+        backgroundColor = '#86D72F';
+      } else if (title === 'recipes') {
+        backgroundColor = '#43B5E5';
+      } else {
+        backgroundColor = '#f0f0f0'; // Default color
+      }
+  
+      $(this).css('background-color', backgroundColor);
+    });
+  
+    $('.like-btn').each(function() {
+      const button = $(this);
+      const isLiked = button.data('liked') === true;
+      updateLikeButton(button, isLiked);
+    });
+  
+    $('.like-btn').click(function() {
+      const button = $(this);
+      const postId = button.data('id');
+  
+      $.ajax({
+        url: `/like/${postId}`,
+        method: 'POST',
+        success: function(response) {
+          if (response.success) {
+            updateLikeButton(button, response.liked);
+            button.find('.like-count').text(response.likes);
+          }
+        },
+        error: function() {
+          alert('Error liking post. Please try again.');
+        }
+      });
+    });
+
+  
+    function updateLikeButton(button, isLiked) {
+      if (isLiked) {
+        button.find('i').removeClass('far').addClass('fas');
+      } else {
+        button.find('i').removeClass('fas').addClass('far');
+      }
+      button.data('liked', isLiked);
+    }
+  });
+  </script>

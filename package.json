@@ -23,6 +23,7 @@
     "express": "^4.19.2",
     "express-session": "^1.18.0",
     "express-validator": "^7.1.0",
+    "fcm-node": "^1.6.1",
     "firebase": "^10.13.2",
     "firebase-admin": "^12.5.0",
     "groq-sdk": "^0.5.0",

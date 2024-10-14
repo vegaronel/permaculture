@@ -31,7 +31,13 @@ app.post('/complete-tutorial', isAuthenticated, async (req, res) => {
 });
 app.get('/dashboard', isAuthenticated, async (req, res) => {
   try {
-    const user = await User.findById(req.session.userId);
+    const user = {
+      _id: req.session.userId,
+      firstname: req.session.firstname,
+      lastname: req.session.lastname,
+      profilePicture: req.session.profilePicture,
+      doneTutorial: req.session.doneTutorial
+    };
     if (!user) {
       return res.status(404).send('User not found');
     }
@@ -127,7 +133,8 @@ app.get('/dashboard', isAuthenticated, async (req, res) => {
       name: `${req.session.firstname} ${req.session.lastname}`,
       day: weekday,
       dateToday: `${month}, ${dayWithComma}`,
-      userId: req.session.userId // Pass the userId to the view
+      userId: req.session.userId, // Pass the userId to the view
+      profilePicture: user.profilePicture // Add this line
     });
   } catch (error) {
     console.error(error);
