@@ -121,30 +121,6 @@ async function handleSoilMoistureUpdate(sensorId, sensorData) {
         console.log(`Task added to the To-Do list for user ${user.email}.`);
       }
 
-      if (user.fcmTokens && user.fcmTokens.length > 0) {
-        const message = {
-          notification: {
-            title: 'Soil Moisture Alert',
-            body: `The soil at ${locationName} is dry. Please water your plant.`,
-          },
-          android: {
-            notification: {
-              icon: 'stock_ticker_update',
-              color: '#7e55c3'
-            }
-          },
-          tokens: user.fcmTokens
-        };
-      
-        try {
-          const response = await admin.messaging().sendEachForMulticast(message);
-          console.log('Successfully sent message:', response);
-          await cleanupInvalidTokens(user._id);
-        } catch (error) {
-          console.log('Error sending message:', error);
-        }
-      }
-
       lastNotificationStatus[locationName] = 'dry';
       console.log(`Notification sent to ${user.email} for dry soil at ${locationName}.`);
     } else {

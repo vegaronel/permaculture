@@ -389,13 +389,11 @@ async function sendTokenToServer(token) {
 
 messaging.onMessage((payload) => {
     console.log('Message received. ', payload);
-    const notificationTitle = payload.notification.title;
-    const notificationOptions = {
-        body: payload.notification.body,
-        icon: '/path/to/icon.png'  // Update with your icon path
-    };
-    new Notification(notificationTitle, notificationOptions);
+
+    // You can log, update the UI, or handle the payload here
+    // But DO NOT create a new notification if you're already handling it in the background
 });
+
     // Initialize messaging when the page loads
     document.addEventListener('DOMContentLoaded', initializeFirebaseMessaging);
 </script>

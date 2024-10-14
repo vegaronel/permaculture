@@ -38,22 +38,5 @@ app.post('/api/save-fcm-token', isAuthenticated, async (req, res) => {
   });
 
 
-// Example route to send a push notification
-app.post('/api/send-notification', async (req, res) => {
-  const { token, title, body } = req.body;
-  try {
-    await admin.messaging().send({
-      token: token,
-      notification: {
-        title: title,
-        body: body,
-      },
-    });
-    res.json({ success: true });
-  } catch (error) {
-    console.error('Error sending message:', error);
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
 
 module.exports = app;
