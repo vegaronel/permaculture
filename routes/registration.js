@@ -98,15 +98,12 @@ app.post("/register", upload.single("profilePicture"), async (req, res) => {
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Use the uploaded profile picture if available, otherwise use the default
-        const profilePicture = req.file ? `/uploads/${req.file.filename}` : '/uploads/profile-default.jpg';
 
         const newUser = new User({
             firstname,
             lastname,
             email,
-            password: hashedPassword,
-            profilePicture
+            password: hashedPassword
         });
 
         await newUser.save();
