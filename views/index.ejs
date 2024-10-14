@@ -387,7 +387,7 @@ async function sendTokenToServer(token) {
     }
 }
 
-messaging.onMessage((payload) => {
+    messaging.onMessage((payload) => {
     console.log('Message received. ', payload);
     const notificationTitle = payload.notification.title;
     const notificationOptions = {
