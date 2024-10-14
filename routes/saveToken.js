@@ -16,11 +16,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 
 
-app.post('/api/save-fcm-token',isAuthenticated, async(req, res) => {
+app.post('/api/save-fcm-token', isAuthenticated, async (req, res) => {
     const { token } = req.body;
-    const userID = req.session.userId;
+    const userId = req.session.userId;
     try {
-      const user = await User.findById(userID);
+      const user = await User.findById(userId);
       if (!user) {
         return res.status(404).json({ success: false, message: 'User not found' });
       }
@@ -28,13 +28,14 @@ app.post('/api/save-fcm-token',isAuthenticated, async(req, res) => {
         user.fcmTokens.push(token);
         await user.save();
       }
-      console.log('FCM token saved for user:', userID);
+      console.log('FCM token saved for user:', userId);
       res.json({ success: true });
     } catch (error) {
       console.error('Error saving FCM token:', error);
       res.status(500).json({ success: false, error: error.message });
     }
   });
+
 
 // Example route to send a push notification
 app.post('/api/send-notification', async (req, res) => {

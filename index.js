@@ -40,6 +40,26 @@ const io = socketIo(server);
 
 const lastNotificationStatus = {}; // This can also be stored in the database
 
+
+// In your server-side code
+async function cleanupInvalidTokens(userId) {
+  const user = await User.findById(userId);
+  if (!user) return;
+
+  for (const token of user.fcmTokens) {
+    try {
+      await admin.messaging().send({ token }, true);
+    } catch (error) {
+      if (error.code === 'messaging/invalid-registration-token' ||
+          error.code === 'messaging/registration-token-not-registered') {
+        // Remove the invalid token
+        user.fcmTokens = user.fcmTokens.filter(t => t !== token);
+      }
+    }
+  }
+  await user.save();
+}
+
 async function handleSoilMoistureUpdate(soilMoistureData) {
   if (!soilMoistureData) {
     console.log('Invalid soil moisture data, not saving to database');
@@ -95,7 +115,6 @@ async function handleSoilMoistureUpdate(soilMoistureData) {
             await newTask.save();
             console.log(`Task added to the To-Do list for user ${user.email}.`);
           }
-
           if (user.fcmTokens && user.fcmTokens.length > 0) {
             const message = {
               notification: {
@@ -110,15 +129,15 @@ async function handleSoilMoistureUpdate(soilMoistureData) {
               },
               tokens: user.fcmTokens
             };
-
+          
             try {
               const response = await admin.messaging().sendEachForMulticast(message);
               console.log('Successfully sent message:', response);
+              // Cleanup invalid tokens after sending
+              await cleanupInvalidTokens(user._id);
             } catch (error) {
               console.log('Error sending message:', error);
             }
-          } else {
-            console.log('No FCM tokens found for user:', user.email);
           }
 
           lastNotificationStatus[locationName] = 'dry';
