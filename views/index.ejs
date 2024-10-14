@@ -351,7 +351,7 @@
             if (permission === 'granted') {
             console.log('Notification permission granted.');
             // Force token refresh
-            const token = await messaging.getToken({ vapidKey: 'YOUR_VAPID_KEY' });
+            const token = await messaging.getToken({ vapidKey: 'BMW4W2ep89MwUklf-YKAbiTm8943yzfJzZo1whtLoRIVXnWFtuJ-BpCOvknc5GAZB71TSiciCxhDbZz3u9sxeFQ' });
             console.log('FCM Token:', token);
             document.getElementById('token-display').textContent = `FCM Token: ${token}`;
             await sendTokenToServer(token);

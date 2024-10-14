@@ -20,6 +20,16 @@ ref.on('value', (snapshot) => {
   console.log('Soil Moisture Value:', soilMoistureValue);
 });
 
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/firebase-messaging-sw.js')
+    .then((registration) => {
+      console.log('Service Worker registered with scope:', registration.scope);
+    })
+    .catch((error) => {
+      console.error('Service Worker registration failed:', error);
+    });
+}
+
 app.get('/soil-moisture',async(req,res)=>{
 
   axios.get('https://soil-moisture-monitoring-1d52c-default-rtdb.firebaseio.com/CurrentValue.json')
