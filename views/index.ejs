@@ -347,8 +347,8 @@
     // Request permission and get FCM token
     async function initializeFirebaseMessaging() {
     try {
-            const permission = await Notification.requestPermission();
-            if (permission === 'granted') {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
             console.log('Notification permission granted.');
             // Force token refresh
             const token = await messaging.getToken({ vapidKey: 'BMW4W2ep89MwUklf-YKAbiTm8943yzfJzZo1whtLoRIVXnWFtuJ-BpCOvknc5GAZB71TSiciCxhDbZz3u9sxeFQ' });
@@ -367,18 +367,14 @@
         document.getElementById('token-display').textContent = `Error: ${error.message}`;
     }
 }
-
-
-// Function to send token to server
 async function sendTokenToServer(token) {
     try {
-        const userId = getCurrentUserId();
         const response = await fetch('/api/save-fcm-token', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ token, userId })
+            body: JSON.stringify({ token })
         });
         if (!response.ok) {
             throw new Error('Failed to save token');
@@ -390,17 +386,16 @@ async function sendTokenToServer(token) {
         document.getElementById('notification-status').textContent += ' - Failed to send token to server';
     }
 }
-       // Handle incoming messages
-        messaging.onMessage((payload) => {
-            console.log('Message received. ', payload);
-            // Display the notification
-            const notificationTitle = payload.notification.title;
-            const notificationOptions = {
-                body: payload.notification.body,
-                icon: '/path/to/icon.png' // Update with your icon path
-            };
-            new Notification(notificationTitle, notificationOptions);
-        });
+
+messaging.onMessage((payload) => {
+    console.log('Message received. ', payload);
+    const notificationTitle = payload.notification.title;
+    const notificationOptions = {
+        body: payload.notification.body,
+        icon: '/path/to/icon.png'  // Update with your icon path
+    };
+    new Notification(notificationTitle, notificationOptions);
+});
     // Initialize messaging when the page loads
     document.addEventListener('DOMContentLoaded', initializeFirebaseMessaging);
 </script>
@@ -767,7 +762,6 @@ $('#plantDiedButton').click(function(e) {
 }
 
 
-    
 });
 
 
