@@ -27,6 +27,7 @@ app.post('/api/save-fcm-token', isAuthenticated, async (req, res) => {
       if (!user.fcmTokens.includes(token)) {
         user.fcmTokens.push(token);
         await user.save();
+        
       }
       console.log('FCM token saved for user:', userId);
       res.json({ success: true });
