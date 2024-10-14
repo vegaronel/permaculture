@@ -131,6 +131,7 @@ app.get('/dashboard', isAuthenticated, async (req, res) => {
       totalPages,
       filter,
       name: `${req.session.firstname} ${req.session.lastname}`,
+      firstname: user.firstname,
       day: weekday,
       dateToday: `${month}, ${dayWithComma}`,
       userId: req.session.userId, // Pass the userId to the view

@@ -65,9 +65,9 @@ app.post('/change-profile', upload.single('profilePicture'), async (req, res) =>
             await Post.updateMany(
                 { userId: userId },
                 { $set: { 
-                    "userProfile.profilePicture": user.profilePicture,
-                    "userProfile.firstname": user.firstname,
-                    "userProfile.lastname": user.lastname
+                    "profile": user.profilePicture,
+                    "firstname": user.firstname,
+                    "lastname": user.lastname
                 } }
             );
         }
@@ -83,5 +83,6 @@ app.post('/change-profile', upload.single('profilePicture'), async (req, res) =>
         res.status(500).json({ error: 'Server error', details: error.message });
     }
 });
+
 
 module.exports = app;
