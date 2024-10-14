@@ -32,52 +32,59 @@
       </form>
       
         <br>
+        <% function formatContent(content, maxLength) { %>
+          <% if (content.length > maxLength) { %>
+              <%- content.substring(0, maxLength).replace(/\n/g, '<br>') + '<strong>...See more</strong>' %>
+          <% } else { %>
+              <%- content.replace(/\n/g, '<br>') %>
+          <% } %>
+      <% } %>
 
-        <% posts.forEach(post => { %> 
-          <div class="card mb-4 shadow-sm bg-white rounded-lg border-0">
-            <div class="card-body d-flex align-items-start">
-              <!-- Profile Image -->
-              <div class="me-3">
-                <img src="<%= post.profile %>" alt="Profile Picture" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
+      <% posts.forEach(post => { %> 
+        <div class="card mb-4 shadow-sm bg-white rounded-lg border-0">
+          <div class="card-body d-flex align-items-start">
+            <!-- Profile Image -->
+            <div class="me-3">
+              <img src="<%= post.profile %>" alt="Profile Picture" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
+            </div>
+            
+            <!-- Post Content -->
+            <div class="flex-grow-1">
+              <!-- User Information -->
+              <div class="d-flex align-items-center">
+                <div>
+                  <div class="d-flex gap-3">
+                    <h6 class="mb-0 fw-bold"><%= post.userId.firstname %> <%= post.userId.lastname %></h6>
+                    <div class="px-2 post" data-category="<%= post.category %>" style="border-radius: 100px;">
+                      <small><%= post.category %></small>
+                    </div>
+                  </div>
+                  
+                  <small class="text-muted"><%= post.timeAgo %></small>
+                </div>
               </div>
               
-              <!-- Post Content -->
-              <div class="flex-grow-1">
-                <!-- User Information -->
-                <div class="d-flex align-items-center">
-                  <div>
-                    <div class="d-flex gap-3">
-                      <h6 class="mb-0 fw-bold"><%= post.userId.firstname %> <%= post.userId.lastname %></h6>
-                      <div class="px-2 post" data-category="<%= post.category %>" style="border-radius: 100px;">
-                        <small><%= post.category %></small>
-                      </div>
-                    </div>
-                    
-                    <small class="text-muted"><%= post.timeAgo %></small>
-                  </div>
-                </div>
-                
-                <!-- Post Title -->
-                <div class="mt-2">
-                  <a href="/post/<%= post._id %>" class="text-decoration-none text-dark">
-                    <p class="mb-0"><%= post.content %></p>
-                  </a>
-                </div>
-                
-                <!-- Like Button and Comment Count -->
-                <div class="mt-3 d-flex align-items-center">
-                  <button class="btn btn-outline-danger btn-sm like-btn" 
-                          data-id="<%= post._id %>" 
-                          data-liked="<%= post.isLiked %>">
-                    <i class="<%= post.isLiked ? 'fas' : 'far' %> fa-heart"></i> 
-                    <span class="like-count"><%= post.likes || 0 %></span>
-                  </button>
-                  <span class="ms-2 text-muted"><%= post.commentsCount || 0 %> comments</span>
-                </div>
+              <!-- Post Title -->
+              <div class="mt-2">
+                <a href="/post/<%= post._id %>" class="text-decoration-none text-dark">
+                  <p><%- formatContent(post.content, 100) %></p> <!-- Pass maxLength to the function -->
+                </a>
+              </div>
+              
+              <!-- Like Button and Comment Count -->
+              <div class="mt-3 d-flex align-items-center">
+                <button class="btn btn-outline-danger btn-sm like-btn" 
+                        data-id="<%= post._id %>" 
+                        data-liked="<%= post.isLiked %>">
+                  <i class="<%= post.isLiked ? 'fas' : 'far' %> fa-heart"></i> 
+                  <span class="like-count"><%= post.likes || 0 %></span>
+                </button>
+                <span class="ms-2 text-muted"><%= post.commentsCount || 0 %> comments</span>
               </div>
             </div>
           </div>
-        <% }) %>
+        </div>
+      <% }) %>
       </div>
     
       <div class="col p-lg-3 p-md-0">
@@ -140,13 +147,12 @@
 </div>
 
 <%- include("partials/UserFooter.ejs") %>
-
 <script>
   $(document).ready(function() {
     $('.post').each(function() {
       var title = $(this).data('category').toLowerCase();
       var backgroundColor;
-  
+
       if (title === 'health') {
         backgroundColor = '#E4A951';
       } else if (title === 'plants') {
@@ -156,20 +162,20 @@
       } else {
         backgroundColor = '#f0f0f0'; // Default color
       }
-  
+
       $(this).css('background-color', backgroundColor);
     });
-  
+
     $('.like-btn').each(function() {
       const button = $(this);
       const isLiked = button.data('liked') === true;
       updateLikeButton(button, isLiked);
     });
-  
+
     $('.like-btn').click(function() {
       const button = $(this);
       const postId = button.data('id');
-  
+
       $.ajax({
         url: `/like/${postId}`,
         method: 'POST',
@@ -185,7 +191,39 @@
       });
     });
 
-  
+    // Handle post creation with line breaks
+    $('#postForm').on('submit', function(e) {
+      e.preventDefault(); // Prevent default form submission
+
+      // Get the content of the textarea and replace line breaks with <br>
+      var content = $('textarea[name="content"]').val();
+      var formattedContent = content.replace(/\n/g, '<br>');
+
+      // Prepare the data to send
+      var formData = {
+        content: formattedContent,
+        category: $('select[name="category"]').val() // Assuming you have a category select field
+      };
+
+      // Send the AJAX request
+      $.ajax({
+        url: '/create',
+        method: 'POST',
+        data: formData,
+        success: function(response) {
+          if (response.success) {
+            // Optionally, you can refresh the posts or append the new post to the DOM
+            location.reload(); // Reload to see the new post
+          } else {
+            alert('Error creating post. Please try again.');
+          }
+        },
+        error: function() {
+          alert('Error creating post. Please try again.');
+        }
+      });
+    });
+
     function updateLikeButton(button, isLiked) {
       if (isLiked) {
         button.find('i').removeClass('far').addClass('fas');
@@ -195,4 +233,4 @@
       button.data('liked', isLiked);
     }
   });
-  </script>
+</script>
