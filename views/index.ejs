@@ -163,21 +163,21 @@
                         <div class="d-flex gap-3">
                             <div class="">
                                 <label for="" class="form-label">Plant Name</label>
-                                <input class="form-control" id="plantName" type="text" value="" name="">
+                                <input class="form-control" id="plantName" type="text" value="" name="" disabled>
                             </div>
                             <div class="">
                                 <label for="" class="form-label">Date Planted</label>
-                                <input class="form-control" id="datePlanted" type="text" value="" name="">
+                                <input class="form-control" id="datePlanted" type="text" value="" name="" disabled>
                             </div>                    
                         </div>
                         <div class="d-flex gap-3">
                             <div>
                                 <label for="" class="form-label">Soil Status</label>
-                                <input class="form-control" id="soilStatus" type="text" value="" name="">
+                                <input class="form-control" id="soilStatus" type="text" value="" name="" disabled>
                             </div>
                             <div>
                                 <label for="" class="form-label">Location</label>
-                                <input class="form-control" id="plantLocation" type="text" value="" name="">
+                                <input class="form-control" id="plantLocation" type="text" value="" name="" disabled>
                             </div>
                         </div>
                         <div class="form-group d-flex gap-3">
@@ -214,7 +214,7 @@
 
                         <div class="">
                             <label for="" class="form-label">Method of Planting</label>
-                            <input class="form-control" id="methodOfPlanting" type="text" value="" name="">
+                            <input class="form-control" id="methodOfPlanting" type="text" value="" name="" disabled>
                         </div>
                     </div>
                 </div>
@@ -225,7 +225,7 @@
         </div>
         </div>
     </div>
-    
+
     <!-- Confirmation Modal -->
     <div class="modal fade" id="confirmationModal" style="z-index: 9999;" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -469,17 +469,17 @@ async function sendTokenToServer(token) {
 });
 
 
-$(document).ready(function() {
+    $(document).ready(function() {
 
-let customPlantID = '';
-
-const plantsTable = $('#plantsTable').DataTable({
+    let customPlantID = '';
+    const plantsTable = $('#plantsTable').DataTable({
         "paging": true,
         "searching": true,
         "lengthChange": false,
+        "order": [[2, 'desc']], // Sort the plantingDate column (index 2) in descending order (newest to oldest)
         "pageLength": 5,
         "processing": true,
-        "serverSide": false, // Change this to true if you implement server-side processing
+        "serverSide": false,
         "ajax": {
             "url": "/plants", // Ensure this endpoint returns all plants data
             "type": "GET",
@@ -508,8 +508,19 @@ const plantsTable = $('#plantsTable').DataTable({
                     return '<button class="btn btn-primary view-plant" data-custom-id="' + data + '">View</button>';
                 }
             }
+        ],
+        "columnDefs": [
+            {
+                "targets": 2, // Target the plantingDate column
+                "type": "date", // Define the type as date for proper sorting
+                "render": function(data) {
+                    const date = new Date(data);
+                    return date.toLocaleDateString('en-GB', {day: '2-digit', month: '2-digit', year: 'numeric'});
+                }
+            }
         ]
     });
+
 
     $('.complete-task-btn').on('click', function() {
             const taskId = $(this).data('id');
@@ -553,50 +564,44 @@ const plantsTable = $('#plantsTable').DataTable({
         $('#harvestConfirmationModal').modal('show');
     });
 
-    // Handle the confirmation when the user clicks "Yes, Harvest"
     $('#confirmHarvestButton').click(function() {
-        const harvestQuality = $('#harvestConfirmationModal').data('quality');
+    const harvestQuality = $('#harvestConfirmationModal').data('quality');
 
-        // Make the AJAX call
-        $.ajax({
-            url: `/plant/harvest/${customPlantID}`,
-            method: 'POST',
-            data: { harvestStatus: harvestQuality },
-            success: function(response) {
-                $('#harvestConfirmationModal').modal('hide');
-                $('#plantDetailsModal').modal('hide');
-                if (response.success) {
-                     // Show the overlay and the success notification
-                     $('#overlay').fadeIn();
-                    const $notification = $('#successHarvestNotification');
-                    $notification.removeClass('d-none').addClass('show');
+    console.log('Harvest confirmed. Making AJAX request...');
+    $.ajax({
+        url: `/plant/harvest/${customPlantID}`,
+        method: 'POST',
+        data: { harvestStatus: harvestQuality },
+        success: function(response) {
+            console.log('AJAX success response:', response);
+            $('#harvestConfirmationModal').modal('hide');
+            $('#plantDetailsModal').modal('hide');
+            if (response.success) {
+                // Display notification and update table
+                $('#overlay').fadeIn();
+                const $notification = $('#successHarvestNotification');
+                $notification.removeClass('d-none').addClass('show');
 
-                    // Hide the notification and overlay after 3 seconds
-                    setTimeout(() => {
-                        $notification.removeClass('show').addClass('d-none');
-                        $('#overlay').fadeOut();
-                    }, 1500);
-                    
-                    // Reset the harvest form
-                    $('#harvestStatus').val('');
-                    $('#harvestButton').prop('disabled', false).text('Harvest');
+                setTimeout(() => {
+                    $notification.removeClass('show').addClass('d-none');
+                    $('#overlay').fadeOut();
+                }, 1500);
 
-                    // Reset the "Plant Died" select dropdown and button
-                    $('#plantDied').val('');  // Reset select to default option
-                    $('#plantDiedButton').prop('disabled', false).text('Plant Died');  // Re-enable button and reset text
+                $('#harvestStatus').val('');
+                $('#harvestButton').prop('disabled', true).text('Harvest'); // Reset button to default state
 
-                    updatePlantsTable(); // Update the table after harvest
-                } else {
-                    alert('Failed to harvest plant.');
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error('Error harvesting plant:', status, error);
-                alert('Error processing the request. Please check the console for details.');
-                $('#harvestButton').prop('disabled', false).text('Harvest');
+                updatePlantsTable(); // Make sure this runs as expected
+            } else {
+                alert('Failed to harvest plant.');
             }
-        });
+        },
+        error: function(xhr, status, error) {
+            console.error('Error harvesting plant:', status, error);
+            alert('Error processing the request. Please check the console for details.');
+        }
     });
+});
+
 $('#plantDiedButton').click(function(e) {
         e.preventDefault(); // Prevent default form action
 
@@ -710,6 +715,15 @@ $('#plantDiedButton').click(function(e) {
         $('#growthProgressBar').css('width', progressPercentage + '%');
         $('#growthProgressBar').attr('aria-valuenow', progressPercentage);
         $('#growthProgressBar').text(Math.round(progressPercentage) + '%');
+
+        // Enable or disable the harvest button based on progress percentage
+        if (progressPercentage === 100) {
+            $('#harvestButton').prop('disabled', false).css('background-color', '#59A645'); // Enable and style the button
+        } else {
+            $('#harvestButton').prop('disabled', true).css('background-color', '#D9D9D9'); // Disable and style the button
+        }
+        
+        
     }
 
     function updatePlantsTable() {
@@ -750,6 +764,7 @@ $('#plantDiedButton').click(function(e) {
                     "paging": true,   
                     "searching": true,   
                     "lengthChange": false,
+                    "order": [[3, 'desc']],
                     "pageLength": 5
                 });
             } else {
