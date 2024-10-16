@@ -99,7 +99,6 @@
                 <form id="addPlantForm" class="p-5 ajax-form" >
                     <input type="hidden" name="userId" value="<%= userId %>"> <!-- Use passed userId here -->                     
                     <div class="form-group">
-                        <label for="plantCollectionId">Select Plant</label>
                         <select class="form-control input-custom" name="plantCollectionId" id="plantCollectionId" hidden>
                             <option value="">Select a Plant</option>
                             <% plantCollections.forEach(function(plant) { %>

@@ -3,6 +3,7 @@ const Post = require('../models/Post');
 const User = require('../models/user');
 const Comment = require('../models/comment');
 const auth = require('../middleware/athenticateUser');
+const path = require('path');
 const app = express();
 const multer = require('multer');
 const cloudinary = require('../config/cloudinary');
@@ -12,6 +13,7 @@ const { formatDistanceToNow } = require('date-fns'); // Import date-fns
 
 require('dotenv').config();
 
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Multer storage configuration to upload directly to Cloudinary
 const storage = new CloudinaryStorage({
@@ -160,22 +162,7 @@ app.get('/posts', auth, async (req, res) => {
   }
 });
 
-// Get a specific post with comments
-app.get('/post/:postId', auth, async (req, res) => {
-  const { postId } = req.params;
 
-  try {
-    const post = await Post.findById(postId).populate('userId', 'firstname lastname email');
-    const comments = await Comment.find({ postId: postId })
-      .populate('userId', 'firstname lastname email')
-      .sort({ createdAt: -1 });
-
-    res.render('post', { post, comments });
-  } catch (error) {
-    console.error('Error fetching post or comments:', error);
-    res.status(500).send('Error retrieving post and comments');
-  }
-});
 
 
 module.exports = app;
