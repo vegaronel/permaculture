@@ -37,9 +37,6 @@
         <video class="camera-preview" id="camera" autoplay style=" display: none;"></video>
         <canvas id="photo-canvas" style="display: none;"></canvas>
       </div>
- 
-   
-     
 
       <div class="camera-image-preview d-flex flex-column-reverse ">
         <!-- Image Preview and Camera view -->
@@ -93,13 +90,8 @@
 
 
     </div>
-
   </div>
 
-  <style>
-
-    
-</style>
 <div id="chatbot" class="chatbot">
   <div class="chat-header">
       <span class="chat-title">Chatbot</span>
@@ -120,7 +112,7 @@
       <button id="send-button">Send</button>
   </div>
 </div>
-<button id="open-chatbot-button">Chat</button>
+<button class="rounded-circle" id="open-chatbot-button">Chat</button>
     </main>
 </div>
 
@@ -129,212 +121,231 @@
 
   
       <script>
-        $(document).ready(function () {
-    const $chatBotContainer = $('#chat-bot-container');
-    const $openChatbotButton = $('#open-chatbot-button');
-    const $closeButton = $('#close-button');
+    $(document).ready(function () 
+      {
+        const $chatBotContainer = $('#chat-bot-container');
+        const $openChatbotButton = $('#open-chatbot-button');
+        const $closeButton = $('#close-button');
+        const $chatbot = $("#chatbot");
 
-    // Open chatbot when the button is clicked
-    $openChatbotButton.on('click', function () {
-        $chatBotContainer.show();
-        $openChatbotButton.hide();
-    });
-
-    // Close chatbot when the close button is clicked
-    $closeButton.on('click', function () {
-        $chatBotContainer.hide();
+        $chatbot.css('display', 'none')
         $openChatbotButton.show();
-    });
-});
 
-      </script>
+        // Open chatbot when the button is clicked
+        $openChatbotButton.on('click', function () 
+          {
+              $chatBotContainer.show();
+              $openChatbotButton.hide();
+          });
+
+        // Close chatbot when the close button is clicked
+        $closeButton.on('click', function () 
+          {
+              $chatBotContainer.hide();
+              $openChatbotButton.show();
+          });
+      });
+
+</script>
 
 <script>
-  $(document).ready(function () {
-    const $takePhotoBtn = $('#take-photo');
-    const $switchCameraBtn = $('#switch-camera');
-    const $video = $('#camera');
-    const $canvas = $('#photo-canvas');
-    const $imagePreview = $('#image-preview');
-    const $capturedImageInput = $('#capturedImage');
-    const $fileUpload = $('#file-upload');
-    const $cameraImagePreview = $('.camera-image-preview');
+  $(document).ready(function () 
+    {
+      const $takePhotoBtn = $('#take-photo');
+      const $switchCameraBtn = $('#switch-camera');
+      const $video = $('#camera');
+      const $canvas = $('#photo-canvas');
+      const $imagePreview = $('#image-preview');
+      const $capturedImageInput = $('#capturedImage');
+      const $fileUpload = $('#file-upload');
+      const $cameraImagePreview = $('.camera-image-preview');
 
-    let stream;
-    let isCameraActive = false;
-    let currentFacingMode = 'environment'; // Default to rear camera
+      let stream;
+      let isCameraActive = false;
+      let currentFacingMode = 'environment'; // Default to rear camera
 
-    // Take Photo button click handler
-    $takePhotoBtn.on('click', function () {
-        if (!isCameraActive) {
-            startCamera();
-        } else {
-            capturePhoto();
-        }
-    });
+      // Take Photo button click handler
+      $takePhotoBtn.on('click', function () {
+          if (!isCameraActive) {
+              startCamera();
+          } else {
+              capturePhoto();
+          }
+      });
 
     // Start camera function
-    function startCamera() {
-        const constraints = {
-            video: {
-                facingMode: currentFacingMode // Use front or rear camera based on the current setting
+    function startCamera() 
+      {
+          const constraints = 
+            {
+                video: 
+                  {
+                      facingMode: currentFacingMode // Use front or rear camera based on the current setting
+                  }
+            };
+
+          if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) 
+            {
+                navigator.mediaDevices.getUserMedia(constraints)
+                    .then(videoStream => 
+                      {
+                          stream = videoStream;
+                          $video[0].srcObject = stream;
+                          $video.show();
+                          $imagePreview.hide();
+                          $cameraImagePreview.append($video);
+                          isCameraActive = true;
+                          $takePhotoBtn.text('Capture Photo');
+                          $takePhotoBtn.addClass('bg-primary')
+                          $switchCameraBtn.show(); // Show switch camera button when camera is active
+                      })
+                    .catch(err => console.error("Error accessing camera: ", err));
             }
-        };
+      }
 
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            navigator.mediaDevices.getUserMedia(constraints)
-                .then(videoStream => {
-                    stream = videoStream;
-                    $video[0].srcObject = stream;
-                    $video.show();
-                    $imagePreview.hide();
-                    $cameraImagePreview.append($video);
-                    isCameraActive = true;
-                    $takePhotoBtn.text('Capture Photo');
-                    $switchCameraBtn.show(); // Show switch camera button when camera is active
-                })
-                .catch(err => console.error("Error accessing camera: ", err));
+    function capturePhoto() 
+      {
+        $canvas[0].width = $video[0].videoWidth;
+        $canvas[0].height = $video[0].videoHeight;
+        const context = $canvas[0].getContext('2d');
+        context.drawImage($video[0], 0, 0, $canvas[0].width, $canvas[0].height);
+
+        const imageData = $canvas[0].toDataURL('image/png');
+        $imagePreview.attr('src', imageData).show();
+        $video.hide();
+        $capturedImageInput.val(imageData);  // Store image in hidden input
+
+        // Stop the camera stream
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
         }
-    }
 
-    function capturePhoto() {
-    $canvas[0].width = $video[0].videoWidth;
-    $canvas[0].height = $video[0].videoHeight;
-    const context = $canvas[0].getContext('2d');
-    context.drawImage($video[0], 0, 0, $canvas[0].width, $canvas[0].height);
-
-    const imageData = $canvas[0].toDataURL('image/png');
-    $imagePreview.attr('src', imageData).show();
-    $video.hide();
-    $capturedImageInput.val(imageData);  // Store image in hidden input
-
-    // Stop the camera stream
-    if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-    }
-
-    isCameraActive = false;
-    $takePhotoBtn.text('Take Photo');
-    $switchCameraBtn.hide();  // Hide switch camera button when camera is stopped
-}
+        isCameraActive = false;
+        $takePhotoBtn.text('Take Photo');
+        $switchCameraBtn.hide();  // Hide switch camera button when camera is stopped
+      }
 
 
     // Switch camera handler
-    $switchCameraBtn.on('click', function () {
-        // Switch between front and rear camera
-        currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
-        if (isCameraActive) {
-            // Stop the current stream and restart the camera with the new facing mode
-            stream.getTracks().forEach(track => track.stop());
-            startCamera();
-        }
-    });
+    $switchCameraBtn.on('click', function () 
+      {
+          // Switch between front and rear camera
+          currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+          if (isCameraActive) 
+            {
+                // Stop the current stream and restart the camera with the new facing mode
+                stream.getTracks().forEach(track => track.stop());
+                startCamera();
+            }
+      });
 
     // File upload handler
-    $fileUpload.on('change', function (event) {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                $imagePreview.attr('src', e.target.result).show();
-                $video.hide();
-                $capturedImageInput.val('');  // Clear any previously captured image
-            };
-            reader.readAsDataURL(file);
-        }
-    });
-
-  const $messagesContainer = $('#chat-messages');
-const $predefinedOptions = $('#predefined-options');
-
-$(document).ready(function() {
-            const $chatbot = $('#chatbot');
-            const $openChatbotButton = $('#open-chatbot-button');
-            const $minimizeButton = $('#minimize-button');
-            const $closeButton = $('#close-button');
-            const $messagesContainer = $('#chat-messages');
-            const $predefinedOptions = $('#predefined-options');
-            const $chatInput = $('#chat-input');
-            const $sendButton = $('#send-button');
-
-            $minimizeButton.on('click', function() {
-                $chatbot.toggleClass('minimized');
-                $(this).text($chatbot.hasClass('minimized') ? '+' : '-');
-            });
-
-            $closeButton.on('click', function() {
-                $chatbot.hide();
-                $openChatbotButton.show();
-            });
-
-            $openChatbotButton.on('click', function() {
-                $chatbot.show();
-                $chatbot.removeClass('minimized');
-                $minimizeButton.text('-');
-                $(this).hide();
-            });
-
-            function updateOptionsVisibility() {
-                if ($messagesContainer.children().length === 1) {
-                    $predefinedOptions.show();
-                } else {
-                    $predefinedOptions.hide();
-                }
+    $fileUpload.on('change', function (event) 
+      {
+          const file = event.target.files[0];
+          if (file) 
+            {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    $imagePreview.attr('src', e.target.result).show();
+                    $video.hide();
+                    $capturedImageInput.val('');  // Clear any previously captured image
+                };
+                reader.readAsDataURL(file);
             }
+      });
 
-            $predefinedOptions.on('click', '.option-button', async function() {
-                const option = $(this).data('option');
-                const message = $(this).text();
-                await sendMessage(message, option);
-            });
+    const $messagesContainer = $('#chat-messages');
+    const $predefinedOptions = $('#predefined-options');
 
-            $sendButton.on('click', async function() {
-                const message = $chatInput.val().trim();
-                if (message) {
-                    await sendMessage(message, message);
-                }
-            });
+  $(document).ready(function() {
+              const $chatbot = $('#chatbot');
+              const $openChatbotButton = $('#open-chatbot-button');
+              const $minimizeButton = $('#minimize-button');
+              const $closeButton = $('#close-button');
+              const $messagesContainer = $('#chat-messages');
+              const $predefinedOptions = $('#predefined-options');
+              const $chatInput = $('#chat-input');
+              const $sendButton = $('#send-button');
 
-            $chatInput.on('keypress', async function(e) {
-                if (e.which === 13) {
-                    const message = $(this).val().trim();
-                    if (message) {
-                        await sendMessage(message, message);
-                    }
-                }
-            });
+              $minimizeButton.on('click', function() {
+                  $chatbot.toggleClass('minimized');
+                  $(this).text($chatbot.hasClass('minimized') ? '+' : '-');
+              });
 
-            async function sendMessage(displayMessage, serverMessage) {
-                appendMessage(displayMessage, 'sent');
-                $chatInput.val('');
-                updateOptionsVisibility();
+              $closeButton.on('click', function() {
+                  $chatbot.hide();
+                  $openChatbotButton.show();
+              });
 
-                try {
-                    const response = await fetch('/chat', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ content: serverMessage })
-                    });
+              $openChatbotButton.on('click', function() {
+                  $chatbot.show();
+                  $chatbot.removeClass('minimized');
+                  $minimizeButton.text('-');
+                  $(this).hide();
+              });
 
-                    const data = await response.json();
-                    appendMessage(data.response, 'received');
-                } catch (error) {
-                    console.error('Error:', error);
-                    appendMessage('Sorry, there was an error processing your request.', 'received');
-                }
-            }
+              function updateOptionsVisibility() {
+                  if ($messagesContainer.children().length === 1) {
+                      $predefinedOptions.show();
+                  } else {
+                      $predefinedOptions.hide();
+                  }
+              }
 
-            function appendMessage(content, type) {
-                const $message = $('<div>')
-                    .addClass(`message ${type}`)
-                    .html(`<p>${content.replace(/\n/g, '<br>')}</p>`)
-                    .appendTo($messagesContainer);
+              $predefinedOptions.on('click', '.option-button', async function() {
+                  const option = $(this).data('option');
+                  const message = $(this).text();
+                  await sendMessage(message, option);
+              });
 
-                $messagesContainer.scrollTop($messagesContainer[0].scrollHeight);
-            }
+              $sendButton.on('click', async function() {
+                  const message = $chatInput.val().trim();
+                  if (message) {
+                      await sendMessage(message, message);
+                  }
+              });
 
-            updateOptionsVisibility();
-        });
-});
+              $chatInput.on('keypress', async function(e) {
+                  if (e.which === 13) {
+                      const message = $(this).val().trim();
+                      if (message) {
+                          await sendMessage(message, message);
+                      }
+                  }
+              });
+
+              async function sendMessage(displayMessage, serverMessage) {
+                  appendMessage(displayMessage, 'sent');
+                  $chatInput.val('');
+                  updateOptionsVisibility();
+
+                  try {
+                      const response = await fetch('/chat', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ content: serverMessage })
+                      });
+
+                      const data = await response.json();
+                      appendMessage(data.response, 'received');
+                  } catch (error) {
+                      console.error('Error:', error);
+                      appendMessage('Sorry, there was an error processing your request.', 'received');
+                  }
+              }
+
+              function appendMessage(content, type) {
+                  const $message = $('<div>')
+                      .addClass(`message ${type}`)
+                      .html(`<p>${content.replace(/\n/g, '<br>')}</p>`)
+                      .appendTo($messagesContainer);
+
+                  $messagesContainer.scrollTop($messagesContainer[0].scrollHeight);
+              }
+
+              updateOptionsVisibility();
+          });
+  });
 
     </script>
