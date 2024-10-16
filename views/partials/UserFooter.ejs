@@ -55,15 +55,19 @@ $(document).ready(function() {
     const pageTitle = $('#page-title');
     
     if (currentPath.includes('/dashboard')) {
-        pageTitle.text('DASHBOARD');
+        pageTitle.text('Dashboard');
     } else if (currentPath.includes('/plant-identification')) {
-        pageTitle.text('IDENTIFICATION');
+        pageTitle.text('Identification');
     } else if (currentPath.includes('/community')) {
-        pageTitle.text('COMMUNITY');
+        pageTitle.text('Community');
     } else if (currentPath.includes('/email')) {
-        pageTitle.text('EMAIL US');
+        pageTitle.text('Email us');
     }else if(currentPath.includes('/posts')){
-        pageTitle.text('COMMUNITY FORUM');
+        pageTitle.text('Community Forum');
+    }else if(currentPath.includes('/post')){
+        pageTitle.text('Community Forum > Post');
+    }else if(currentPath.includes('/add-new-plant')){
+        pageTitle.text('Add Plant');
     }
 
     // Menu toggle and X-bar transformation

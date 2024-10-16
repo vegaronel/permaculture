@@ -1,7 +1,6 @@
 <%- include("partials/UserHeader.ejs") %>
 
   <div class="container-fluid">
-
     <div class="d-flex row">
       <div class="col-lg-8 col-md-12">
         <form action="/create" class="post-form-container mt-3" method="POST" enctype="multipart/form-data">
@@ -10,12 +9,14 @@
                   <img src="<%= profile %>" class="p-3" alt="" style="width: 80px; height: 80px; object-fit: cover; border-radius: 50%;">
                   <textarea class="form-control p-2 border border-light" name="content" placeholder="What's on your plant?" required></textarea>
               </div>
-              <div class="d-flex align-items-center justify-content-between">
-                <div class="d-flex align-items-center">
-                  <img src="" alt="" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-right: 10px; opacity: 0;">
-  
-                  <img id="preview" src="<%= profile %>" alt="" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-right: 10px; opacity: 0; display: none;">
+              <div class="p-3">          
+                <img id="preview" src="<%= profile %>" alt="" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-right: 10px; opacity: 0; display: none;">
+              </div>
+              <img id="preview" src="<%= profile %>" alt="" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-right: 10px; opacity: 0; display: none;">
                   
+              <div class="d-flex align-items-center justify-content-between p-4">
+                <div class="d-flex align-items-center">
+        
                   <label for="image" style="background: linear-gradient(to right, #f0e68c, #f0a1a8); padding: 7px; cursor: pointer; color: #fff; border-radius: 100px;">
                       <i class="fas fa-image"></i> Choose Image
                   </label>
@@ -28,7 +29,7 @@
                       <option value="Recipes">Recipes</option>
                   </select>
               </div>
-              <div class="px-4">
+              <div class="" style="margin-right: 10px;">
                 <button type="submit" class="btn text-white" style="background-color: #43B5E5;" >Post</button>
               </div>
             </div>
