@@ -99,13 +99,12 @@
                                 <tbody>
                                     <% plants.forEach(plant => { %>
                                         <tr>
-                                            <td><img src="<%= plant.image %>" alt="" width="70px"></td>
+                                            <td><img src="<%= plant.image %>" alt=""></td>
                                             <td><%= plant.name %></td>
                                             <td><%= new Date(plant.plantingDate).toLocaleDateString('en-GB', {day: '2-digit', month: '2-digit', year: 'numeric'}) %></td>
                                             <td><%= plant.status %></td>            
                                             <td>
                                                 <button class="btn btn-primary view-plant" data-custom-id="<%= plant.customId %>">View</button>
-
                                             </td>                             
                                         </tr>
                                     <% }) %>
@@ -268,58 +267,23 @@
         </div>
     </div>
 
+    <!-- Gray overlay -->
+    <div id="overlay"></div>
 
-<style>
-    /* Gray overlay background */
-    #overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent gray */
-        z-index: 1040; /* Below the notification */
-        display: none; /* Initially hidden */
-    }
-
-    /* Notification styles */
-    #successHarvestNotification.show {
-        opacity: 1;
-    }
-
-    #successHarvestNotification {
-        opacity: 0;
-        transition: opacity 0.5s;
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        z-index: 1050;
-        text-align: center;
-        width: 300px;
-    }
-</style>
-
-<!-- Gray overlay -->
-<div id="overlay"></div>
-
-<!-- Notification -->
-<div id="successHarvestNotification" class="alert alert-success d-none shadow-lg rounded" role="alert">
-    <img src="/images/Party.gif" alt="Plant Icon" style="width: 100px; height: 100px; margin-bottom: 10px;">
-    <h5>Congratulations!</h5>
-    <p>Your plant has been successfully harvested!</p>
-</div>
-
-  
-<div id="successHarvestNotification" class="alert alert-success d-none shadow-lg rounded" role="alert" 
-     style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1050; transition: all 0.5s; text-align: center; width: 300px;">
-    <img src="/images/Party.gif" alt="Plant Icon">
-    <h5>Congratulations!</h5>
-    <p>Your plant has been successfully harvested!</p>
-</div>
-
+    <!-- Notification -->
+    <div id="successHarvestNotification" class="alert alert-success d-none shadow-lg rounded" role="alert">
+        <img src="/images/Party.gif" alt="Plant Icon" style="width: 100px; height: 100px; margin-bottom: 10px;">
+        <h5>Congratulations!</h5>
+        <p>Your plant has been successfully harvested!</p>
+    </div>
 
     
+    <div id="successHarvestNotification" class="alert alert-success d-none shadow-lg rounded" role="alert" 
+        style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1050; transition: all 0.5s; text-align: center; width: 300px;">
+        <img src="/images/Party.gif" alt="Plant Icon">
+        <h5>Congratulations!</h5>
+        <p>Your plant has been successfully harvested!</p>
+    </div>    
 
 </div>
 <!-- /#page-content-wrapper -->
@@ -328,469 +292,541 @@
 
 
 <script>
-    // Firebase configuration
-    const firebaseConfig = {
-        apiKey: "AIzaSyCxmfWGdh_1oIuIZ-OFJ3hQI4jn5FiE_JM",
-        authDomain: "soil-moisture-monitoring-1d52c.firebaseapp.com",
-        databaseURL: "https://soil-moisture-monitoring-1d52c-default-rtdb.firebaseio.com",
-        projectId: "soil-moisture-monitoring-1d52c",
-        storageBucket: "soil-moisture-monitoring-1d52c.appspot.com",
-        messagingSenderId: "425533189140",
-        appId: "1:425533189140:web:09ad7931def112b1740b01",
-        measurementId: "G-86ZGP33GW0"
-    };
+    
+    const firebaseConfig = 
+        {
+            apiKey: "AIzaSyCxmfWGdh_1oIuIZ-OFJ3hQI4jn5FiE_JM",
+            authDomain: "soil-moisture-monitoring-1d52c.firebaseapp.com",
+            databaseURL: "https://soil-moisture-monitoring-1d52c-default-rtdb.firebaseio.com",
+            projectId: "soil-moisture-monitoring-1d52c",
+            storageBucket: "soil-moisture-monitoring-1d52c.appspot.com",
+            messagingSenderId: "425533189140",
+            appId: "1:425533189140:web:09ad7931def112b1740b01",
+            measurementId: "G-86ZGP33GW0"
+        };
 
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
 
     const messaging = firebase.messaging();
 
     // Request permission and get FCM token
-    async function initializeFirebaseMessaging() {
-    try {
-        const permission = await Notification.requestPermission();
-        if (permission === 'granted') {
-            console.log('Notification permission granted.');
-            // Force token refresh
-            const token = await messaging.getToken({ vapidKey: 'BMW4W2ep89MwUklf-YKAbiTm8943yzfJzZo1whtLoRIVXnWFtuJ-BpCOvknc5GAZB71TSiciCxhDbZz3u9sxeFQ' });
-            console.log('FCM Token:', token);
-            document.getElementById('token-display').textContent = `FCM Token: ${token}`;
-            await sendTokenToServer(token);
-            document.getElementById('notification-status').textContent = 'Notifications enabled';
-        } else {
-            console.log('Unable to get permission to notify.');
-            document.getElementById('notification-status').textContent = 'Notifications disabled';
-            document.getElementById('token-display').textContent = 'No token available - permission denied';
-        }
-    } catch (error) {
-        console.error('Error initializing Firebase messaging:', error);
-        document.getElementById('notification-status').textContent = 'Error initializing notifications';
-        document.getElementById('token-display').textContent = `Error: ${error.message}`;
+    async function initializeFirebaseMessaging() 
+    {
+        try 
+            {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') 
+                {
+                    console.log('Notification permission granted.');
+                    // Force token refresh
+                    const token = await messaging.getToken({ vapidKey: 'BMW4W2ep89MwUklf-YKAbiTm8943yzfJzZo1whtLoRIVXnWFtuJ-BpCOvknc5GAZB71TSiciCxhDbZz3u9sxeFQ' });
+                    console.log('FCM Token:', token);
+                    document.getElementById('token-display').textContent = `FCM Token: ${token}`;
+                    await sendTokenToServer(token);
+                    document.getElementById('notification-status').textContent = 'Notifications enabled';
+                } 
+                else 
+                    {
+                        console.log('Unable to get permission to notify.');
+                        document.getElementById('notification-status').textContent = 'Notifications disabled';
+                        document.getElementById('token-display').textContent = 'No token available - permission denied';
+                    }
+            } 
+        catch (error) 
+            {
+                console.error('Error initializing Firebase messaging:', error);
+                document.getElementById('notification-status').textContent = 'Error initializing notifications';
+                document.getElementById('token-display').textContent = `Error: ${error.message}`;
+            }
     }
-}
-async function sendTokenToServer(token) {
-    try {
-        const response = await fetch('/api/save-fcm-token', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ token })
-        });
-        if (!response.ok) {
-            throw new Error('Failed to save token');
-        }
-        console.log('Token successfully sent to server');
-        document.getElementById('notification-status').textContent += ' - Token sent to server';
-    } catch (error) {
-        console.error('Error sending token to server:', error);
-        document.getElementById('notification-status').textContent += ' - Failed to send token to server';
+    async function sendTokenToServer(token) 
+    {
+        try 
+            {
+                const response = await fetch('/api/save-fcm-token', 
+                    {
+                        method: 'POST',
+                        headers: 
+                        {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ token })
+                    });
+                if (!response.ok) 
+                    {
+                        throw new Error('Failed to save token');
+                    }
+                console.log('Token successfully sent to server');
+                document.getElementById('notification-status').textContent += ' - Token sent to server';
+            } 
+        catch (error) 
+            {
+                console.error('Error sending token to server:', error);
+                document.getElementById('notification-status').textContent += ' - Failed to send token to server';
+            }
     }
-}
 
-    messaging.onMessage((payload) => {
-    console.log('Message received. ', payload);
-    const notificationTitle = payload.notification.title;
-    const notificationOptions = {
-        body: payload.notification.body,
-        icon: './images/logo copy.svg'  // Update with your icon path
-    };
-    new Notification(notificationTitle, notificationOptions);
-});
-    // Initialize messaging when the page loads
+    messaging.onMessage((payload) => 
+        {
+            console.log('Message received. ', payload);
+            const notificationTitle = payload.notification.title;
+            const notificationOptions = 
+                {
+                    body: payload.notification.body,
+                    icon: './images/logo copy.svg'
+                };
+            new Notification(notificationTitle, notificationOptions);
+        });
+
     document.addEventListener('DOMContentLoaded', initializeFirebaseMessaging);
+
 </script>
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
     const socket = io();
-    const userId = '<%= userId %>'; // Get the userId from the server-side render
-    socket.on('soilMoistureUpdate', (data) => {
-    const $container = $('#soilMoistureContainer');
-    if (!$container.length) return;
+    const userId = '<%= userId %>';
+    socket.on('soilMoistureUpdate', (data) => 
+        {
+            const $container = $('#soilMoistureContainer');
+            if (!$container.length) return;
 
-    $.each(data, (sensorId, sensorData) => {
-        if (sensorData.userId === userId) {
-            const moistureValue = sensorData.moistureValue;
-            const locDat = sensorData.locationName;
+            $.each(data, (sensorId, sensorData) => 
+                {
+                    if (sensorData.userId === userId) 
+                        {
+                            const moistureValue = sensorData.moistureValue;
+                            const locDat = sensorData.locationName;
 
-            let statusText;
-            let statusClass = '';
+                            let statusText;
+                            let statusClass = '';
 
-            // Define status and status class based on moisture value
-            if (moistureValue < 30) {
-                statusText = 'Soil is Dry';
-                statusClass = 'text-white';
-            } else if (moistureValue < 45) {
-                statusText = 'Soil is Moist';
-                statusClass = 'text-white';
-            } else if (moistureValue < 60) {
-                statusText = 'Soil is Damp';
-                statusClass = 'text-white';
-            } else {
-                statusText = 'Soil is Wet';
-                statusClass = 'text-white';
-            }
+                            if (moistureValue < 30) 
+                                {
+                                    statusText = 'Soil is Dry';
+                                    statusClass = 'text-white';
+                                } 
+                            else if (moistureValue < 45) 
+                                {
+                                    statusText = 'Soil is Moist';
+                                    statusClass = 'text-white';
+                                } 
+                            else if (moistureValue < 60) 
+                                {
+                                    statusText = 'Soil is Damp';
+                                    statusClass = 'text-white';
+                                } 
+                            else 
+                                {
+                                    statusText = 'Soil is Wet';
+                                    statusClass = 'text-white';
+                                }
 
-            let $card = $container.find(`.card[data-location="${locDat}"]`);
+                            let $card = $container.find(`.card[data-location="${locDat}"]`);
 
-            if ($card.length) {
-                // Update the percentage, status text, and background gradient
-                $card.find('.percentage').text(`${moistureValue}%`);
-                $card.find('.status-text').text(statusText);
-                $card.find('.status-text').attr('class', `status-text ${statusClass}`); // Update the text class
-                $card.css('background', `linear-gradient(${getGradient(moistureValue)})`); // Update the background
-            } else {
-                // Create a new card with the proper gradient and text class
-                $card = $(`
-                    <div class="card mb-3 p-2 shadow-none" data-location="${locDat}" style="border-radius: 20px; background: linear-gradient(${getGradient(moistureValue)});">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h5 class="location-name mb-2">${locDat}</h5>
-                                <p class="action-text text-muted">No Action Needed</p>
-                            </div>
-                            <div class="d-flex flex-column justify-content-center">
-                                <h1 class="percentage" style="font-weight: bold; color: #fff;">${moistureValue}%</h1>
-                                <span class="status-text ${statusClass}" style="font-size: 16px;">${statusText}</span>
-                            </div>
-                        </div>
-                    </div>
-                `);
+                            if ($card.length) 
+                                {
+                                    // Update the percentage, status text, and background gradient
+                                    $card.find('.percentage').text(`${moistureValue}%`);
+                                    $card.find('.status-text').text(statusText);
+                                    $card.find('.status-text').attr('class', `status-text ${statusClass}`); // Update the text class
+                                    $card.css('background', `linear-gradient(${getGradient(moistureValue)})`); // Update the background
+                                } 
+                            else 
+                                {
+                                    // Create a new card with the proper gradient and text class
+                                    $card = $(`
+                                        <div class="card mb-3 p-2 shadow-none" data-location="${locDat}" style="border-radius: 20px; background: linear-gradient(${getGradient(moistureValue)});">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h5 class="location-name mb-2">${locDat}</h5>
+                                                    <p class="action-text text-muted">No Action Needed</p>
+                                                </div>
+                                                <div class="d-flex flex-column justify-content-center">
+                                                    <h1 class="percentage" style="font-weight: bold; color: #fff;">${moistureValue}%</h1>
+                                                    <span class="status-text ${statusClass}" style="font-size: 16px;">${statusText}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `);
 
-                $container.append($card);
-            }
+                                    $container.append($card);
+                                }
 
-            // Smooth update animation
-            $card.find('.percentage').css({
-                'transition': 'all 1s ease-in-out'
+                            // Smooth update animation
+                            $card.find('.percentage').css({
+                                'transition': 'all 1s ease-in-out'
+                            });
+                        }
+                });
+        });
+
+
+    $(document).ready(function() 
+        {
+            let customPlantID = '';
+            const plantsTable = $('#plantsTable').DataTable
+            ({
+                "paging": true,
+                "searching": true,
+                "lengthChange": false,
+                "order": [[2, 'desc']],
+                "pageLength": 5,
+                "processing": true,
+                "serverSide": false,
+                "ajax": {
+                    "url": "/plants",
+                    "type": "GET",
+                    "dataSrc": function(json) 
+                    {
+                        return json.plants || [];
+                    }
+                },
+                "columns": 
+                    [
+                        { 
+                            "data": "image",
+                            "render": function(data) 
+                                {
+                                    return '<img src="' + data + '" alt="" style="width:90px;height:70px; background-size:cover;">';
+                                }
+                        },
+                        { "data": "name" },
+                            { 
+                                "data": "plantingDate",
+                                "render": function(data) 
+                                    {
+                                        return new Date(data).toLocaleDateString('en-GB', {day: '2-digit', month: '2-digit', year: 'numeric'});
+                                    }
+                            },
+                        { "data": "status" },
+                            {
+                                "data": "customId",
+                                "render": function(data) 
+                                    {
+                                        return '<button class="btn btn-primary view-plant" data-custom-id="' + data + '">View</button>';
+                                    }
+                            }
+                    ],
+                "columnDefs": 
+                    [
+                        {
+                            "targets": 2, // Target the plantingDate column
+                            "type": "date", // Define the type as date for proper sorting
+                            "render": function(data) 
+                                {
+                                    const date = new Date(data);
+                                    return date.toLocaleDateString('en-GB', {day: '2-digit', month: '2-digit', year: 'numeric'});
+                                }
+                        }
+                    ]
             });
-        }
-    });
-});
 
 
-    $(document).ready(function() {
+            $('.complete-task-btn').on('click', function() 
+                {
+                        const taskId = $(this).data('id');
+                        const $taskItem = $(this).closest('li');
 
-    let customPlantID = '';
-    const plantsTable = $('#plantsTable').DataTable({
-        "paging": true,
-        "searching": true,
-        "lengthChange": false,
-        "order": [[2, 'desc']], // Sort the plantingDate column (index 2) in descending order (newest to oldest)
-        "pageLength": 5,
-        "processing": true,
-        "serverSide": false,
-        "ajax": {
-            "url": "/plants", // Ensure this endpoint returns all plants data
-            "type": "GET",
-            "dataSrc": function(json) {
-                return json.plants || [];
-            }
-        },
-        "columns": [
-            { 
-                "data": "image",
-                "render": function(data) {
-                    return '<img src="' + data + '" alt="" width="70px">';
-                }
-            },
-            { "data": "name" },
-            { 
-                "data": "plantingDate",
-                "render": function(data) {
-                    return new Date(data).toLocaleDateString('en-GB', {day: '2-digit', month: '2-digit', year: 'numeric'});
-                }
-            },
-            { "data": "status" },
+                        $.ajax({
+                            url: '/tasks/complete',
+                            method: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify({ taskId: taskId }),
+                            success: function(response) 
+                                {
+                                    // Show the success notification
+                                    $('#successTaskNotification').removeClass('d-none');
+
+                                    // Remove the task item or mark it as completed in some way
+                                    $taskItem.remove();
+
+                                    // Hide the notification after 3 seconds
+                                    setTimeout(() => 
+                                        {
+                                            $('#successTaskNotification').addClass('d-none');
+                                        }, 3000);
+                                },
+                            error: function(xhr, status, error) 
+                                {
+                                    console.error('Error:', error);
+                                }
+                        });
+                    });
+
+            
+            $('#harvestButton').click(function(e) 
+                {
+                    e.preventDefault();
+
+                    const harvestQuality = $('#harvestStatus').val();
+                    if (!harvestQuality) 
+                        {
+                            alert('Please select a harvest quality.');
+                            return;
+                        }
+                    // Store the harvest quality for use in the confirmation handler
+                    $('#harvestConfirmationModal').data('quality', harvestQuality);
+                    $('#harvestConfirmationModal').modal('show');
+                });
+
+            $('#confirmHarvestButton').click(function() 
+                {
+                    const harvestQuality = $('#harvestConfirmationModal').data('quality');
+
+                    console.log('Harvest confirmed. Making AJAX request...');
+                    $.ajax({
+                        url: `/plant/harvest/${customPlantID}`,
+                        method: 'POST',
+                        data: { harvestStatus: harvestQuality },
+                        success: function(response) {
+                            console.log('AJAX success response:', response);
+                            $('#harvestConfirmationModal').modal('hide');
+                            $('#plantDetailsModal').modal('hide');
+                            if (response.success) 
+                                {
+                                    // Display notification and update table
+                                    $('#overlay').fadeIn();
+                                    const $notification = $('#successHarvestNotification');
+                                    $notification.removeClass('d-none').addClass('show');
+
+                                    setTimeout(() => 
+                                        {
+                                            $notification.removeClass('show').addClass('d-none');
+                                            $('#overlay').fadeOut();
+                                        }, 1500);
+
+                                    $('#harvestStatus').val('');
+                                    $('#harvestButton').prop('disabled', true).text('Harvest'); // Reset button to default state
+
+                                    updatePlantsTable(); // Make sure this runs as expected
+                                } 
+                            else 
+                                {
+                                    alert('Failed to harvest plant.');
+                                }
+                        },
+                        error: function(xhr, status, error) 
+                            {
+                                console.error('Error harvesting plant:', status, error);
+                                alert('Error processing the request. Please check the console for details.');
+                            }
+                    });
+                });
+
+        $('#plantDiedButton').click(function(e) 
             {
-                "data": "customId",
-                "render": function(data) {
-                    return '<button class="btn btn-primary view-plant" data-custom-id="' + data + '">View</button>';
-                }
-            }
-        ],
-        "columnDefs": [
-            {
-                "targets": 2, // Target the plantingDate column
-                "type": "date", // Define the type as date for proper sorting
-                "render": function(data) {
-                    const date = new Date(data);
-                    return date.toLocaleDateString('en-GB', {day: '2-digit', month: '2-digit', year: 'numeric'});
-                }
-            }
-        ]
-    });
+                e.preventDefault(); // Prevent default form action
 
+                const reasonForDying = $('#plantDied').val();
+                if (!reasonForDying) {
+                    alert('Please select a reason for plant death.');
+                    return;
+                }
 
-    $('.complete-task-btn').on('click', function() {
-            const taskId = $(this).data('id');
-            const $taskItem = $(this).closest('li');
+                // Store the reason and customPlantID for use in the confirmation handler
+                $('#confirmationModal').data('reason', reasonForDying);
+                $('#confirmationModal').modal('show');
+            });
+
+            // Handle the confirmation when the user clicks "Yes, Proceed"
+            $('#confirmPlantDiedButton').click(function() {
+            const reasonForDying = $('#confirmationModal').data('reason');
 
             $.ajax({
-                url: '/tasks/complete',
+                url: `/plant/died/${customPlantID}`,
                 method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({ taskId: taskId }),
+                data: { plantDied: reasonForDying },
                 success: function(response) {
-                    // Show the success notification
-                    $('#successTaskNotification').removeClass('d-none');
+                    $('#confirmationModal').modal('hide');
+                    if (response.success) {
+                        // Show success notification
+                        const notification = $('#successNotification');
+                        notification.text('Plant status updated as died!').removeClass('d-none').fadeIn(300);
+                        setTimeout(function() {
+                            notification.fadeOut(300, function() {
+                                notification.addClass('d-none');
+                            });
+                        }, 3000);
 
-                    // Remove the task item or mark it as completed in some way
-                    $taskItem.remove();
+                        // Reset the "Plant Died" select dropdown and button
+                        $('#plantDied').val('');  // Reset select to default option
+                        $('#plantDiedButton').prop('disabled', false).text('Plant Died');  // Re-enable button and reset text
 
-                    // Hide the notification after 3 seconds
-                    setTimeout(() => {
-                        $('#successTaskNotification').addClass('d-none');
-                    }, 3000);
+                        // Reset the harvest form
+                        $('#harvestStatus').val('');
+                            $('#harvestButton').prop('disabled', false).text('Harvest');
+
+                        updatePlantsTable(); // Update the table after plant status is updated
+
+                        // Close the plant details modal after a short delay
+                        setTimeout(function() {
+                            $('#plantDetailsModal').modal('hide');
+                        }, 1000);  // Adjust the delay as needed
+                    } else {
+                        alert('Failed to update plant status.');
+                    }
                 },
                 error: function(xhr, status, error) {
-                    console.error('Error:', error);
+                    console.error('Error updating plant status:', status, error);
+                    alert('Error processing the request. Please check the console for details.');
                 }
             });
         });
 
-    
-    $('#harvestButton').click(function(e) {
-        e.preventDefault();
 
-        const harvestQuality = $('#harvestStatus').val();
-        if (!harvestQuality) {
-            alert('Please select a harvest quality.');
-            return;
-        }
+        // Use event delegation for the "View" button click event
+        $('#plantsTable').on('click', '.view-plant', function() 
+            {
+                const customId = $(this).data('custom-id');
+                fetchPlantDetails(customId);
+            });
 
-        // Store the harvest quality for use in the confirmation handler
-        $('#harvestConfirmationModal').data('quality', harvestQuality);
-        $('#harvestConfirmationModal').modal('show');
-    });
+        function fetchPlantDetails(customId) 
+            {
+                $.ajax({
+                    url: `/plant/${customId}`,
+                    method: 'GET',
+                    success: function(response) 
+                        {
+                            if (response.success) 
+                                {
+                                    const plant = response.plant;
+                                    // Fill the modal with plant data
+                                    customPlantID = customId;
+                                    $('#plantName').attr('value',plant.name);
+                                    $('#plantHarvestTime').text(new Date(plant.estimatedHarvestTime).toLocaleDateString());
+                                    $('#methodOfPlanting').attr('value',plant.methodOfPlanting);
+                                    $('#plantLocation').attr('value',plant.location ? plant.location.name : 'N/A');
+                                    $('#plantGrowthStage').text(plant.growthStage);
+                                    $('#plantStatus').text(plant.status);
+                                    $('#plantImage').attr('src', plant.image);
+                                    $("#datePlanted").attr('value',new Date(plant.plantingDate).toLocaleDateString('en-GB', { month: 'long', day: '2-digit', year: 'numeric'}));
 
-    $('#confirmHarvestButton').click(function() {
-    const harvestQuality = $('#harvestConfirmationModal').data('quality');
+                                    // Calculate and update progress bar
+                                    updateProgressBar(plant.plantingDate, plant.estimatedHarvestTime);
 
-    console.log('Harvest confirmed. Making AJAX request...');
-    $.ajax({
-        url: `/plant/harvest/${customPlantID}`,
-        method: 'POST',
-        data: { harvestStatus: harvestQuality },
-        success: function(response) {
-            console.log('AJAX success response:', response);
-            $('#harvestConfirmationModal').modal('hide');
-            $('#plantDetailsModal').modal('hide');
-            if (response.success) {
-                // Display notification and update table
-                $('#overlay').fadeIn();
-                const $notification = $('#successHarvestNotification');
-                $notification.removeClass('d-none').addClass('show');
-
-                setTimeout(() => {
-                    $notification.removeClass('show').addClass('d-none');
-                    $('#overlay').fadeOut();
-                }, 1500);
-
-                $('#harvestStatus').val('');
-                $('#harvestButton').prop('disabled', true).text('Harvest'); // Reset button to default state
-
-                updatePlantsTable(); // Make sure this runs as expected
-            } else {
-                alert('Failed to harvest plant.');
+                                    // Show the modal
+                                    $('#plantDetailsModal').modal('show');
+                                } 
+                            else 
+                                {
+                                    alert('Plant not found!');
+                                }
+                        },
+                    error: function() 
+                        {
+                            alert('Error fetching plant details.');
+                        }
+                });
             }
-        },
-        error: function(xhr, status, error) {
-            console.error('Error harvesting plant:', status, error);
-            alert('Error processing the request. Please check the console for details.');
-        }
-    });
-});
 
-$('#plantDiedButton').click(function(e) {
-        e.preventDefault(); // Prevent default form action
+            function updateProgressBar(plantingDate, harvestDate) 
+                {
+                    const plantingDateObj = new Date(plantingDate);
+                    const harvestDateObj = new Date(harvestDate);
+                    const today = new Date();
 
-        const reasonForDying = $('#plantDied').val();
-        if (!reasonForDying) {
-            alert('Please select a reason for plant death.');
-            return;
-        }
+                    const totalDuration = harvestDateObj - plantingDateObj;
+                    const elapsedDuration = today - plantingDateObj;
 
-        // Store the reason and customPlantID for use in the confirmation handler
-        $('#confirmationModal').data('reason', reasonForDying);
-        $('#confirmationModal').modal('show');
-    });
+                    let progressPercentage = (elapsedDuration / totalDuration) * 100;
+                    progressPercentage = Math.max(0, Math.min(progressPercentage, 100));
 
-    // Handle the confirmation when the user clicks "Yes, Proceed"
-    $('#confirmPlantDiedButton').click(function() {
-    const reasonForDying = $('#confirmationModal').data('reason');
+                    $('#growthProgressBar').css('width', progressPercentage + '%');
+                    $('#growthProgressBar').attr('aria-valuenow', progressPercentage);
+                    $('#growthProgressBar').text(Math.round(progressPercentage) + '%');
 
-    $.ajax({
-        url: `/plant/died/${customPlantID}`,
-        method: 'POST',
-        data: { plantDied: reasonForDying },
-        success: function(response) {
-            $('#confirmationModal').modal('hide');
-            if (response.success) {
-                // Show success notification
-                const notification = $('#successNotification');
-                notification.text('Plant status updated as died!').removeClass('d-none').fadeIn(300);
-                setTimeout(function() {
-                    notification.fadeOut(300, function() {
-                        notification.addClass('d-none');
+                    // Enable or disable the harvest button based on progress percentage
+                    if (progressPercentage === 100) 
+                        {
+                            $('#harvestButton').prop('disabled', false).css('background-color', '#59A645'); // Enable and style the button
+                        } 
+                    else 
+                        {
+                            $('#harvestButton').prop('disabled', true).css('background-color', '#D9D9D9'); // Disable and style the button
+                        }
+                }
+
+            function updatePlantsTable() 
+                {
+                    $.ajax({
+                        url: '/plants', // The endpoint to fetch plant data
+                        method: 'GET',
+                        success: function(response) 
+                            {
+                                if (response.success) 
+                                    {
+                                        const plants = response.plants;
+                                        const tableBody = $('#plantsTable tbody');
+                                        
+                                        // Destroy existing DataTable instance
+                                        if ($.fn.DataTable.isDataTable('#plantsTable')) 
+                                            {
+                                                $('#plantsTable').DataTable().destroy();
+                                            }
+                                        
+                                        // Clear existing rows
+                                        tableBody.empty();
+
+                                        // Add new rows
+                                        plants.forEach(plant => 
+                                            {
+                                                const row = `
+                                                    <tr>
+                                                        <td><img src="${plant.image}" alt="" width="70px"></td>
+                                                        <td>${plant.name}</td>
+                                                        <td>${new Date(plant.plantingDate).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
+                                                        <td>${plant.status}</td>
+                                                        <td>
+                                                            <button class="btn btn-primary view-plant" data-custom-id="${plant.customId}">View</button>
+                                                        </td>
+                                                    </tr>
+                                                `;
+                                                tableBody.append(row);
+                                            });
+
+                                        // Reinitialize DataTable
+                                        $('#plantsTable').DataTable({
+                                            "paging": true,   
+                                            "searching": true,   
+                                            "lengthChange": false,
+                                            "order": [[3, 'desc']],
+                                            "pageLength": 5
+                                        });
+                                    } 
+                                else 
+                                    {
+                                        alert('Failed to fetch updated plant data.');
+                                    }
+                            },
+                        error: function() 
+                        {
+                            alert('Error updating the plant table.');
+                        }
                     });
-                }, 3000);
-
-                // Reset the "Plant Died" select dropdown and button
-                $('#plantDied').val('');  // Reset select to default option
-                $('#plantDiedButton').prop('disabled', false).text('Plant Died');  // Re-enable button and reset text
-
-                 // Reset the harvest form
-                 $('#harvestStatus').val('');
-                    $('#harvestButton').prop('disabled', false).text('Harvest');
-
-                updatePlantsTable(); // Update the table after plant status is updated
-
-                // Close the plant details modal after a short delay
-                setTimeout(function() {
-                    $('#plantDetailsModal').modal('hide');
-                }, 1000);  // Adjust the delay as needed
-            } else {
-                alert('Failed to update plant status.');
             }
-        },
-        error: function(xhr, status, error) {
-            console.error('Error updating plant status:', status, error);
-            alert('Error processing the request. Please check the console for details.');
-        }
-    });
-});
-
-
-  // Use event delegation for the "View" button click event
-  $('#plantsTable').on('click', '.view-plant', function() {
-        const customId = $(this).data('custom-id');
-        fetchPlantDetails(customId);
     });
 
-    function fetchPlantDetails(customId) {
-        $.ajax({
-            url: `/plant/${customId}`,
-            method: 'GET',
-            success: function(response) {
-                if (response.success) {
-                    const plant = response.plant;
-                    // Fill the modal with plant data
-                    customPlantID = customId;
-                    $('#plantName').attr('value',plant.name);
-                    $('#plantHarvestTime').text(new Date(plant.estimatedHarvestTime).toLocaleDateString());
-                    $('#methodOfPlanting').attr('value',plant.methodOfPlanting);
-                    $('#plantLocation').attr('value',plant.location ? plant.location.name : 'N/A');
-                    $('#plantGrowthStage').text(plant.growthStage);
-                    $('#plantStatus').text(plant.status);
-                    $('#plantImage').attr('src', plant.image);
-                    $("#datePlanted").attr('value',new Date(plant.plantingDate).toLocaleDateString('en-GB', { month: 'long', day: '2-digit', year: 'numeric'}));
 
-                    // Calculate and update progress bar
-                    updateProgressBar(plant.plantingDate, plant.estimatedHarvestTime);
-
-                    // Show the modal
-                    $('#plantDetailsModal').modal('show');
-                } else {
-                    alert('Plant not found!');
+    function getGradient(moistureValue) 
+        {
+            if (moistureValue < 30) 
+                {
+                    return 'to bottom right, rgba(220, 53, 69, 1) 35%, rgba(255, 255, 255, 0) 100%';
+                } 
+            else if (moistureValue < 45) 
+                {
+                    return 'to bottom right, rgba(255, 193, 7, 1) 35%, rgba(255, 255, 255, 0) 100%'; 
+                } 
+            else if (moistureValue < 60) 
+                {
+                    return 'to bottom right, rgba(67, 181, 229, 1) 35%, rgba(255, 255, 255, 0) 100%'; 
+                } 
+            else 
+                {
+                    return 'to bottom right, rgba(40, 167, 69, 1) 35%, rgba(255, 255, 255, 0) 100%'; 
                 }
-            },
-            error: function() {
-                alert('Error fetching plant details.');
-            }
-        });
-    }
-
-    function updateProgressBar(plantingDate, harvestDate) {
-        const plantingDateObj = new Date(plantingDate);
-        const harvestDateObj = new Date(harvestDate);
-        const today = new Date();
-
-        const totalDuration = harvestDateObj - plantingDateObj;
-        const elapsedDuration = today - plantingDateObj;
-
-        let progressPercentage = (elapsedDuration / totalDuration) * 100;
-        progressPercentage = Math.max(0, Math.min(progressPercentage, 100));
-
-        $('#growthProgressBar').css('width', progressPercentage + '%');
-        $('#growthProgressBar').attr('aria-valuenow', progressPercentage);
-        $('#growthProgressBar').text(Math.round(progressPercentage) + '%');
-
-        // Enable or disable the harvest button based on progress percentage
-        if (progressPercentage === 100) {
-            $('#harvestButton').prop('disabled', false).css('background-color', '#59A645'); // Enable and style the button
-        } else {
-            $('#harvestButton').prop('disabled', true).css('background-color', '#D9D9D9'); // Disable and style the button
         }
-        
-        
-    }
-
-    function updatePlantsTable() {
-    $.ajax({
-        url: '/plants', // The endpoint to fetch plant data
-        method: 'GET',
-        success: function(response) {
-            if (response.success) {
-                const plants = response.plants;
-                const tableBody = $('#plantsTable tbody');
-                
-                // Destroy existing DataTable instance
-                if ($.fn.DataTable.isDataTable('#plantsTable')) {
-                    $('#plantsTable').DataTable().destroy();
-                }
-                
-                // Clear existing rows
-                tableBody.empty();
-
-                // Add new rows
-                plants.forEach(plant => {
-                    const row = `
-                        <tr>
-                            <td><img src="${plant.image}" alt="" width="70px"></td>
-                            <td>${plant.name}</td>
-                            <td>${new Date(plant.plantingDate).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
-                            <td>${plant.status}</td>
-                            <td>
-                                <button class="btn btn-primary view-plant" data-custom-id="${plant.customId}">View</button>
-                            </td>
-                        </tr>
-                    `;
-                    tableBody.append(row);
-                });
-
-                // Reinitialize DataTable
-                $('#plantsTable').DataTable({
-                    "paging": true,   
-                    "searching": true,   
-                    "lengthChange": false,
-                    "order": [[3, 'desc']],
-                    "pageLength": 5
-                });
-            } else {
-                alert('Failed to fetch updated plant data.');
-            }
-        },
-        error: function() {
-            alert('Error updating the plant table.');
-        }
-    });
-}
-
-
-});
-
-
-function getGradient(moistureValue) {
-    if (moistureValue < 30) {
-        return 'to bottom right, rgba(220, 53, 69, 1) 35%, rgba(255, 255, 255, 0) 100%';
-    } else if (moistureValue < 45) {
-        return 'to bottom right, rgba(255, 193, 7, 1) 35%, rgba(255, 255, 255, 0) 100%'; 
-    } else if (moistureValue < 60) {
-        return 'to bottom right, rgba(67, 181, 229, 1) 35%, rgba(255, 255, 255, 0) 100%'; 
-    } else {
-        return 'to bottom right, rgba(40, 167, 69, 1) 35%, rgba(255, 255, 255, 0) 100%'; 
-    }
-}
 
 </script>

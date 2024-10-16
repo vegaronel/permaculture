@@ -144,6 +144,7 @@ app.get('/plant-details/:id', isAuthenticated, async (req, res) => {
       plant: {
         name: plant.name,
         plantingInstructions: plant.plantingInstructions,
+        plantId:plant._id,
         image:plant.image,
         harvestTime: plant.harvestTime,
         overview: plant.overview,
@@ -293,7 +294,7 @@ app.post('/add-new-plant', isAuthenticated, async (req, res) => {
           await newTask.save();
       }
 
-      res.redirect('/dashboard'); // Redirect after adding the plant and task
+      res.json({ success: true, message: 'Plant added successfully', plant: newPlant });
   } catch (error) {
       console.error(error);
       res.status(500).send('Internal Server Error');

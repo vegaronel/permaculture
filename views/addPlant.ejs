@@ -100,7 +100,7 @@
                     <input type="hidden" name="userId" value="<%= userId %>"> <!-- Use passed userId here -->                     
                     <div class="form-group">
                         <label for="plantCollectionId">Select Plant</label>
-                        <select class="form-control input-custom" name="plantCollectionId" id="plantCollectionId" required>
+                        <select class="form-control input-custom" name="plantCollectionId" id="plantCollectionId" hidden>
                             <option value="">Select a Plant</option>
                             <% plantCollections.forEach(function(plant) { %>
                                 <option id="plantNameInput" value="<%= plant._id %>" data-harvest-time="<%= plant.harvestTime %>">
@@ -139,6 +139,24 @@
                     </select>
                     </div>
 
+            
+                    <div class="accordion" id="accordionExample">
+                       
+                        <div class="accordion-item">
+                          <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                View Planting Instructions
+                            </button>
+                          </h2>
+                          <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+                            <div class="accordion-body">
+                                <p id="plantingInstructions"></p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                      </div>
+
                     <div class="mt-4">
                         <button type="button" class="btn back-button" data-bs-dismiss="modal">Back</button>
                         <button type="submit" class="btn green-button submit-button">Add Plant</button>
@@ -171,7 +189,7 @@ $(document).ready(function() {
             $('#submitCustomLocation').hide();
         }
 
-    $('.view-plant-info').click(function() {
+        $('.view-plant-info').click(function() {
         const plantId = $(this).data('id');
 
         $.ajax({
@@ -184,9 +202,13 @@ $(document).ready(function() {
                     $('#overview').text(response.plant.overview);
                     $('#benefits').text(response.plant.benefits);
                     $('#usedFor').text(response.plant.usedFor);
+                    $('#plantingInstructions').text(response.plant.plantingInstructions);
                     $("#plantImageForm").attr('src', response.plant.image);
-                    $('#selectedPlantId').val(response.plant._id);
+                    $('#selectedPlantId').val(response.plant.plantId);
                     $('#plantInfoModal').modal('show');
+
+                    // Store the selected plant ID in a data attribute
+                    $('#showAddPlantModal').data('selectedPlantId', response.plant.plantId);
                 } else {
                     alert('Plant not found.');
                 }
@@ -197,9 +219,18 @@ $(document).ready(function() {
         });
     });
 
+
     $('#showAddPlantModal').click(function() {
         $('#plantInfoModal').css('z-index', "1050");
         $('#addPlantModal').modal('show');
+
+        // Get the stored plant ID and select it in the dropdown
+        const selectedPlantId = $(this).data('selectedPlantId');
+        if (selectedPlantId) {
+            $('#plantCollectionId').val(selectedPlantId);
+            // Trigger the change event to update any dependent fields
+            $('#plantCollectionId').trigger('change');
+        }
     });
 
     $('#addPlantModal').on('hidden.bs.modal', function (e) {
@@ -225,44 +256,45 @@ $(document).ready(function() {
             clearForm();
         });
         $('#addPlantForm').on('submit', function(e) {
-    e.preventDefault(); // Prevent default form submission
+        e.preventDefault();
 
-    // Disable the submit button to prevent multiple submissions and change the text
-    const submitButton = $('#addPlantForm button[type="submit"]');
-    submitButton.prop('disabled', true).text('Processing...');
+        const submitButton = $('#addPlantForm button[type="submit"]');
+        submitButton.prop('disabled', true).text('Processing...');
 
-    $.ajax({
-        type: 'POST',
-        url: '/add-new-plant', // Adjust this URL if necessary
-        data: $(this).serialize(), // Serialize form data
-        success: function(response) {
-            // Show the success notification
-            const notification = $('#successNotification');
-            notification.removeClass('d-none').fadeIn(300);
+        $.ajax({
+            type: 'POST',
+            url: '/add-new-plant',
+            data: $(this).serialize(),
+            success: function(response) {
+                if (response.success) {
+                    const notification = $('#successNotification');
+                    notification.removeClass('d-none').fadeIn(300);
 
-            // Hide the notification after 3 seconds
-            setTimeout(function() {
-                notification.fadeOut(300, function() {
-                    notification.addClass('d-none');
-                });
-            }, 3000);
+                    setTimeout(function() {
+                        notification.fadeOut(300, function() {
+                            notification.addClass('d-none');
+                        });
+                    }, 3000);
 
-            // Clear the form and close the modal
-            $('#addPlantForm')[0].reset();
-            $('#addPlantModal').modal('hide');
+                    $('#addPlantForm')[0].reset();
+                    $('#addPlantModal').modal('hide');
 
-            // Reset the submit button to its original state
-            submitButton.prop('disabled', false).text('Add Plant');
-        },
-        error: function(xhr, status, error) {
-            // Log the error or display an error message
-            console.error('Error: ' + xhr.responseText);
-
-            // Reset the submit button to its original state in case of an error
-            submitButton.prop('disabled', false).text('Add Plant');
-        }
+                    // Optionally, update the UI to reflect the newly added plant
+                    // This could involve adding the new plant to a list on the page
+                    // or refreshing a section of the page
+                } else {
+                    alert(response.message || 'Error adding plant.');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error: ' + error);
+                alert('Error adding plant. Please try again.');
+            },
+            complete: function() {
+                submitButton.prop('disabled', false).text('Add Plant');
+            }
+        });
     });
-});
 
 
         // Show custom location input when 'Add Custom Location' is selected
