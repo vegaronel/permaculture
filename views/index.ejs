@@ -174,19 +174,18 @@
     <!-- Modal -->
     <div class="modal fade" id="plantDetailsModal" tabindex="-1" aria-labelledby="plantDetailsModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered custom-modal-width">
-        <div class="modal-content">
-            <div class="modal-body p-5">
-                <p class="nexa-black gray-text">Plant Information</p>
-                <div class="d-flex justify-content-center flex-column text-center">
-                    <p class="h-3 nexa-black gray-text">Plant Progress Tracking</p>
-                    <p class="gray-text m-0">This tracking system utilizes estimated days before harvest and may vary from your actual plant</p>
-            
+            <div class="modal-content">
+                <div class="modal-body p-5">
+                    <p class="nexa-black gray-text">Plant Information</p>
+                    <div class="d-flex justify-content-center flex-column text-center">
+                        <p class="h-3 nexa-black gray-text">Plant Progress Tracking</p>
+                        <p class="gray-text m-0">This tracking system utilizes estimated days before harvest and may vary from your actual plant</p>
                         <div class="d-flex align-items-center gap-1" style="max-width: 450px; width: 100%; margin: auto;">
                             <div class="d-flex flex-column align-items-center justify-content-center">
                                 <img src="/images/seed-icon.svg" alt="">
                                 <small>Seed</small>
                             </div>
-                          
+                        
                             <div class="progress flex-grow-1" >
                                 <div id="growthProgressBar" class="progress-bar" role="progressbar" style="width: 0%; background-color:#59A645 ;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
                             </div>
@@ -197,75 +196,75 @@
                             </div>
                             
                         </div>
-                </div>
-                <div class="d-flex row view-plant-model view-plant-model-inputs">
-                    <div class="col d-flex justify-content-center align-items-center">
-                        <img id="plantImage" src="" alt="Plant Image" class="img-fluid p-3" width="100%" />
                     </div>
-                    <div class="col">
-                        <div class="d-flex gap-3">
-                            <div class="">
-                                <label for="" class="form-label">Plant Name</label>
-                                <input class="form-control" id="plantName" type="text" value="" name="" disabled>
+                        <div class="d-flex row view-plant-model view-plant-model-inputs">
+                            <div class="col d-flex justify-content-center align-items-center">
+                                <img id="plantImage" src="" alt="Plant Image" class="img-fluid p-3" width="100%" />
                             </div>
-                            <div class="">
-                                <label for="" class="form-label">Date Planted</label>
-                                <input class="form-control" id="datePlanted" type="text" value="" name="" disabled>
-                            </div>                    
-                        </div>
-                        <div class="d-flex gap-3">
-                            <div>
-                                <label for="" class="form-label">Soil Status</label>
-                                <input class="form-control" id="soilStatus" type="text" value="" name="" disabled>
-                            </div>
-                            <div>
-                                <label for="" class="form-label">Location</label>
-                                <input class="form-control" id="plantLocation" type="text" value="" name="" disabled>
-                            </div>
-                        </div>
-                        <div class="form-group d-flex gap-3">
-                            <div>
-                                <label for="harvestStatus" class="form-label">In case you want to Harvest</label>
-                                <select name="harvestStatus" class="form-control" id="harvestStatus" style="width: 180px;">
-                                    <option value="">Select Quality</option>
-                                    <option value="Premium">Premium</option>
-                                    <option value="Good">Good</option>
-                                    <option value="Acceptable">Acceptable</option>
-                                    <option value="Low">Low</option>
-                                </select>
-                            </div>
-                            <div class="d-flex align-items-end">
-                                <button class="btn border modal-plant-button text-white" id="harvestButton" style="width: 90px; background-color: #D9D9D9;">Harvest</button>
-                            </div>        
-                        </div>
-                        <div class="form-group d-flex gap-3">
-                            <div>
-                                <label for="plantDied" class="form-label">In case the plant died</label>
-                                <select name="plantDied" class="form-control" id="plantDied" style="width: 180px;">
-                                    <option value="">Select Reason</option>
-                                    <option value="Poor Soil Quality">Poor Soil Quality</option>
-                                    <option value="Inadequate Watering">Inadequate Watering</option>
-                                    <option value="Pests and Diseases">Pests and Diseases</option>
-                                    <option value="Improper Sunlight and Temperature">Improper Sunlight and Temperature</option>
-                                    <option value="Negligence">Negligence</option>
-                                </select>
-                            </div>
-                            <div class="d-flex align-items-end">
-                                <button class="btn btn-danger modal-plant-button" id="plantDiedButton" style="width: 90px;">Plant Died</button>
-                            </div>        
-                        </div>
+                            <div class="col">
+                                <div class="d-flex gap-3">
+                                    <div class="">
+                                        <label for="" class="form-label">Plant Name</label>
+                                        <input class="form-control" id="plantName" type="text" value="" name="" disabled>
+                                    </div>
+                                    <div class="">
+                                        <label for="" class="form-label">Date Planted</label>
+                                        <input class="form-control" id="datePlanted" type="text" value="" name="" disabled>
+                                    </div>                    
+                                </div>
+                                <div class="d-flex gap-3">
+                                    <div>
+                                        <label for="" class="form-label">Soil Status</label>
+                                        <input class="form-control" id="soilStatus" type="text" value="" name="" disabled>
+                                    </div>
+                                    <div>
+                                        <label for="" class="form-label">Location</label>
+                                        <input class="form-control" id="plantLocation" type="text" value="" name="" disabled>
+                                    </div>
+                                </div>
+                                <div class="form-group d-flex gap-3">
+                                    <div>
+                                        <label for="harvestStatus" class="form-label">In case you want to Harvest</label>
+                                        <select name="harvestStatus" class="form-control" id="harvestStatus" style="width: 180px;">
+                                            <option value="">Select Quality</option>
+                                            <option value="Premium">Premium</option>
+                                            <option value="Good">Good</option>
+                                            <option value="Acceptable">Acceptable</option>
+                                            <option value="Low">Low</option>
+                                        </select>
+                                    </div>
+                                    <div class="d-flex align-items-end">
+                                        <button class="btn border modal-plant-button text-white" id="harvestButton" style="width: 90px; background-color: #D9D9D9;">Harvest</button>
+                                    </div>        
+                                </div>
+                                <div class="form-group d-flex gap-3">
+                                    <div>
+                                        <label for="plantDied" class="form-label">In case the plant died</label>
+                                        <select name="plantDied" class="form-control" id="plantDied" style="width: 180px;">
+                                            <option value="">Select Reason</option>
+                                            <option value="Poor Soil Quality">Poor Soil Quality</option>
+                                            <option value="Inadequate Watering">Inadequate Watering</option>
+                                            <option value="Pests and Diseases">Pests and Diseases</option>
+                                            <option value="Improper Sunlight and Temperature">Improper Sunlight and Temperature</option>
+                                            <option value="Negligence">Negligence</option>
+                                        </select>
+                                    </div>
+                                    <div class="d-flex align-items-end">
+                                        <button class="btn btn-danger modal-plant-button" id="plantDiedButton" style="width: 90px;">Plant Died</button>
+                                    </div>        
+                                </div>
 
-                        <div class="">
-                            <label for="" class="form-label">Method of Planting</label>
-                            <input class="form-control" id="methodOfPlanting" type="text" value="" name="" disabled>
+                                <div class="">
+                                    <label for="" class="form-label">Method of Planting</label>
+                                    <input class="form-control" id="methodOfPlanting" type="text" value="" name="" disabled>
+                                </div>
+                            </div>
                         </div>
+                    <div class="mt-4 d-flex justify-content-center">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Back</button>
                     </div>
                 </div>
-            <div class="mt-4 d-flex justify-content-center">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Back</button>
             </div>
-            </div>
-        </div>
         </div>
     </div>
 
@@ -437,83 +436,90 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-    const socket = io();
+   const socket = io();
     const userId = '<%= userId %>';
-    socket.on('soilMoistureUpdate', (data) => 
-        {
-            const $container = $('#soilMoistureContainer');
-            if (!$container.length) return;
+socket.on('soilMoistureUpdate', (data) => {
+    const $container = $('#soilMoistureContainer');
+    if (!$container.length) return;
 
-            $.each(data, (sensorId, sensorData) => 
-                {
-                    if (sensorData.userId === userId) 
-                        {
-                            const moistureValue = sensorData.moistureValue;
-                            const locDat = sensorData.locationName;
+    $.each(data, (sensorId, sensorData) => {
+        if (sensorData.userId === userId) {
+            const moistureValue = sensorData.moistureValue;
+            const locDat = sensorData.locationName;
 
-                            let statusText;
-                            let statusClass = '';
+            let statusText;
+            let statusClass = '';
+            let actionText = '';
 
-                            if (moistureValue < 30) 
-                                {
-                                    statusText = 'Soil is Dry';
-                                    statusClass = 'text-white';
-                                } 
-                            else if (moistureValue < 45) 
-                                {
-                                    statusText = 'Soil is Moist';
-                                    statusClass = 'text-white';
-                                } 
-                            else if (moistureValue < 60) 
-                                {
-                                    statusText = 'Soil is Damp';
-                                    statusClass = 'text-white';
-                                } 
-                            else 
-                                {
-                                    statusText = 'Soil is Wet';
-                                    statusClass = 'text-white';
-                                }
+            if (moistureValue <= 250) {
+                statusText = 'Waterlogged';
+                actionText = 'Improve drainage and stop watering';
+            } else if (moistureValue <= 525) {
+                statusText = 'Wet';
+                actionText = 'Monitor soil condition';
+            } else if (moistureValue <= 799) {
+                statusText = 'Moist';
+                actionText = 'Soil condition is good';
+            } else if (moistureValue <= 1023) {
+                statusText = 'Dry';
+                actionText = 'Water the plants';
+            } else {
+                statusText = 'Sensor Lifted';
+                actionText = 'Reinsert the sensor';
+            }
 
-                            let $card = $container.find(`.card[data-location="${locDat}"]`);
+            let $card = $container.find(`.card[data-location="${locDat}"]`);
 
-                            if ($card.length) 
-                                {
-                                    // Update the percentage, status text, and background gradient
-                                    $card.find('.percentage').text(`${moistureValue}%`);
-                                    $card.find('.status-text').text(statusText);
-                                    $card.find('.status-text').attr('class', `status-text ${statusClass}`); // Update the text class
-                                    $card.css('background', `linear-gradient(${getGradient(moistureValue)})`); // Update the background
-                                } 
-                            else 
-                                {
-                                    // Create a new card with the proper gradient and text class
-                                    $card = $(`
-                                        <div class="card mb-3 p-2 shadow-none" data-location="${locDat}" style="border-radius: 20px; background: linear-gradient(${getGradient(moistureValue)});">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div>
-                                                    <h5 class="location-name mb-2">${locDat}</h5>
-                                                    <p class="action-text text-muted">No Action Needed</p>
-                                                </div>
-                                                <div class="d-flex flex-column justify-content-center">
-                                                    <h1 class="percentage" style="font-weight: bold; color: #fff;">${moistureValue}%</h1>
-                                                    <span class="status-text ${statusClass}" style="font-size: 16px;">${statusText}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    `);
+            if ($card.length) {
+                $card.find('.percentage').text(`${moistureValue}`);
+                $card.find('.status-text').text(statusText);
+                $card.find('.status-text').attr('class', `status-text text-white ${statusClass}`);
+                $card.find('.action-text').text(actionText);
+                $card.css('background', `linear-gradient(${getGradient(moistureValue)})`);
+            } else {
+                $card = $(`
+                    <div class="card mb-3 p-4 shadow-none" data-location="${locDat}" style="border-radius: 20px; background: linear-gradient(${getGradient(moistureValue)});">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="location-name text-white mb-2">${locDat}</h5>
+                                <p class="action-text text-white">${actionText}</p>
+                            </div>
+                            <div class="d-flex flex-column justify-content-center align-items-center">
+                                <h1 class="percentage" style="font-weight: bold; color: #fff;">${moistureValue}</h1>
+                                <p class="status-text text-white">${statusText}</p>
+                            </div>
+                        </div>
+                    </div>
+                `);
 
-                                    $container.append($card);
-                                }
+                $container.append($card);
+            }
 
-                            // Smooth update animation
-                            $card.find('.percentage').css({
-                                'transition': 'all 1s ease-in-out'
-                            });
-                        }
-                });
-        });
+            $card.find('.percentage').css({
+                'transition': 'all 1s ease-in-out'
+            });
+        }
+    });
+});
 
+function getGradient(moistureValue) {
+    if (moistureValue <= 250) {
+        // waterlogged
+        return 'to bottom right, rgba(0, 0, 255, 1) 35%, rgba(255, 255, 255, 0) 100%';
+    } else if (moistureValue <= 525) {
+        // wet
+        return 'to bottom right, rgba(89, 166, 69) 35%, rgba(255, 255, 255, 0) 100%';
+    } else if (moistureValue <= 799) {
+        // moist
+        return 'to bottom right, rgba(67, 181, 229, 1) 35%, rgba(255, 255, 255, 0) 100%'; 
+    } else if (moistureValue <= 1023) {
+        // dry
+        return 'to bottom right, rgba(220, 53, 69, 1) 35%, rgba(255, 255, 255, 0) 100%';
+    } else {
+        // sensor lifted
+        return 'to bottom right, rgba(255, 193, 7, 1) 35%, rgba(255, 255, 255, 0) 100%'; 
+    }
+}
 
     $(document).ready(function() 
         {
@@ -652,6 +658,10 @@
                                     $('#harvestStatus').val('');
                                     $('#harvestButton').prop('disabled', true).text('Harvest'); // Reset button to default state
 
+                                    $('#harvestButton').prop('disabled', true).css('background-color', '#D9D9D9');
+                                    $('#plantDiedButton').prop('disabled', true).css('background-color', '#D9D9D9');
+
+
                                     updatePlantsTable(); // Make sure this runs as expected
                                 } 
                             else 
@@ -711,6 +721,10 @@
                         $('#harvestStatus').val('');
                             $('#harvestButton').prop('disabled', false).text('Harvest');
 
+                        $('#harvestButton').prop('disabled', true).css('background-color', '#D9D9D9');
+                        $('#plantDiedButton').prop('disabled', true).css('background-color', '#D9D9D9');
+
+
                         updatePlantsTable(); // Update the table after plant status is updated
 
                         // Close the plant details modal after a short delay
@@ -757,8 +771,16 @@
                                     $('#plantImage').attr('src', plant.image);
                                     $("#datePlanted").attr('value',new Date(plant.plantingDate).toLocaleDateString('en-GB', { month: 'long', day: '2-digit', year: 'numeric'}));
 
+                                    if (plant.status === 'Harvested' || plant.status === 'Died') {
+                                        $('#harvestButton').prop('disabled', true).css('background-color', '#D9D9D9');
+                                        $('#plantDiedButton').prop('disabled', true).css('background-color', '#D9D9D9');
+                                    } else {
+                                        $('#harvestButton').prop('disabled', false).css('background-color', '#59A645');
+                                        $('#plantDiedButton').prop('disabled', false).css('background-color', '#dc3545');
+                                    }
+                                    
                                     // Calculate and update progress bar
-                                    updateProgressBar(plant.plantingDate, plant.estimatedHarvestTime);
+                                    updateProgressBar(plant.plantingDate, plant.estimatedHarvestTime, plant.status);
 
                                     // Show the modal
                                     $('#plantDetailsModal').modal('show');
@@ -774,33 +796,30 @@
                         }
                 });
             }
+            
 
-            function updateProgressBar(plantingDate, harvestDate) 
-                {
-                    const plantingDateObj = new Date(plantingDate);
-                    const harvestDateObj = new Date(harvestDate);
-                    const today = new Date();
+            function updateProgressBar(plantingDate, harvestDate, plantStatus) {
+                const plantingDateObj = new Date(plantingDate);
+                const harvestDateObj = new Date(harvestDate);
+                const today = new Date();
 
-                    const totalDuration = harvestDateObj - plantingDateObj;
-                    const elapsedDuration = today - plantingDateObj;
+                const totalDuration = harvestDateObj - plantingDateObj;
+                const elapsedDuration = today - plantingDateObj;
 
-                    let progressPercentage = (elapsedDuration / totalDuration) * 100;
-                    progressPercentage = Math.max(0, Math.min(progressPercentage, 100));
+                let progressPercentage = (elapsedDuration / totalDuration) * 100;
+                progressPercentage = Math.max(0, Math.min(progressPercentage, 100));
 
-                    $('#growthProgressBar').css('width', progressPercentage + '%');
-                    $('#growthProgressBar').attr('aria-valuenow', progressPercentage);
-                    $('#growthProgressBar').text(Math.round(progressPercentage) + '%');
+                $('#growthProgressBar').css('width', progressPercentage + '%');
+                $('#growthProgressBar').attr('aria-valuenow', progressPercentage);
+                $('#growthProgressBar').text(Math.round(progressPercentage) + '%');
 
-                    // Enable or disable the harvest button based on progress percentage
-                    if (progressPercentage === 100) 
-                        {
-                            $('#harvestButton').prop('disabled', false).css('background-color', '#59A645'); // Enable and style the button
-                        } 
-                    else 
-                        {
-                            $('#harvestButton').prop('disabled', true).css('background-color', '#D9D9D9'); // Disable and style the button
-                        }
+                // Enable or disable the harvest button based on progress percentage and plant status
+                if (progressPercentage === 100 && plantStatus !== 'Harvested' && plantStatus !== 'Died') {
+                    $('#harvestButton').prop('disabled', false).css('background-color', '#59A645');
+                } else {
+                    $('#harvestButton').prop('disabled', true).css('background-color', '#D9D9D9');
                 }
+            }
 
             function updatePlantsTable() 
                 {
@@ -863,24 +882,6 @@
     });
 
 
-    function getGradient(moistureValue) 
-        {
-            if (moistureValue < 30) 
-                {
-                    return 'to bottom right, rgba(220, 53, 69, 1) 35%, rgba(255, 255, 255, 0) 100%';
-                } 
-            else if (moistureValue < 45) 
-                {
-                    return 'to bottom right, rgba(255, 193, 7, 1) 35%, rgba(255, 255, 255, 0) 100%'; 
-                } 
-            else if (moistureValue < 60) 
-                {
-                    return 'to bottom right, rgba(67, 181, 229, 1) 35%, rgba(255, 255, 255, 0) 100%'; 
-                } 
-            else 
-                {
-                    return 'to bottom right, rgba(40, 167, 69, 1) 35%, rgba(255, 255, 255, 0) 100%'; 
-                }
-        }
+   
 
 </script>

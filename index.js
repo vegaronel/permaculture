@@ -47,24 +47,26 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-function sendNotificationEmail(toEmail, locationName) {
-  const mailOptions = {
-    from: `"JELLYACE" <${process.env.EMAIL_USER}>`,
-    to: toEmail,
-    subject: 'Soil Dry Alert',
-    text: `The soil at ${locationName} is dry. Please water your plants.`
-  };
+function sendNotificationEmail(toEmail, locationName, title, body) {
+  return new Promise((resolve, reject) => {
+      const mailOptions = {
+          from: `"JELLYACE" <${process.env.EMAIL_USER}>`,
+          to: toEmail,
+          subject: title,
+          text: body
+      };
 
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      console.error('Error sending email:', error);
-    } else {
-      console.log('Email sent:', info.response);
-    }
+      transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
+              console.error('Error sending email:', error);
+              reject(error);
+          } else {
+              console.log('Email sent:', info.response);
+              resolve(info);
+          }
+      });
   });
 }
-
-
 
 // In your server-side code
 async function cleanupInvalidTokens(userId) {
@@ -84,9 +86,15 @@ async function cleanupInvalidTokens(userId) {
   }
   await user.save();
 }
+// Object to store the last known status for each sensor
+const lastKnownStatus = {};
 
-const lastNotificationTime = {};
-const NOTIFICATION_COOLDOWN = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+function getMoistureStatus(moistureValue) {
+    if (moistureValue <= 250) return 'waterlogged';
+    if (moistureValue >= 800 && moistureValue <= 1023) return 'dry';
+    if (moistureValue > 1023) return 'lifted';
+    return 'normal';
+}
 
 async function handleSoilMoistureUpdate(sensorId, sensorData) {
     if (!sensorData) {
@@ -103,87 +111,90 @@ async function handleSoilMoistureUpdate(sensorId, sensorData) {
             return;
         }
 
-        const existingSoilData = await SoilData.findOne({ userId, locationName });
+        const currentStatus = getMoistureStatus(moistureValue);
+        const previousStatus = lastKnownStatus[sensorId];
 
-        if (existingSoilData && existingSoilData.moistureValue === moistureValue) {
-            console.log('No change in soil moisture value for sensor:', sensorId);
-            return;
+        // Update the last known status
+        lastKnownStatus[sensorId] = currentStatus;
+
+        // Only proceed with notification if the status has changed
+        if (currentStatus !== previousStatus && currentStatus !== 'normal') {
+            let notificationTitle = '';
+            let notificationBody = '';
+            let taskTitle = '';
+            let taskDescription = '';
+            let taskType = 'custom';
+
+            switch (currentStatus) {
+                case 'waterlogged':
+                    notificationTitle = 'Waterlogged Soil Alert';
+                    notificationBody = `The soil at ${locationName} has become waterlogged. Improve drainage and stop watering to prevent plant damage.`;
+                    taskTitle = `Improve drainage at ${locationName}`;
+                    taskDescription = `The soil at ${locationName} is waterlogged. Improve drainage and stop watering to prevent plant damage.`;
+                    break;
+                case 'dry':
+                    notificationTitle = 'Dry Soil Alert';
+                    notificationBody = `The soil at ${locationName} has become dry. Water the plants to prevent stress and dehydration.`;
+                    taskTitle = `Water plants at ${locationName}`;
+                    taskDescription = `The soil at ${locationName} is dry. Water the plants to prevent stress and dehydration.`;
+                    taskType = 'watering';
+                    break;
+                case 'lifted':
+                    notificationTitle = 'Sensor Lifted Alert';
+                    notificationBody = `Sensor at ${locationName} has been lifted from the soil. Reinsert the sensor to get accurate moisture readings.`;
+                    taskTitle = `Check sensor at ${locationName}`;
+                    taskDescription = `Sensor at ${locationName} is not in soil. Reinsert the sensor to get accurate moisture readings.`;
+                    break;
+            }
+
+            // Create a new task
+            const existingTask = await Todo.findOne({
+                userId: user._id,
+                plantId: plantId || null,
+                title: taskTitle,
+                completed: false
+            });
+
+            if (!existingTask) {
+                const newTask = new Todo({
+                    userId: user._id,
+                    plantId: plantId || null,
+                    title: taskTitle,
+                    description: taskDescription,
+                    dueDate: new Date(),
+                    taskType: taskType,
+                    priority: 'high'
+                });
+
+                await newTask.save();
+                console.log(`Task added to the To-Do list for user ${user.email}.`);
+            }
+
+            // Send email notification
+            try {
+                await sendNotificationEmail(user.email, locationName, notificationTitle, notificationBody);
+                console.log(`Email sent successfully to ${user.email} for ${notificationTitle} at ${locationName}.`);
+            } catch (error) {
+                console.error(`Failed to send email for ${notificationTitle} at ${locationName}:`, error);
+            }
         }
 
+        // Update soil moisture data in database
         await SoilData.findOneAndUpdate(
             { userId, locationName },
             { moistureValue },
             { new: true, upsert: true }
         );
 
+        // Emit updated data to connected clients
         io.emit('soilMoistureUpdate', {
             [sensorId]: { locationName, moistureValue, userId }
         });
 
-        if (moistureValue < 30) {
-            const currentTime = Date.now();
-            if (!lastNotificationTime[locationName] || 
-                (currentTime - lastNotificationTime[locationName] > NOTIFICATION_COOLDOWN)) {
-                
-                const existingTask = await Todo.findOne({
-                    userId: user._id,
-                    plantId: plantId || null,
-                    title: `Water your plant at ${locationName}`,
-                    taskType: 'watering',
-                    completed: false
-                });
-
-                if (!existingTask) {
-                    const newTask = new Todo({
-                        userId: user._id,
-                        plantId: plantId || null,
-                        title: `Water your plant at ${locationName}`,
-                        description: `The soil at ${locationName} is dry. Please water your plant.`,
-                        dueDate: new Date(),
-                        taskType: 'watering',
-                        priority: 'high'
-                    });
-
-                    await newTask.save();
-                    console.log(`Task added to the To-Do list for user ${user.email}.`);
-                }
-
-                if (user.fcmTokens && user.fcmTokens.length > 0) {
-                    const message = {
-                        notification: {
-                            title: 'Soil Moisture Alert',
-                            body: `The soil at ${locationName} is dry. Please water your plant.`,
-                        },
-                        android: {
-                            notification: {
-                                icon: 'stock_ticker_update',
-                                color: '#7e55c3'
-                            }
-                        },
-                        tokens: user.fcmTokens
-                    };
-
-                    try {
-                        const response = await admin.messaging().sendEachForMulticast(message);
-                        console.log('Successfully sent message:', response);
-                        await cleanupInvalidTokens(user._id);
-                    } catch (error) {
-                        console.log('Error sending message:', error);
-                    }
-                }
-
-                // Send email notification
-                sendNotificationEmail(user.email, locationName);
-
-                lastNotificationTime[locationName] = currentTime;
-                console.log(`Notification sent to ${user.email} for dry soil at ${locationName}.`);
-            }
-        }
     } catch (error) {
         console.error('Error updating soil moisture data in MongoDB:', error);
     }
 }
-
 // Set up the Firebase listener
 ref.on('child_changed', (snapshot) => {
   const sensorId = snapshot.key;

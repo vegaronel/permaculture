@@ -68,14 +68,14 @@ app.post('/add-custom-location', isAuthenticated, async (req, res) => {
 
 app.get('/plant/:customId', async (req, res) => {
   try {
-      const plant = await Plant.findOne({ customId: req.params.customId }).populate('location').populate('userId').populate('plantCollectionId');
-      if (plant) {
-          res.json({ success: true, plant });
-      } else {
-          res.json({ success: false, message: 'Plant not found' });
-      }
+    const plant = await Plant.findOne({ customId: req.params.customId }).populate('location').populate('userId').populate('plantCollectionId');
+    if (plant) {
+      res.json({ success: true, plant });
+    } else {
+      res.json({ success: false, message: 'Plant not found' });
+    }
   } catch (err) {
-      res.status(500).json({ success: false, message: 'Server error', error: err.message });
+    res.status(500).json({ success: false, message: 'Server error', error: err.message });
   }
 });
 

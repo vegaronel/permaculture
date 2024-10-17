@@ -14,7 +14,17 @@
     font-style: normal;
     font-display: swap;
 }
+@font-face {
+    font-family: "Nexa-Light";
+    src: url("../fonts/Nexa-ExtraLight.ttf") format("truetype"), url("../fonts/my-font.woff") format("woff");
+    font-weight: light;
+    font-style: normal;
+    font-display: swap;
+}
 
+.nexa-light{
+    font-family: "Nexa-Light";
+}
 /* BOOTSTRAP CUSTOM */
 
 
@@ -806,6 +816,12 @@ a{
 
 /* POSTS */
 
+.profile-picture{
+    border-radius: 100px;
+    height: 50px;
+    background-size: cover;
+    width: 50px;
+}
 .card {
     transition: transform 0.2s, box-shadow 0.2s;
   }
