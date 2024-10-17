@@ -2,31 +2,37 @@
 
 <div class="container-fluid hidden-scroll"> 
 
-    <div class="card mb-4 shadow-sm bg-white rounded-lg">
-        <div class="card-body d-flex align-items-start">          
-          <!-- Post Content -->
-          <div class="flex-grow-1">
-            <p><%= post.userId.firstname %> <%= post.userId.lastname %> <small> <strong><%= post.category %></strong></small></p>
-            <p><%= post.createdAt.toLocaleString() %></p>
-            <p> <%= post.content %></p>
-            <% if (post.image) { %>
-                <img src="<%= post.image %>" alt="Post Image" style="max-width: 100%; height: auto;" />
-            <% } %>
-          </div>
-        </div>
-        <div class="shadow-sm bg-primary rounded-lg">
-            <h2>Comments</h2>
-            <div id="comments">
-                <!-- Comments will be dynamically loaded here -->
+    <div class="card bg-white rounded-0 rounded-top rounded-bottom">
+        <div class=" nexa-light fw-bolder " style="border-bottom: 1px solid rgba(0, 0, 0, 0.608); width: auto; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Creates a top shadow */">
+            <p class="text-center p-2 mt-2"><%= post.userId.firstname %>'s Post</p>
+        </div>  
+        <div class="p-4">
+            <div class="d-flex align-items-center gap-2">
+                <img src="<%= post.profile %>" alt="" style="width: 50px; height: 50px; background-size: cover; border-radius: 100px;">
+                <p class="m-0"><%= post.userId.firstname %> <%= post.userId.lastname %> <small> • <strong><%= post.category %></strong></small></p>
             </div>
-            <button id="showMore" class="btn btn-primary" style="display: none;">Show More Comments</button>
-            
-            <form id="commentForm" action="/comment/<%= post._id %>" method="POST">
-                <input type="text" name="comment" required placeholder="Add a comment...">
-                <button type="submit">Comment</button>
+            <div>
+                <p> <%= post.content %></p>
+                <% if (post.image) { %>
+                    <img src="<%= post.image %>" alt="Post Image" style="max-width: 400px; width: 100%; height: auto;" />
+                <% } %>
+            </div>
+            <div class="py-3">
+                <div id="comments">
+                    <!-- Comments will be dynamically loaded here -->
+                </div>
+                <button id="showMore" class="btn btn-primary" style="display: none;">Show More Comments</button>
+            </div>
+        </div>
+        <div class="rounded-bottom p-3" style="border-top: 1px solid rgba(0, 0, 0, 0.605); width: auto;  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2); /* Creates a top shadow */">
+            <form  class="d-flex gap-3" id="commentForm" action="/comment/<%= post._id %>" method="POST">
+                <img class="profile-picture" src="<%=profilePicture %>" alt="">
+                <input class="form-control " type="text" name="comment" required placeholder="Comment as <%= post.userId.firstname %>">
+                <button type="submit" style="border: none; background-color: rgba(255, 255, 255, 0); max-width: 35px;"><img src="/images/comment-arrow.svg" alt="" style="width: 100%;"></button>
             </form>
         </div>
     </div>
+
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -44,9 +50,9 @@
                     if (comments.length > 0) {
                         comments.forEach(comment => {
                             $('#comments').append(`
-                                <div class="comment">
-                                    <p><strong>${comment.userId.firstname} ${comment.userId.lastname}:</strong> ${comment.comment}</p>
-                                    <p>Commented at: ${new Date(comment.createdAt).toLocaleString()}</p>
+                                <div class="card p-3 mb-2" style="background-color:#F0F2F5; width:max-content;">
+                                    <p class="m-0"><strong>${comment.userId.firstname} ${comment.userId.lastname}:</strong></p>
+                                    <p class="m-0">${comment.comment}</p>
                                 </div>
                             `);
                         });
@@ -88,9 +94,9 @@
                 data: { comment: comment },
                 success: function(response) {
                     $('#comments').prepend(`
-                        <div class="comment">
-                            <p><strong>${response.user.firstname} ${response.user.lastname}:</strong> ${response.comment.comment}</p>
-                            <p>Commented at: ${new Date(response.comment.createdAt).toLocaleString()}</p>
+                           <div class="card p-3 mb-2" style="background-color:#F0F2F5; width:max-content;">
+                            <p class="m-0"><strong>${response.user.firstname} ${response.user.lastname}:</strong></p>
+                            <p class="m-0">${response.comment.comment}</p>
                         </div>
                     `);
                     $('input[name="comment"]').val(''); // Clear the input field

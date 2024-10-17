@@ -65,7 +65,7 @@ $(document).ready(function() {
     }else if(currentPath.includes('/posts')){
         pageTitle.text('Community Forum');
     }else if(currentPath.includes('/post')){
-        pageTitle.text('Community Forum > Post');
+        pageTitle.html(' <a id="page-title" class="nexa-black bread-crumbs m-0" href="/posts">Community Forum</a> > Post');
     }else if(currentPath.includes('/add-new-plant')){
         pageTitle.text('Add Plant');
     }
