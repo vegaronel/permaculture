@@ -1,10 +1,11 @@
 const express = require("express")
 const Email = require("../models/message")
 const User = require("../models/user")
-const isAuthenticated = require('../middleware/athenticateUser')
 const PlantCollection = require('../models/plantCollections');
 const Plant = require('../models/Plant');
+const Admin = require('../models/Admin');
 const multer = require('multer');
+const bcrypt = require("bcryptjs");
 const path = require('path');
 const fs = require('fs');
 const cloudinary = require('../config/cloudinary');
@@ -12,6 +13,13 @@ const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
 const app = express();
 
+
+const isAuthenticated = (req, res, next) => {
+    if (req.session.userId) {
+        return next(); // User is authenticated, proceed to the next middleware
+    }
+    res.redirect('/admin-login'); // Redirect to login if not authenticated
+};
 
 // Configure multer storage for Cloudinary
 const storage = new CloudinaryStorage({
@@ -24,7 +32,63 @@ const storage = new CloudinaryStorage({
   });
 
   const upload = multer({ storage: storage });
-  app.get("/admin", upload.single('plantImage'), async (req, res) => {
+
+  app.get("/admin-login", (req,res)=>{
+    res.render('admin-login');
+  });
+
+  app.get("/admin-register", (req,res)=>{
+    res.render('admin-register');
+  });
+
+  
+
+
+  // Route to handle admin registration
+app.post('/admin-register', async (req, res) => {
+    const { username, password } = req.body;
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newAdmin = new Admin({
+        username,
+        password: hashedPassword
+    });
+
+    try {
+        await newAdmin.save();
+        res.redirect('/admin-login'); // Redirect to login page after successful registration
+    } catch (error) {
+        console.error(error);
+        res.render('admin-register', { error: 'Username already exists' }); // Show error message
+    }
+});
+
+// Route to handle admin login
+app.post('/admin' , async (req, res) => {
+    const { username, password } = req.body;
+
+    try {
+        // Find the admin by username
+        const admin = await Admin.findOne({ username });
+
+        // Check if admin exists and compare passwords
+        if (admin && await bcrypt.compare(password, admin.password)) {
+            // Successful login
+            req.session.userId = admin._id; // Store admin ID in session
+            return res.redirect('/admin'); // Redirect to admin dashboard
+        } else {
+            // Invalid credentials
+            return res.render('admin-login', { error: 'Invalid username or password' });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.render('admin-login', { error: 'An error occurred. Please try again.' });
+    }
+});
+
+  app.get("/admin",isAuthenticated, upload.single('plantImage'), async (req, res) => {
     try {
         // Fetch all emails from the database
         const emails = await Email.find().sort({ dateSent: -1 });
