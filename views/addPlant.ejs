@@ -165,12 +165,15 @@
         </div>
     </div>
 </div>
-<!-- Notification div for success message -->
-<div id="successNotification" class="alert alert-success d-none position-fixed" style="top: 20px; right: 20px; z-index: 1051; display: flex; align-items: center; border-radius: 40px;">
-    <i class="fas fa-check-circle" style="font-size: 24px; margin-right: 10px;"></i>
-    <span>Plant has been added successfully!</span>
-</div>
 
+<div id="overlay" class="position-fixed top-0 start-0 w-100 h-100" style="background-color: rgba(0,0,0,0.5); z-index: 1060; display: none;"></div>
+
+<!-- Notification -->
+<div id="successAddPlantNotification" class="alert alert-success d-none shadow-lg rounded position-fixed top-50 start-50 translate-middle text-center" style="z-index: 1070; width: 300px;" role="alert">
+    <img src="/images/Party.gif" alt="Plant Icon" style="width: 100px; height: 100px; margin-bottom: 10px;">
+    <h5>Congratulations!</h5>
+    <p>Your plant has been successfully added!</p>
+</div>
 
 </div>
 </div>
@@ -249,12 +252,12 @@ $(document).ready(function() {
     });
 
 
-  
-
+    $(document).ready(function() {
     $('#addPlantModal').on('hidden.bs.modal', function() {
-            clearForm();
-        });
-        $('#addPlantForm').on('submit', function(e) {
+        clearForm();
+    });
+
+    $('#addPlantForm').on('submit', function(e) {
         e.preventDefault();
 
         const submitButton = $('#addPlantForm button[type="submit"]');
@@ -266,17 +269,26 @@ $(document).ready(function() {
             data: $(this).serialize(),
             success: function(response) {
                 if (response.success) {
-                    const notification = $('#successNotification');
+                    // Hide both modals
+                    $('#plantInfoModal').modal('hide');
+                    $('#addPlantModal').modal('hide');
+
+                    // Show overlay
+                    $('#overlay').fadeIn(300);
+
+                    // Show notification
+                    const notification = $('#successAddPlantNotification');
                     notification.removeClass('d-none').fadeIn(300);
 
+                    // Hide notification and overlay after 3 seconds
                     setTimeout(function() {
                         notification.fadeOut(300, function() {
                             notification.addClass('d-none');
+                            $('#overlay').fadeOut(300);
                         });
                     }, 3000);
 
                     $('#addPlantForm')[0].reset();
-                    $('#addPlantModal').modal('hide');
 
                     // Optionally, update the UI to reflect the newly added plant
                     // This could involve adding the new plant to a list on the page
@@ -295,6 +307,25 @@ $(document).ready(function() {
         });
     });
 
+    // Function to ensure all modals and overlays are hidden
+    function hideAllModalsAndOverlays() {
+        $('.modal').modal('hide');
+        $('#overlay').fadeOut(300);
+        $('#successAddPlantNotification').addClass('d-none');
+    }
+
+    // Add this event listener to hide everything when clicking outside modals
+    $(document).on('click', function(event) {
+        if ($(event.target).hasClass('modal')) {
+            hideAllModalsAndOverlays();
+        }
+    });
+
+    // Add this to your existing close buttons
+    $('.modal .close, .modal .back-button').on('click', function() {
+        hideAllModalsAndOverlays();
+    });
+});
 
         // Show custom location input when 'Add Custom Location' is selected
         $('#location').change(function() {

@@ -3,6 +3,7 @@ const Email = require("../models/message")
 const User = require("../models/user")
 const isAuthenticated = require('../middleware/athenticateUser')
 const PlantCollection = require('../models/plantCollections');
+const Plant = require('../models/Plant');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -23,9 +24,7 @@ const storage = new CloudinaryStorage({
   });
 
   const upload = multer({ storage: storage });
-
-// Update the /admin route to fetch plants
-app.get("/admin",upload.single('plantImage'), async (req, res) => {
+  app.get("/admin", upload.single('plantImage'), async (req, res) => {
     try {
         // Fetch all emails from the database
         const emails = await Email.find().sort({ dateSent: -1 });
@@ -33,13 +32,50 @@ app.get("/admin",upload.single('plantImage'), async (req, res) => {
         // Fetch all users with status 'pending'
         const pendingUsers = await User.find({ status: 'pending' });
 
-        // Render the admin view with emails, pending users, and plants
-        res.render("admin.ejs", { emails, pendingUsers });
+        const totalUserCount = await User.countDocuments(); // Count total users
+
+        // Count total plants
+        const totalPlantCount = await Plant.countDocuments();
+
+        // Count harvested plants
+        const harvestedPlantCount = await Plant.countDocuments({ status: "Harvested" });
+
+        // Count dead plants
+        const deadPlantCount = await Plant.countDocuments({ status: "Died" });
+
+        // Count available plants (assuming available means not dead or harvested)
+        const availablePlants = await Plant.countDocuments({
+            status: { $ne: "Died" } // Exclude dead plants
+        });
+
+        // Find the most planted plant
+        const mostPlanted = await Plant.aggregate([
+            { $group: { _id: "$name", count: { $sum: 1 } } },
+            { $sort: { count: -1 } },
+            { $limit: 1 } // Get the plant with the highest count
+        ]);
+
+        const mostPlantedName = mostPlanted.length > 0 ? mostPlanted[0]._id : "No plants planted yet";
+        const mostPlantedCount = mostPlanted.length > 0 ? mostPlanted[0].count : 0;
+
+        // Render the admin view with emails, pending users, and plant counts
+        res.render("admin.ejs", { 
+            emails, 
+            pendingUsers, 
+            totalUserCount, 
+            totalPlantCount, 
+            harvestedPlantCount, 
+            deadPlantCount,
+            availablePlants, // Include available plants
+            mostPlantedName,
+            mostPlantedCount
+        });
     } catch (err) {
         console.error(err);
         res.status(500).send('Error fetching data');
     }
 });
+
 
 app.get("/plant-collection", async(req,res)=>{
       // Fetch all plants from the database
@@ -49,7 +85,7 @@ app.get("/plant-collection", async(req,res)=>{
 })
 
 // Route to delete a plant
-app.post("/admin/plants/delete/:id", async (req, res) => {
+app.post("/admin/emails/delete/:id", async (req, res) => {
     try {
         await PlantCollection.findByIdAndDelete(req.params.id);
         res.redirect("/plant-collection");
@@ -177,19 +213,17 @@ app.get("/email",isAuthenticated, (req, res)=>{
     res.render("email.ejs", {name: req.session.firstname + " "+ req.session.lastname, email: req.session.email, profilePicture: req.session.profilePicture});
 })
 
-app.post("/admin/emails/delete/:id", async (req, res) => {
-    try 
-        {
-            const emailId = req.params.id;
-            await Email.findByIdAndDelete(emailId);
-            res.redirect("/admin/emails/");
-        } 
-    catch (err) 
-        {
-            console.error(err);
-            res.status(500).send('Error deleting email');
-        }
+app.delete("/admin/emails/delete/:id", async (req, res) => {
+    try {
+        const emailId = req.params.id;
+        await Email.findByIdAndDelete(emailId);
+        res.status(200).json({ message: 'Email deleted successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Error deleting email' });
+    }
 });
+
 
 app.post('/send-mail',isAuthenticated, async(req, res)=>{
     const { name, email, subject, message, profilePicture } = req.body;

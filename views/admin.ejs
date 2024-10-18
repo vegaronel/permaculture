@@ -1,9 +1,75 @@
 <%- include("partials/AdminHeader.ejs") %>
 
 <div class="container">
-  <h1>Pending Registration</h1>
-  <div class="table-responsive">
-    <table id="pendingUsersTable" class="display table mt-5">
+  <div class="container my-5">
+    <p class="mb-4 h4">Plant Statistics / Accounts</p>
+    <div class="row">
+      <div class="col-md-4 mb-3">
+          <div class="card shadow-sm border-0">
+              <div class="card-body text-center">
+                  <i class="bi bi-seedling text-success fs-1 mb-3"></i>
+                  <h5 class="card-title">Total Number of Plants Planted</h5>
+                  <p class="card-text fs-4"><%= totalPlantCount %></p>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-4 mb-3">
+          <div class="card shadow-sm border-0">
+              <div class="card-body text-center">
+                  <i class="bi bi-box-arrow-in-down text-primary fs-1 mb-3"></i>
+                  <h5 class="card-title">Harvested Plants</h5>
+                  <p class="card-text fs-4"><%= harvestedPlantCount %></p>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-4 mb-3">
+          <div class="card shadow-sm border-0">
+              <div class="card-body text-center">
+                  <i class="bi bi-x-circle text-danger fs-1 mb-3"></i>
+                  <h5 class="card-title">Dead Plants</h5>
+                  <p class="card-text fs-4"><%= deadPlantCount %></p>
+              </div>
+          </div>
+      </div>
+  </div>
+  
+  <div class="row">
+      <div class="col-md-4 mb-3">
+          <div class="card shadow-sm border-0">
+              <div class="card-body text-center">
+                  <i class="bi bi-graph-up text-warning fs-1 mb-3"></i>
+                  <h5 class="card-title">Most Planted</h5>
+                  <p class="card-text fs-4"><%= mostPlantedName %> (Count: <%= mostPlantedCount %>)</p>
+              </div>
+          </div>
+      </div>
+      <div class="col-md-4 mb-3">
+        <div class="card shadow-sm border-0">
+            <div class="card-body text-center">
+                <i class="bi bi-graph-up text-warning fs-1 mb-3"></i>
+                <h5 class="card-title">Available Plants</h5>
+                <p class="card-text fs-4"><%= availablePlants %></p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+      <div class="card shadow-sm border-0">
+          <div class="card-body text-center">
+              <i class="bi bi-person-fill text-info fs-1 mb-3"></i>
+              <h5 class="card-title">Total Registered Accounts</h5>
+              <p class="card-text fs-4"><%= totalUserCount %></p>
+          </div>
+      </div>
+  </div>
+  </div>
+    
+</div>
+
+
+<p class="h4">Pending Registration</p>
+<div class="table-responsive mt-4">
+  <% if (pendingUsers.length > 0) { %>
+    <table id="pendingUsersTable" class="display table mt-3">
       <thead>
         <tr>
           <th>Name</th>
@@ -30,9 +96,13 @@
         <% }) %>
       </tbody>
     </table>
-  </div>
+  <% } else { %>
+    <p class="text-muted mt-3 text-center">No pending registration</p>
+  <% } %>
+</div>
 
-  <h4>Received Emails</h4>
+
+  <p class="h4">Received Emails</p>
   <div class="table-responsive">
     <table id="example" class="display table mt-5">
       <thead>
@@ -47,26 +117,55 @@
       </thead>
       <tbody>
         <% emails.forEach(email => { %>
-          <tr>
-            <td class="d-flex justify-content-center"> <img src="/<%= email.profilePicture  %>" alt="" width="50" height="50"></td>
+        <tr id="email-row-<%= email._id %>">
+            <td class="d-flex justify-content-center">
+                <img src="/<%= email.profilePicture %>" alt="" width="50" height="50">
+            </td>
             <td><%= email.read ? '📤' : '✉️' %></td>
             <td>
-              <a href="#" class="email-link" data-id="<%= email._id %>"><%= email.email %></a>
+                <a href="#" class="email-link" data-id="<%= email._id %>"><%= email.email %></a>
             </td>
             <td><%= email.subject %></td>
             <td><%= email.dateSent.toLocaleString() %></td>
             <td>
-              <a class="btn btn-primary btn-sm" href="/admin/email/<%= email._id %>">View</a>
-              <button type="button" class="btn btn-danger btn-sm delete-button" data-id="<%= email._id %>">Delete</button>
-              <form id="delete-form-<%= email._id %>" action="/admin/emails/delete/<%= email._id %>" method="POST" style="display:none;"></form>
+                <a class="btn btn-primary btn-sm" href="/admin/email/<%= email._id %>">View</a>
+                <button type="button" class="btn btn-danger btn-sm delete-button" data-id="<%= email._id %>">Delete</button>
             </td>
-          </tr>
+        </tr>
         <% }) %>
-      </tbody>
+    </tbody>
     </table>
   </div>
 
   
 </div>
 
+<script>
+    document.querySelectorAll('.delete-button').forEach(button => {
+        button.addEventListener('click', function () {
+            const emailId = this.getAttribute('data-id');
+            if (confirm('Are you sure you want to delete this email?')) {
+                // AJAX request to delete the email
+                fetch(`/admin/emails/delete/${emailId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Remove the email row from the table if the delete was successful
+                        document.getElementById(`email-row-${emailId}`).remove();
+                    } else {
+                        alert('Error deleting email');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error deleting email');
+                });
+            }
+        });
+    });
+</script>
 <%- include("partials/AdminFooter.ejs") %>
