@@ -41,9 +41,6 @@ const storage = new CloudinaryStorage({
     res.render('admin-register');
   });
 
-  
-
-
   // Route to handle admin registration
 app.post('/admin-register', async (req, res) => {
     const { username, password } = req.body;
@@ -88,7 +85,7 @@ app.post('/admin' , async (req, res) => {
     }
 });
 
-  app.get("/admin",isAuthenticated, upload.single('plantImage'), async (req, res) => {
+app.get("/admin", isAuthenticated, upload.single('plantImage'), async (req, res) => {
     try {
         // Fetch all emails from the database
         const emails = await Email.find().sort({ dateSent: -1 });
@@ -122,7 +119,28 @@ app.post('/admin' , async (req, res) => {
         const mostPlantedName = mostPlanted.length > 0 ? mostPlanted[0]._id : "No plants planted yet";
         const mostPlantedCount = mostPlanted.length > 0 ? mostPlanted[0].count : 0;
 
-        // Render the admin view with emails, pending users, and plant counts
+        // Fetch all users and their plant count, sorted by most plants to least
+        const usersWithPlantCount = await User.aggregate([
+            {
+                $lookup: {
+                    from: "plants", // Collection name for plants
+                    localField: "_id",
+                    foreignField: "userId", // Assuming userId field in the Plant model
+                    as: "plants"
+                }
+            },
+            {
+                $project: {
+                    firstname: 1,
+                    lastname: 1,
+                    email: 1,
+                    plantCount: { $size: "$plants" }
+                }
+            },
+            { $sort: { plantCount: -1 } } // Sort by plant count, descending
+        ]);
+
+        // Render the admin view with the necessary data
         res.render("admin.ejs", { 
             emails, 
             pendingUsers, 
@@ -132,14 +150,14 @@ app.post('/admin' , async (req, res) => {
             deadPlantCount,
             availablePlants, // Include available plants
             mostPlantedName,
-            mostPlantedCount
+            mostPlantedCount,
+            usersWithPlantCount // Pass the users with plant count to the view
         });
     } catch (err) {
         console.error(err);
         res.status(500).send('Error fetching data');
     }
 });
-
 
 app.get("/plant-collection", async(req,res)=>{
       // Fetch all plants from the database
