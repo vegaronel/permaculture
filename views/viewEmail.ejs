@@ -1,34 +1,35 @@
-<%-include("partials/AdminHeader.ejs")  %>
+<%- include("partials/AdminHeader.ejs") %>
 
 <body>
-
-    <section id="info-section">
+    <section id="info-section" class="my-5">
         <div class="container">
-
-            <h3>Email Details</h3>
-            <div class="row ">
-                <div class="col-lg-6"><p><strong>From:</strong> <%= email.name %> (<%= email.email %>)</p></div>
-                <div class="col-lg-6 d-flex justify-content-end"> <p style="font-size: 15px;"><strong>Date Sent:</strong> <%= email.dateSent.toISOString().split('T')[0] %></p></div>
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">Email Details</h3>
+                    <a class="btn btn-light btn-sm" href="/admin">Back to Emails</a>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-lg-6">
+                            <p class="mb-1"><strong>From:</strong> <%= email.name %> (<a href="mailto:<%= email.email %>"><%= email.email %></a>)</p>
+                        </div>
+                        <div class="col-lg-6 text-end">
+                            <p class="mb-1"><strong>Date Sent:</strong> <%= new Date(email.dateSent).toLocaleDateString() %></p>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <p class="mb-1"><strong>Subject:</strong> <%= email.subject %></p>
+                    </div>
+                    <div class="mb-4">
+                        <div class="p-4 bg-light rounded" style="border-left: 4px solid #007bff;">
+                            <p class="mb-2"><strong>Message:</strong></p>
+                            <p class="mb-0" style="white-space: pre-wrap;"><%= email.message %></p>
+                        </div>
+                    </div>
+                </div>
             </div>
-       
-        <p><strong>Subject:</strong> <%= email.subject %></p>
-         
-     
-    
-        <div class="row shadow p-3 mb-5 bg-body rounded" style="border-radius: 10px;">
-            <p><strong>Message:</strong></p>
-            <p><%= email.message %></p>
-    
         </div>
-       
-       
-        <a class="btn btn-primary" href="/admin/emails">Back to Emails</a>
-    
-        </div>
-        
     </section>
-   
-
 </body>
 
 <%- include("partials/AdminFooter.ejs") %>

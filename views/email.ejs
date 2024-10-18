@@ -18,24 +18,33 @@
               <% } %>
               
                 <form class="form-container form-control p-4" action="/send-mail" method="post"> 
-                <% if(locals.emailSent){ %>
-                    <p class="wrongCridentials bg-success hvr-wobble-horizontal"><%= emailSent %></p>
-                <% } %>
-            <div class="row">
-                
-                <input hidden type="text" name="profilePicture"<% if (locals.profilePicture) { %>
-                    value="<%= profilePicture %>"
-                <% } %>>
-                <div hidden class="col-lg-3 col-md-12"><input class="form-control"  type="text" name="name" <% if(locals.name) { %>
-                value="<%= name %>"<% } %> placeholder="Name"></div>
+                    <% if(locals.emailSent){ %>
+                        <p class="wrongCridentials bg-success hvr-wobble-horizontal"><%= emailSent %></p>
+                    <% } %>
+                    <div class="row">
+                        
+                        <input hidden type="text" name="profilePicture"<% if (locals.profilePicture) { %>
+                            value="<%= profilePicture %>"
+                        <% } %>>
+                        <div hidden class="col-lg-3 col-md-12"><input class="form-control"  type="text" name="name" <% if(locals.name) { %>
+                        value="<%= name %>"<% } %> placeholder="Name"></div>
 
-                <div hidden class="col-lg-3 col-md-12" ><input class="form-control" type="email" name="email"
-                    <% if (locals.email) { %>
-                        value="<%= email %>"
-                    <% } %> placeholder="Email"></div>
-                <div class="col-lg-3 col-md-12"><input class="form-control" type="text" name="subject" placeholder="Subject"></div>
-            </div>
-                    <textarea class="form-control textMessage" name="message" id="" rows="7" placeholder="Message"></textarea>
+                        <div hidden class="col-lg-3 col-md-12" ><input class="form-control" type="email" name="email"
+                            <% if (locals.email) { %>
+                                value="<%= email %>"
+                            <% } %> placeholder="Email"></div>
+                        <div class="col-lg-3 col-md-12">
+                            <select class="form-control" name="subject" id="subject" required>
+                                <option value="">Select Subject</option>
+                                <option value="Seedling Request">Seedling Request</option>
+                                <option value="Iot Kit">Iot Kit</option>
+                                <option value="Pest Report">Feedback</option>
+                                <option value="Account Help">Account Help</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>                            
+                    </div>
+                    <textarea class="form-control textMessage mt-3 " name="message" id="" rows="7" placeholder="Message"></textarea>
                     <button type="submit" class="send-btn btn btn-success">Send</button>
                 </form>
         </div>

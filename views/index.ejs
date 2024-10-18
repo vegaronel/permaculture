@@ -436,90 +436,85 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-   const socket = io();
+    const socket = io();
     const userId = '<%= userId %>';
-socket.on('soilMoistureUpdate', (data) => {
-    const $container = $('#soilMoistureContainer');
-    if (!$container.length) return;
-
-    $.each(data, (sensorId, sensorData) => {
-        if (sensorData.userId === userId) {
-            const moistureValue = sensorData.moistureValue;
-            const locDat = sensorData.locationName;
-
-            let statusText;
-            let statusClass = '';
-            let actionText = '';
-
-            if (moistureValue <= 250) {
-                statusText = 'Waterlogged';
-                actionText = 'Improve drainage and stop watering';
-            } else if (moistureValue <= 525) {
-                statusText = 'Wet';
-                actionText = 'Monitor soil condition';
-            } else if (moistureValue <= 799) {
-                statusText = 'Moist';
-                actionText = 'Soil condition is good';
-            } else if (moistureValue <= 1023) {
-                statusText = 'Dry';
-                actionText = 'Water the plants';
-            } else {
-                statusText = 'Sensor Lifted';
-                actionText = 'Reinsert the sensor';
-            }
-
-            let $card = $container.find(`.card[data-location="${locDat}"]`);
-
-            if ($card.length) {
-                $card.find('.percentage').text(`${moistureValue}`);
-                $card.find('.status-text').text(statusText);
-                $card.find('.status-text').attr('class', `status-text text-white ${statusClass}`);
-                $card.find('.action-text').text(actionText);
-                $card.css('background', `linear-gradient(${getGradient(moistureValue)})`);
-            } else {
-                $card = $(`
-                    <div class="card mb-3 p-4 shadow-none" data-location="${locDat}" style="border-radius: 20px; background: linear-gradient(${getGradient(moistureValue)});">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h5 class="location-name text-white mb-2">${locDat}</h5>
-                                <p class="action-text text-white">${actionText}</p>
-                            </div>
-                            <div class="d-flex flex-column justify-content-center align-items-center">
-                                <h1 class="percentage" style="font-weight: bold; color: #fff;">${moistureValue}</h1>
-                                <p class="status-text text-white">${statusText}</p>
+    
+    socket.on('soilMoistureUpdate', (data) => {
+        const $container = $('#soilMoistureContainer');
+        if (!$container.length) return;
+    
+        $.each(data, (sensorId, sensorData) => {
+            if (sensorData.userId === userId) {
+                const moistureValue = sensorData.moistureValue;
+                const locDat = sensorData.locationName;
+    
+                let statusText;
+                let statusClass = '';
+                let actionText = '';
+    
+                if (moistureValue <= 500) {
+                    statusText = 'Waterlogged';
+                    actionText = `Soil at ${locDat} is waterlogged. Improve drainage and stop watering to prevent plant damage.`;
+                } else if (moistureValue <= 799) {
+                    statusText = 'Moist';
+                    actionText = `Soil at ${locDat} is moist. Conditions are good for plant growth.`;
+                } else if (moistureValue <= 1023) {
+                    statusText = 'Dry';
+                    actionText = `Soil at ${locDat} is dry. Water the plants to prevent stress and dehydration.`;
+                } else {
+                    statusText = 'Sensor Lifted';
+                    actionText = `Sensor at ${locDat} is not in soil. Reinsert the sensor to get accurate moisture readings.`;
+                }
+    
+                let $card = $container.find(`.card[data-location="${locDat}"]`);
+    
+                if ($card.length) {
+                    $card.find('.percentage').text(`${moistureValue}`);
+                    $card.find('.status-text').text(statusText);
+                    $card.find('.status-text').attr('class', `status-text text-white ${statusClass}`);
+                    $card.find('.action-text').text(actionText);
+                    $card.css('background', `linear-gradient(${getGradient(moistureValue)})`);
+                } else {
+                    $card = $(`
+                        <div class="card mb-3 p-4 shadow-none" data-location="${locDat}" style="border-radius: 20px; background: linear-gradient(${getGradient(moistureValue)});">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="location-name text-white mb-2">${locDat}</h5>
+                                    <p class="action-text text-white">${actionText}</p>
+                                </div>
+                                <div class="d-flex flex-column justify-content-center align-items-center">
+                                    <h1 class="percentage" style="font-weight: bold; color: #fff;">${moistureValue}</h1>
+                                    <p class="status-text text-white">${statusText}</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `);
-
-                $container.append($card);
+                    `);
+    
+                    $container.append($card);
+                }
+    
+                $card.find('.percentage').css({
+                    'transition': 'all 1s ease-in-out'
+                });
             }
-
-            $card.find('.percentage').css({
-                'transition': 'all 1s ease-in-out'
-            });
-        }
+        });
     });
-});
-
-function getGradient(moistureValue) {
-    if (moistureValue <= 250) {
-        // waterlogged
-        return 'to bottom right, rgba(0, 0, 255, 1) 35%, rgba(255, 255, 255, 0) 100%';
-    } else if (moistureValue <= 525) {
-        // wet
-        return 'to bottom right, rgba(89, 166, 69) 35%, rgba(255, 255, 255, 0) 100%';
-    } else if (moistureValue <= 799) {
-        // moist
-        return 'to bottom right, rgba(67, 181, 229, 1) 35%, rgba(255, 255, 255, 0) 100%'; 
-    } else if (moistureValue <= 1023) {
-        // dry
-        return 'to bottom right, rgba(220, 53, 69, 1) 35%, rgba(255, 255, 255, 0) 100%';
-    } else {
-        // sensor lifted
-        return 'to bottom right, rgba(255, 193, 7, 1) 35%, rgba(255, 255, 255, 0) 100%'; 
+    
+    function getGradient(moistureValue) {
+        if (moistureValue <= 500) {
+            // waterlogged
+            return 'to bottom right, rgba(0, 0, 255, 1) 35%, rgba(255, 255, 255, 0) 100%';
+        } else if (moistureValue <= 799) {
+            // moist
+            return 'to bottom right, rgba(67, 181, 229, 1) 35%, rgba(255, 255, 255, 0) 100%'; 
+        } else if (moistureValue <= 1023) {
+            // dry
+            return 'to bottom right, rgba(220, 53, 69, 1) 35%, rgba(255, 255, 255, 0) 100%';
+        } else {
+            // sensor lifted
+            return 'to bottom right, rgba(255, 193, 7, 1) 35%, rgba(255, 255, 255, 0) 100%'; 
+        }
     }
-}
 
     $(document).ready(function() 
         {

@@ -486,7 +486,6 @@ a{
     position: relative; 
     right: 20px;
 }
-
 /* TUTORIAL PAGE */
 
 .section {
@@ -504,6 +503,12 @@ a{
     border-left: 2px solid rgb(255, 255, 255);
     z-index: 4;
 }
+
+/* Remove vertical line for the first section */
+#tut::after {
+    display: none;
+}
+
 .content-text {
     position: relative;
     z-index: 2;
@@ -515,18 +520,21 @@ a{
     transform: translateX(-50%);
     z-index: 10;
 }
-.tut{
+.tut {
     background-repeat: no-repeat;
     background-size: cover;
     width: 100%;
     background-position: center; /* Keeps the image centered */
 }
-#tut1 { background-image: url(/images/tutorial1.svg); }
-#tut2 { background-image: url(/images/tut2.svg); }
-#tut3 { background-image: url(/images/tut3.svg); }
-#tut4 { background-image: url(/images/tut4.svg); }
-#tut5 { background-image: url(/images/tut5.svg); }
+#tut { background-image: url(/images/tutorial-1st.jpg); }
+#tut1 { background-image: url(/images/tuto-1.jpg); }
+#tut2 { background-image: url(/images/tuto-2.jpg); }
+#tut3 { background-image: url(/images/tuto-3.jpg); }
+#tut4 { background-image: url(/images/tuto-4.jpg); }
+#tut5 { background-image: url(/images/tuto-5.jpg); }
 
+#tut6 { background-image: url(/images/tuto-6.jpg); }
+#tut7 { background-image: url(/images/tuto-7.jpg); }
 /*  */
 
 /* SOIL DATA VIEW */
