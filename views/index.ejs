@@ -98,7 +98,7 @@
           </div>
           <div class="message-text-container">
             <p class="message-text">Success message</p>
-            <p class="sub-text">Everything seems great</p>
+            <p class="sub-text">Task Completed</p>
           </div>
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -607,70 +607,57 @@
                                 }
                         });
                     });
+                    $('#harvestButton').click(function(e) {
+                        e.preventDefault();
 
-            
-            $('#harvestButton').click(function(e) 
-                {
-                    e.preventDefault();
-
-                    const harvestQuality = $('#harvestStatus').val();
-                    if (!harvestQuality) 
-                        {
+                        const harvestQuality = $('#harvestStatus').val();
+                        if (!harvestQuality) {
                             alert('Please select a harvest quality.');
                             return;
                         }
-                    // Store the harvest quality for use in the confirmation handler
-                    $('#harvestConfirmationModal').data('quality', harvestQuality);
-                    $('#harvestConfirmationModal').modal('show');
-                });
-
-            $('#confirmHarvestButton').click(function() 
-                {
-                    const harvestQuality = $('#harvestConfirmationModal').data('quality');
-
-                    console.log('Harvest confirmed. Making AJAX request...');
-                    $.ajax({
-                        url: `/plant/harvest/${customPlantID}`,
-                        method: 'POST',
-                        data: { harvestStatus: harvestQuality },
-                        success: function(response) {
-                            console.log('AJAX success response:', response);
-                            $('#harvestConfirmationModal').modal('hide');
-                            $('#plantDetailsModal').modal('hide');
-                            if (response.success) 
-                                {
-                                    // Display notification and update table
-                                    $('#overlay').fadeIn();
-                                    const $notification = $('#successHarvestNotification');
-                                    $notification.removeClass('d-none').addClass('show');
-
-                                    setTimeout(() => 
-                                        {
-                                            $notification.removeClass('show').addClass('d-none');
-                                            $('#overlay').fadeOut();
-                                        }, 1500);
-
-                                    $('#harvestStatus').val('');
-                                    $('#harvestButton').prop('disabled', true).text('Harvest'); // Reset button to default state
-
-                                    $('#harvestButton').prop('disabled', true).css('background-color', '#D9D9D9');
-                                    $('#plantDiedButton').prop('disabled', true).css('background-color', '#D9D9D9');
-
-
-                                    updatePlantsTable(); // Make sure this runs as expected
-                                } 
-                            else 
-                                {
-                                    alert('Failed to harvest plant.');
-                                }
-                        },
-                        error: function(xhr, status, error) 
-                            {
-                                console.error('Error harvesting plant:', status, error);
-                                alert('Error processing the request. Please check the console for details.');
-                            }
+                        
+                        // Store the harvest quality for use in the confirmation handler
+                        $('#harvestConfirmationModal').data('quality', harvestQuality);
+                        $('#harvestConfirmationModal').modal('show');
                     });
-                });
+                    $('#confirmHarvestButton').click(function() {
+    const harvestQuality = $('#harvestConfirmationModal').data('quality');
+
+    $.ajax({
+        url: `/plant/harvest/${customPlantID}`,
+        method: 'POST',
+        data: { harvestStatus: harvestQuality },
+        success: function(response) {
+            $('#harvestConfirmationModal').modal('hide');
+            $('#plantDetailsModal').modal('hide');
+            if (response.success) {
+                // Display notification and update table
+                $('#overlay').fadeIn();
+                const $notification = $('#successHarvestNotification');
+                $notification.removeClass('d-none').addClass('show');
+
+                setTimeout(() => {
+                    $notification.removeClass('show').addClass('d-none');
+                    $('#overlay').fadeOut();
+                }, 1500);
+
+                $('#harvestStatus').val('');
+                
+                // No longer disabling the harvest button after a successful harvest
+                $('#harvestButton').text('Harvest').css('background-color', '#59A645');
+
+                // Update the plants table
+                updatePlantsTable(); 
+            } else {
+                alert('Failed to harvest plant.');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error harvesting plant:', status, error);
+            alert('Error processing the request. Please check the console for details.');
+        }
+    });
+});
 
         $('#plantDiedButton').click(function(e) 
             {
@@ -793,28 +780,25 @@
             }
             
 
-            function updateProgressBar(plantingDate, harvestDate, plantStatus) {
-                const plantingDateObj = new Date(plantingDate);
-                const harvestDateObj = new Date(harvestDate);
-                const today = new Date();
+            function updateProgressBar(plantingDate, estimatedHarvestTime, status) {
+    const now = new Date();
+    const planting = new Date(plantingDate);
+    const estimatedHarvest = new Date(estimatedHarvestTime);
+    
+    // Calculate the progress percentage
+    const totalTime = estimatedHarvest - planting;
+    const elapsedTime = now - planting;
+    const progressPercentage = Math.min(Math.max((elapsedTime / totalTime) * 100, 0), 100);
 
-                const totalDuration = harvestDateObj - plantingDateObj;
-                const elapsedDuration = today - plantingDateObj;
+    $('#growthProgressBar').css('width', progressPercentage + '%').attr('aria-valuenow', progressPercentage).text(Math.round(progressPercentage) + '%');
 
-                let progressPercentage = (elapsedDuration / totalDuration) * 100;
-                progressPercentage = Math.max(0, Math.min(progressPercentage, 100));
-
-                $('#growthProgressBar').css('width', progressPercentage + '%');
-                $('#growthProgressBar').attr('aria-valuenow', progressPercentage);
-                $('#growthProgressBar').text(Math.round(progressPercentage) + '%');
-
-                // Enable or disable the harvest button based on progress percentage and plant status
-                if (progressPercentage === 100 && plantStatus !== 'Harvested' && plantStatus !== 'Died') {
-                    $('#harvestButton').prop('disabled', false).css('background-color', '#59A645');
-                } else {
-                    $('#harvestButton').prop('disabled', true).css('background-color', '#D9D9D9');
-                }
-            }
+    // Enable the harvest button if progress is 100%
+    if (progressPercentage === 100) {
+        $('#harvestButton').prop('disabled', false).css('background-color', '#59A645');
+    } else {
+        $('#harvestButton').prop('disabled', true).css('background-color', '#D9D9D9');
+    }
+}
 
             function updatePlantsTable() 
                 {
