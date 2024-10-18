@@ -65,6 +65,62 @@
     
 </div>
 
+<style>
+  .table thead th {
+      background-color: #343a40;
+      color: white;
+  }
+
+  .table-hover tbody tr:hover {
+      background-color: #f1f1f1;
+  }
+
+  .pagination .page-item.active .page-link {
+      background-color: #343a40;
+      border-color: #343a40;
+      color: white;
+  }
+
+  .pagination .page-link {
+      color: #343a40;
+  }
+
+  .pagination .page-link:hover {
+      color: white;
+      background-color: #343a40;
+      border-color: #343a40;
+  }
+</style>
+
+
+<div class="container my-5">
+  <p class="mb-4 h4">Users and Their Plant Counts</p>
+  <div class="table-responsive">
+      <table id="usersTable" class="table table-hover table-striped table-bordered mt-3">
+          <thead class="thead-dark">
+              <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Plant Count</th>
+              </tr>
+          </thead>
+          <tbody>
+              <% usersWithPlantCount.forEach(user => { %>
+                  <tr>
+                      <td><%= user.firstname %> <%= user.lastname %></td>
+                      <td><%= user.email %></td>
+                      <td><%= user.plantCount %></td>
+                  </tr>
+              <% }) %>
+          </tbody>
+      </table>
+  </div>
+  <nav aria-label="Page navigation">
+      <ul class="pagination justify-content-center mt-4" id="pagination"></ul>
+  </nav>
+</div>
+
+
 
 <p class="h4">Pending Registration</p>
 <div class="table-responsive mt-4">
@@ -119,7 +175,7 @@
         <% emails.forEach(email => { %>
         <tr id="email-row-<%= email._id %>">
             <td class="d-flex justify-content-center">
-                <img src="/<%= email.profilePicture %>" alt="" width="50" height="50">
+                <img src="<%= email.profilePicture %>" alt="" width="50" height="50">
             </td>
             <td><%= email.read ? '📤' : '✉️' %></td>
             <td>
@@ -169,3 +225,43 @@
     });
 </script>
 <%- include("partials/AdminFooter.ejs") %>
+
+
+<script>
+  $(document).ready(function () {
+      const rowsPerPage = 10;
+      const rows = $('#usersTable tbody tr');
+      const rowsCount = rows.length;
+      const pageCount = Math.ceil(rowsCount / rowsPerPage);
+      const pagination = $('#pagination');
+
+      // Function to display rows based on page number
+      function displayRows(page) {
+          const start = (page - 1) * rowsPerPage;
+          const end = start + rowsPerPage;
+          rows.hide();
+          rows.slice(start, end).show();
+      }
+
+      // Create pagination
+      for (let i = 1; i <= pageCount; i++) {
+          pagination.append(`
+              <li class="page-item${i === 1 ? ' active' : ''}">
+                  <a class="page-link" href="#">${i}</a>
+              </li>
+          `);
+      }
+
+      // Click event for pagination links
+      pagination.on('click', 'a', function (e) {
+          e.preventDefault();
+          const page = parseInt($(this).text());
+          displayRows(page);
+          pagination.find('.page-item').removeClass('active');
+          $(this).parent().addClass('active');
+      });
+
+      // Initialize by showing the first set of rows
+      displayRows(1);
+  });
+</script>
