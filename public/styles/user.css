@@ -526,15 +526,20 @@ a{
     width: 100%;
     background-position: center; /* Keeps the image centered */
 }
-#tut { background-image: url(/images/tutorial-1st.jpg); }
-#tut1 { background-image: url(/images/tuto-1.jpg); }
-#tut2 { background-image: url(/images/tuto-2.jpg); }
-#tut3 { background-image: url(/images/tuto-3.jpg); }
-#tut4 { background-image: url(/images/tuto-4.jpg); }
-#tut5 { background-image: url(/images/tuto-5.jpg); }
+#tut { 
+    background-image: url(/images/tut1.jpg);
+    background-size: cover;
+}
+#tut1 { background-image: url(/images/tut2.jpg); 
+    background-size: cover;
+}
+#tut2 { background-image: url(/images/tut3.jpg); background-size: cover; }
+#tut3 { background-image: url(/images/tut4.jpg);  background-size: cover;}
+#tut4 { background-image: url(/images/tut5.jpg);  background-size: cover;}
+#tut5 { background-image: url(/images/tut6.jpg);  background-size: cover;}
 
-#tut6 { background-image: url(/images/tuto-6.jpg); }
-#tut7 { background-image: url(/images/tuto-7.jpg); }
+#tut6 { background-image: url(/images/tut7.jpg);  background-size: cover;}
+#tut7 { background-image: url(/images/tut8.jpg);  background-size: cover;}
 /*  */
 
 /* SOIL DATA VIEW */

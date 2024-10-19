@@ -16,7 +16,7 @@ async function getGroqChatCompletion(content) {
     messages: [
       {
         role: 'system',
-        content: 'You are an expert on plants, crops, and agriculture. Only answer questions related to these topics. If the question is about something else, politely refuse to answer.'
+        content: 'You are an expert on plants, crops, and agriculture. Only answer questions related to these topics. If the question is about something else, politely refuse to answer. When giving response always answer in Tagalog.'
       },
       { 
         role: 'user', content 

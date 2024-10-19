@@ -1,68 +1,81 @@
 <%- include("partials/LoginPageHeader.ejs") %>
 
-
 <style>
-     #login-section{
+     #login-section {
           background-image: url(/images/bg-login.svg);
           height: 100vh;
      }
-     .plant-pic-container{
+     .plant-pic-container {
           max-width: 450px;
      }
-     .plant-pic-container img{
+     .plant-pic-container img {
           width: 100%;
      }
-     .login-title{
+     .login-title {
           font-family: "Nexa-Black";
           color: white;
           max-width: 500px;
           font-size: clamp(25px, 3vw, 40px);
           text-align: center;
      }
-     .login-card{
+     .login-card {
           border-radius: 60px;
           max-width: 450px;
           height: 600px;
           background-color: rgba(255, 255, 255, 0.7);
      }
-     .nexa{
+     .nexa {
           font-family: "Nexa-Black";
      }
-     .grey-text{
+     .grey-text {
           color: #6B6B6B;
      }
-     .transparent{
+     .transparent {
           background-color: rgba(255, 255, 255, 0);
           border: 1px solid #B3B3B3;
           border-radius: 100px;
      }
+     .password-container {
+          position: relative;
+     }
+     .show-password-icon {
+          position: absolute;
+          right: 10px;
+          top: 50%;
+          transform: translateY(-50%);
+          cursor: pointer;
+          color: #6B6B6B;
+     }
 </style>
-     <section id="login-section" class="d-flex justify-content-center align-items-center">
-          <div class="row m-0 p-0 d-flex justify-content-center align-items-center">
-               <div class="d-lg-block d-none col-lg-6 d-flex justify-content-center align-items-center flex-column">
-                    <p class="login-title mx-auto mt-5">Permaculture: Plant the Seeds, Fulfill your Needs.</p>
-                    <div class="plant-pic-container mx-auto">
-                         <img src="/images/plant-pic.svg" alt="">
-                    </div>
+
+<section id="login-section" class="d-flex justify-content-center align-items-center">
+     <div class="row m-0 p-0 d-flex justify-content-center align-items-center">
+          <div class="d-lg-block d-none col-lg-6 d-flex justify-content-center align-items-center flex-column">
+               <p class="login-title mx-auto mt-5">Permaculture: Plant the Seeds, Fulfill your Needs.</p>
+               <div class="plant-pic-container mx-auto">
+                    <img src="/images/plant-pic.svg" alt="">
                </div>
-               <div class="col-lg-6 p-2">
-                    <div class="login-card text-center mx-auto d-flex justify-content-center align-items-center" style="padding: 45px;">
-                         <form action="/login" method="post" class="login-form">
-                              <div>
-                                   <% if (locals.message) { %>
-                                   <small class="success-message"><%= message %></small>
-                                   <% } %> <% if (locals.wrongCridentials) { %>
-                                   <small class="wrong-message">*<%= wrongCridentials %></small>
-                                   <% } %>
-                              </div>
+          </div>
+          <div class="col-lg-6 p-2">
+               <div class="login-card text-center mx-auto d-flex justify-content-center align-items-center" style="padding: 45px;">
+                    <form action="/login" method="post" class="login-form">
+                         <div>
+                              <% if (locals.message) { %>
+                              <small class="success-message"><%= message %></small>
+                              <% } %> 
+                              <% if (locals.wrongCridentials) { %>
+                              <small class="wrong-message">*<%= wrongCridentials %></small>
+                              <% } %>
+                         </div>
 
                          <p class="h3 nexa grey-text">Log in</p>
                          <p class="mx-auto" style="max-width: 400px;">Logging in is the process of verifying your identity to access a website or app.</p>
                          <div class="mt-4">
                               <input type="text" class="form-control transparent" name="email" placeholder="Email" />
                          </div>
-                         <div class="mt-4">
-                              <input type="password" name="password" class="form-control transparent" placeholder="Password" />
+                         <div class="mt-4 password-container">
+                              <input type="password" name="password" class="form-control transparent" placeholder="Password" id="password" />
+                              <i class="fas fa-eye show-password-icon" onclick="togglePassword()"></i>
                          </div>
                          <div class="d-flex flex-column mt-3">
                               <div class="d-flex justify-content-end">
@@ -71,13 +84,26 @@
                               <button type="submit" class="btn my-button mt-3">Login</button>
                               <p class="text-center mt-3">Don't have an account?<a class="fs-13" href="/register" class="no-account-text"> Sign up</a></p>
                          </div>
-
                     </form>
-           
-                    </div>
-                    
                </div>
           </div>
-     </section>
-</body>
+     </div>
+</section>
+
+<script>
+     function togglePassword() {
+          const passwordField = document.getElementById('password');
+          const icon = document.querySelector('.show-password-icon');
+          if (passwordField.type === 'password') {
+               passwordField.type = 'text';
+               icon.classList.remove('fa-eye');
+               icon.classList.add('fa-eye-slash');
+          } else {
+               passwordField.type = 'password';
+               icon.classList.remove('fa-eye-slash');
+               icon.classList.add('fa-eye');
+          }
+     }
+</script>
+
 <%- include("partials/LoginFooter.ejs") %>
