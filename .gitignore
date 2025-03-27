@@ -7,3 +7,5 @@ node_modules/
 # dotenv environment variables file
 .env
 .vercel
+
+config/soil-moisture-monitoring-1d52c-firebase-adminsdk*.json
