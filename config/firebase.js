@@ -1,10 +1,11 @@
 // firebase.js
-const admin = require('firebase-admin');
-const serviceAccount = require('../config/soil-moisture-monitoring-1d52c-firebase-adminsdk-416o3-c3a5ead8f0.json');
+const admin = require("firebase-admin");
+const serviceAccount = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEY);
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: 'https://soil-moisture-monitoring-1d52c-default-rtdb.firebaseio.com'
+  databaseURL:
+    "https://soil-moisture-monitoring-1d52c-default-rtdb.firebaseio.com",
 });
 
 module.exports = admin;
