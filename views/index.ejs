@@ -43,25 +43,30 @@
                 </div>
             </div>
 
-            <div class="col-lg-4 p-4 weather-card b-radius-50">
-                <div class="d-flex align-items-center">
-                    <img src="/images/todo-icon.svg" alt="">
-                    <p class="m-0 gray-text todo-text">To do list</p>
-                </div>
+            <div class="col-lg-4 p-2 weather-card b-radius-50">
+               
                 <div class="px-4" style="height: 370px;overflow-y: scroll;">
+                    <div class="d-flex flex-column my-3">
+                        <h3 class="gray-text m-0 ">Task</h3>
+                        <small class="gray-text">Your todo-list</small>
+                    </div>
                     <% if (tasks && tasks.length > 0) { %>
-                        <ul class="list-group">
+                        <div class="list-group">
                             <% tasks.forEach(task => { %>
-                                <li class="list-group-item d-flex flex-lg-row justify-content-between align-items-center flex-sm-column">
-                                    <div>
-                                        <strong><%= task.title %></strong><br>
-                                        <small><%= task.description %></small>
-                                    </div>
-                                    <span class="badge badge-pill text-black">
-                                        Due: <%= new Date(task.dueDate).toLocaleDateString('en-PH') %>
-                                    </span>
-                                    <button class="btn border complete-task-btn" data-id="<%= task._id %>">Done</button>
-                                </li>
+                                <div class="rounded-2 p-2 border">
+                                    <strong><%= task.title %></strong><br>
+                                    <div class=" d-flex flex-lg-row justify-content-between align-items-center flex-sm-column">
+                                         <div class="w-100">
+                                          
+                                             <small class="text-muted"><%= task.description %></small>
+                                         </div>
+                                         <span class="badge badge-pill text-black">
+                                             Due: <%= new Date(task.dueDate).toLocaleDateString('en-PH') %>
+                                         </span>
+                                         <button class="btn border complete-task-btn" data-id="<%= task._id %>">Done</button>
+                                     </div>
+                                </div>
+                              
                             <% }) %>
                         </ul>
                     <% } else { %>
