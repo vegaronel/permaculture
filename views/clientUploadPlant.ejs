@@ -60,24 +60,56 @@
   
   <div class="tab-content" id="nav-tabContent">
     <div class="tab-pane fade show active" id="nav-plant-identify" role="tabpanel" aria-labelledby="nav-home-tab" tabindex="0">
-      <h2>Plant Identification</h2>
-      <img class="image-preview" src="<%= imagePath %>" alt="Uploaded plant image" />
-      <p><strong>Plant Name:</strong> <%= plantName %></p>
-      <p><strong>Common Names:</strong> <%= commonNames.join(', ') %></p>
-      <p><strong>Description:</strong> <%= description %></p>
+      <div class="d-flex gap-4">
+        <div class="plant-info">
+          <h2>Plant Identification</h2>
+          <p>Name: <%= plantName %></p>
+          <p>Confidence: <%= (confidence * 100).toFixed(1) %>%</p>
+          <p>Is Plant: <%= isPlant ? 'Yes' : 'No' %> (<%= (plantProbability * 100).toFixed(1) %>% probability)</p>
+        </div>
+  
+        <div class="health-status">
+          <h2>Health Assessment</h2>
+          <p>Status: <%= healthStatus.isHealthy ? 'Healthy' : 'Unhealthy' %></p>
+          <p>Probability: <%= (healthStatus.probability * 100).toFixed(1) %>%</p>
+        </div>
+  
+      </div>
+  
+      <div class="similar-plants">
+        <h2>Similar Plants</h2>
+        <% similarImages.forEach(img => { %>
+          <div class="similar-image">
+            <img src="<%= img.url_small %>" alt="Similar plant image" />
+            <p>Similarity: <%= (img.similarity * 100).toFixed(1) %>%</p>
+            <p>Credit: <%= img.citation %></p>
+          </div>
+        <% }); %>
+      </div>
     </div>
 
     <!-- Disease Detection Tab -->
     <div class="tab-pane fade" id="nav-plant-disease" role="tabpanel" aria-labelledby="nav-profile-tab" tabindex="0">
       <h2>Disease Detection</h2>
       <% if (diseases.length > 0) { %>
-        <% diseases.forEach(disease => { %>
-          <div class="disease">
-            <p class="h5"><%= disease.name %> (Probability: <%= (disease.probability * 100).toFixed(2) %>%)</p>
-            <p><strong>Description:</strong> <%= disease.description %></p>
-            <p><strong>Treatment:</strong> <%= disease.treatment %></p>
+        <% if (diseases.length > 0) { %>
+          <div class="diseases">
+            <% diseases.forEach(disease => { %>
+              <div class="disease">
+                <h3><%= disease.name %></h3>
+                <p>Probability: <%= (disease.probability * 100).toFixed(1) %>%</p>
+                <% if (disease.similarImages.length > 0) { %>
+                  <div class="similar-images">
+                    <% disease.similarImages.forEach(img => { %>
+                      <img src="<%= img.url_small %>" alt="Similar disease image" />
+                     
+                    <% }); %>
+                  </div>
+                <% } %>
+              </div>
+            <% }); %>
           </div>
-        <% }); %>
+        <% } %>
       <% } else { %>
         <p>No diseases detected.</p>
       <% } %>
