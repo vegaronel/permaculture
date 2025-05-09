@@ -71,13 +71,21 @@ app.post(
 
       // Send the base64 image to the Plant Identification API
       const response = await axios.post(
-        "https://plant.id/api/v3/identification",
+        "https://api.plant.id/v2/identify",
         {
           images: [imageBase64],
-          similar_images: true,
-          health: "all",
-          classification_level: "all",
-          symptoms: true,
+          organs: ["leaf", "flower", "fruit", "bark", "habit"],
+          plant_details: [
+            "common_names",
+            "url",
+            "wiki_description",
+            "taxonomy",
+          ],
+          disease_details: ["common_names", "description", "treatment"],
+          modifiers: ["health_all", "disease_similar_images"],
+          language: "en",
+          plant_language: "en",
+          disease_language: "en",
         },
         {
           headers: {
@@ -90,30 +98,26 @@ app.post(
       const result = response.data;
       console.log("API Response:", JSON.stringify(result, null, 2));
 
-      // Check if the API response is valid
-      if (!result || !result.result) {
-        throw new Error("Invalid API response");
-      }
-
       // Get the first result from the identification
-      const plantInfo = result.result?.classification?.suggestions?.[0] || {};
-      const healthInfo = result.result?.is_healthy || {};
-      const diseaseInfo = result.result?.disease || {};
-      const symptomInfo = result.result?.symptom || {};
+      const plantInfo = result.suggestions?.[0] || {};
+      const healthInfo = result.health_assessment || {};
 
-      // Check if we have a valid plant identification
-      if (!plantInfo.name) {
+      // Check the confidence score
+      const confidence = plantInfo.probability || 0;
+      console.log("Plant identification confidence:", confidence);
+
+      // Only show error if we have no suggestions at all
+      if (!result.suggestions?.length) {
         return res.render("clientUploadPlant", {
-          error:
-            "Could not identify the plant in the image. Please try uploading a clearer image.",
           plantName: null,
           commonNames: [],
           description: "",
           diseases: [],
-          imagePath: req.file
-            ? "/uploads/" + req.file.filename
-            : req.body.capturedImage,
+          symptoms: [],
+          imagePath: "",
           name: req.session.firstname + " " + req.session.lastname,
+          error:
+            "No plant was identified in the image. Please try uploading a clearer image of the plant, preferably showing leaves or flowers.",
         });
       }
 
@@ -124,91 +128,70 @@ app.post(
           url_small: img.url_small,
           similarity: img.similarity,
           citation: img.citation || "Unknown",
-          license: img.license_name || "Unknown",
         })) || [];
 
       // Prepare health assessment
       let healthStatus = {
-        isHealthy: healthInfo.binary || false,
-        probability: healthInfo.probability || 0,
-        threshold: healthInfo.threshold || 0,
+        isHealthy: healthInfo.is_healthy,
+        probability: healthInfo.is_healthy ? 1 : 0,
       };
 
-      // Get disease information
+      // Prepare diseases data
       let diseases = [];
-      if (diseaseInfo.suggestions) {
-        diseases = diseaseInfo.suggestions.map((disease) => ({
+      if (healthInfo.diseases) {
+        diseases = healthInfo.diseases.map((disease) => ({
           name: disease.name,
           probability: disease.probability,
-          similarImages:
-            disease.similar_images?.map((img) => ({
-              url: img.url,
-              url_small: img.url_small,
-              similarity: img.similarity,
-              citation: img.citation || "Unknown",
-              license: img.license_name || "Unknown",
-            })) || [],
+          description:
+            disease.disease_details?.description || "No description available",
+          treatment:
+            disease.disease_details?.treatment?.chemical ||
+            "No treatment information available",
         }));
       }
 
-      // Get symptom information
-      let symptoms = [];
-      if (symptomInfo.suggestions) {
-        symptoms = symptomInfo.suggestions.map((symptom) => ({
-          name: symptom.name,
-          probability: symptom.score,
-          heatmaps: symptom.heatmaps || [],
-        }));
+      // If no diseases but plant is unhealthy
+      if (diseases.length === 0 && healthInfo.is_healthy === false) {
+        diseases.push({
+          name: "Unhealthy",
+          probability: 1,
+          description:
+            "The plant appears to be unhealthy, but no specific disease was identified.",
+          treatment: "Consider general plant care improvements.",
+        });
       }
 
       res.render("clientUploadPlant", {
-        plantName: plantInfo.name,
-        commonNames: [],
-        description: "",
+        plantName: plantInfo.plant_name || "Unknown",
+        commonNames: plantInfo.plant_details?.common_names || [],
+        description: plantInfo.plant_details?.wiki_description?.value || "",
         diseases: diseases,
-        symptoms: symptoms,
+        symptoms: [], // API v2 doesn't provide symptoms
         imagePath: req.file
           ? "/uploads/" + req.file.filename
           : req.body.capturedImage,
         name: req.session.firstname + " " + req.session.lastname,
         error: null,
-        confidence: plantInfo.probability || 0,
+        confidence: confidence,
         similarImages: similarImages,
         healthStatus: healthStatus,
-        isPlant: result.result?.is_plant?.binary || false,
-        plantProbability: result.result?.is_plant?.probability || 0,
+        isPlant: true,
+        plantProbability: confidence,
+        plantDetails: {
+          taxonomy: plantInfo.plant_details?.taxonomy || {},
+          url: plantInfo.plant_details?.url || "",
+        },
       });
     } catch (error) {
       console.error("Error in API request:", error);
-
-      // Check if it's an API error
-      if (error.response) {
-        console.error("API Error Response:", error.response.data);
-        return res.render("clientUploadPlant", {
-          error:
-            "Error communicating with the plant identification service. Please try again later.",
-          plantName: null,
-          commonNames: [],
-          description: "",
-          diseases: [],
-          imagePath: req.file
-            ? "/uploads/" + req.file.filename
-            : req.body.capturedImage,
-          name: req.session.firstname + " " + req.session.lastname,
-        });
-      }
-
-      // For other errors
-      res.render("clientUploadPlant", {
+      res.status(500).render("clientUploadPlant", {
         error:
           "Error in detecting plant species and disease. Please try again.",
         plantName: null,
         commonNames: [],
         description: "",
         diseases: [],
-        imagePath: req.file
-          ? "/uploads/" + req.file.filename
-          : req.body.capturedImage,
+        imagePath: "",
         name: req.session.firstname + " " + req.session.lastname,
       });
     }
